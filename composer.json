@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": ">=7.2",
+        "ballstatecber/datacenter-plugin-cakephp4": "dev-master",
         "cakephp/cakephp": "~4.1.0",
         "cakephp/migrations": "^3.0",
         "cakephp/plugin-installer": "^1.3",

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "46d83ee2e8f259b1b5008b89653691f0",
+    "content-hash": "29150bb0ebcadcead5c24ee45f40837d",
     "packages": [
         {
             "name": "aura/intl",
@@ -51,6 +51,43 @@
                 "localization"
             ],
             "time": "2017-01-20T05:00:11+00:00"
+        },
+        {
+            "name": "ballstatecber/datacenter-plugin-cakephp4",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/BallStateCBER/datacenter-plugin-cakephp4.git",
+                "reference": "dcc15c62a1c4e8e4856b3a06e7e18e4e7e677697"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/BallStateCBER/datacenter-plugin-cakephp4/zipball/dcc15c62a1c4e8e4856b3a06e7e18e4e7e677697",
+                "reference": "dcc15c62a1c4e8e4856b3a06e7e18e4e7e677697",
+                "shasum": ""
+            },
+            "require": {
+                "cakephp/cakephp": "~4.1.0",
+                "ext-json": "*",
+                "php": ">=7.4"
+            },
+            "require-dev": {
+                "cakephp/bake": "^2.0.3",
+                "cakephp/cakephp-codesniffer": "~4.2.0",
+                "phpunit/phpunit": "~8.5.0"
+            },
+            "type": "cakephp-plugin",
+            "autoload": {
+                "psr-4": {
+                    "DataCenter\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Ball State CBER DataCenter plugin for CakePHP 4",
+            "time": "2020-11-10T21:55:40+00:00"
         },
         {
             "name": "cakephp/cakephp",
@@ -5142,6 +5179,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "ballstatecber/datacenter-plugin-cakephp4": 20,
         "psy/psysh": 0
     },
     "prefer-stable": true,
