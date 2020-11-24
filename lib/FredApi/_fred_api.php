@@ -31,7 +31,7 @@ class fred_api
     {
         $class = 'fred_api_'.strtolower($type);
         $file = $class.'.php';
-        if (!file_exists($file)) {
+        if (!file_exists(FRED_API_ROOT . $file)) {
             throw new fred_api_exception('File does not exist: '.$file);
         }
 
