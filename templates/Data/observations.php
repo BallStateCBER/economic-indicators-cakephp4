@@ -1,8 +1,23 @@
 <?php
 /**
+ * @var \App\View\AppView $this
  * @var array|bool $data
  * @var string $pageTitle
  */
+
+$this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
+
+function getArrow($value) {
+    if ($value > 0) {
+        return '<i class="fas fa-arrow-circle-up"></i>';
+    }
+
+    if ($value < 0) {
+        return '<i class="fas fa-arrow-circle-down"></i>';
+    }
+
+    return null;
+}
 ?>
 <h1 id="page-title">
     <?= $pageTitle ?>
@@ -51,9 +66,11 @@
                     </td>
                     <td>
                         <?= number_format(round($series['change']['value'], 2)) ?>
+                        <?= getArrow($series['change']['value']) ?>
                     </td>
                     <td>
                         <?= round($series['percentChange']['value'], 2) ?>%
+                        <?= getArrow($series['percentChange']['value']) ?>
                     </td>
                 </tr>
             <?php endforeach; ?>
