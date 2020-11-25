@@ -38,11 +38,11 @@ class DataController extends AppController
                 ->setSeries($series)
                 ->latest();
 
-            $seriesData['value'] = $series + $fetcher->getObservations()[0];
-            $seriesData['change'] = $series + $fetcher->changeFromYearAgo()->getObservations()[0];
-            $seriesData['percentChange'] = $series + $fetcher->percentChangeFromYearAgo()->getObservations()[0];
-
-            $data[$series['subvar']] = $seriesData;
+            $data[$series['subvar']] = [
+                'value' => $series + $fetcher->getObservations()[0],
+                'change' => $series + $fetcher->changeFromYearAgo()->getObservations()[0],
+                'percentChange' => $series + $fetcher->percentChangeFromYearAgo()->getObservations()[0],
+            ];
         }
 
         $this->set([
