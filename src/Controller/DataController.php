@@ -25,33 +25,13 @@ class DataController extends AppController
      */
     public function housing()
     {
-        $seriesGroup = [
-            FredEndpoints::HOUSING_TOTAL,
-            FredEndpoints::HOUSING_1_UNIT,
-            FredEndpoints::HOUSING_2_4_UNIT,
-            FredEndpoints::HOUSING_5_UNIT,
-        ];
-
-        $fetcher = new Fetcher();
-        $data = [];
-        try {
-            foreach ($seriesGroup as $series) {
-                $fetcher
-                    ->setSeries($series)
-                    ->latest();
-
-                $data[$series['subvar']] = [
-                    'value' => $series + $fetcher->getObservations()[0],
-                    'change' => $series + $fetcher->changeFromYearAgo()->getObservations()[0],
-                    'percentChange' => $series + $fetcher->percentChangeFromYearAgo()->getObservations()[0],
-                ];
-            }
-        } catch (NotFoundException $e) {
-            $data = false;
-        }
-
         $this->set([
-            'data' => $data,
+            'data' => (new Fetcher())->getValuesAndChanges([
+                FredEndpoints::HOUSING_TOTAL,
+                FredEndpoints::HOUSING_1_UNIT,
+                FredEndpoints::HOUSING_2_4_UNIT,
+                FredEndpoints::HOUSING_5_UNIT,
+            ]),
             'pageTitle' => 'Housing',
         ]);
 

@@ -155,4 +155,35 @@ class Fetcher
 
         return $this;
     }
+
+    /**
+     * Returns an array of observations, with value, change from year ago, and percent change from year ago
+     *
+     * Returns FALSE if there's an error getting this data
+     *
+     * @param array $seriesGroup An array of series IDs or of arrays that contain the 'seriesId' key
+     * @return array|false
+     * @throws \fred_api_exception
+     */
+    public function getValuesAndChanges(array $seriesGroup)
+    {
+        $data = [];
+        try {
+            foreach ($seriesGroup as $series) {
+                $this
+                    ->setSeries($series)
+                    ->latest();
+
+                $data[$series['subvar']] = [
+                    'value' => $series + $this->getObservations()[0],
+                    'change' => $series + $this->changeFromYearAgo()->getObservations()[0],
+                    'percentChange' => $series + $this->percentChangeFromYearAgo()->getObservations()[0],
+                ];
+            }
+        } catch (NotFoundException $e) {
+            return false;
+        }
+
+        return $data;
+    }
 }
