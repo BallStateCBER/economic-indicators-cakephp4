@@ -7,3 +7,16 @@
     font-size: 80%;
     margin-top: 15px;
 }
+
+table.observations {
+    th,
+    td {
+        vertical-align: top;
+    }
+    .fa-arrow-circle-up {
+        color: green;
+    }
+    .fa-arrow-circle-down {
+        color: red;
+    }
+}
