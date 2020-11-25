@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Fetcher;
 
+use Cake\Cache\Cache;
 use Cake\Core\Configure;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\Http\Exception\NotFoundException;
@@ -163,7 +164,6 @@ class Fetcher
      *
      * @param array $seriesGroup An array of series IDs or of arrays that contain the 'seriesId' key
      * @return array|false
-     * @throws \fred_api_exception
      */
     public function getValuesAndChanges(array $seriesGroup)
     {
@@ -180,10 +180,34 @@ class Fetcher
                     'percentChange' => $series + $this->percentChangeFromYearAgo()->getObservations()[0],
                 ];
             }
-        } catch (NotFoundException $e) {
+        } catch (NotFoundException | fred_api_exception $e) {
             return false;
         }
 
         return $data;
+    }
+
+    /**
+     * A cache wrapper for getValuesAndChanges
+     *
+     * @param string $cacheKey Cache key
+     * @param array $seriesGroup An array of series IDs or of arrays that contain the 'seriesId' key
+     * @return array|bool
+     */
+    public function getCachedValuesAndChanges(string $cacheKey, array $seriesGroup)
+    {
+        $data = Cache::read($cacheKey, 'observations');
+        if ($data) {
+            return $data;
+        }
+
+        $data = $this->getValuesAndChanges($seriesGroup);
+        if ($data) {
+            Cache::write($cacheKey, $data, 'observations');
+
+            return $data;
+        }
+
+        return false;
     }
 }
