@@ -6,6 +6,7 @@ namespace App\Controller;
 use App\Fetcher\FredEndpoints;
 use App\Fetcher\Fetcher;
 use Cake\Event\EventInterface;
+use Cake\Http\Exception\NotFoundException;
 
 class DataController extends AppController
 {
@@ -33,16 +34,20 @@ class DataController extends AppController
 
         $fetcher = new Fetcher();
         $data = [];
-        foreach ($seriesGroup as $series) {
-            $fetcher
-                ->setSeries($series)
-                ->latest();
+        try {
+            foreach ($seriesGroup as $series) {
+                $fetcher
+                    ->setSeries($series)
+                    ->latest();
 
-            $data[$series['subvar']] = [
-                'value' => $series + $fetcher->getObservations()[0],
-                'change' => $series + $fetcher->changeFromYearAgo()->getObservations()[0],
-                'percentChange' => $series + $fetcher->percentChangeFromYearAgo()->getObservations()[0],
-            ];
+                $data[$series['subvar']] = [
+                    'value' => $series + $fetcher->getObservations()[0],
+                    'change' => $series + $fetcher->changeFromYearAgo()->getObservations()[0],
+                    'percentChange' => $series + $fetcher->percentChangeFromYearAgo()->getObservations()[0],
+                ];
+            }
+        } catch (NotFoundException $e) {
+            $data = false;
         }
 
         $this->set([

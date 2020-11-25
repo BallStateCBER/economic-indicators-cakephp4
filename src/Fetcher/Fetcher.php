@@ -5,6 +5,7 @@ namespace App\Fetcher;
 
 use Cake\Core\Configure;
 use Cake\Http\Exception\InternalErrorException;
+use Cake\Http\Exception\NotFoundException;
 use fred_api;
 use fred_api_exception;
 
@@ -99,7 +100,7 @@ class Fetcher
      * @param array $parameters Additional optional parameters
      * @return array
      * @throws \fred_api_exception
-     * @throws \Cake\Http\Exception\InternalErrorException
+     * @throws \Cake\Http\Exception\NotFoundException
      * @link https://fred.stlouisfed.org/docs/api/fred/
      */
     public function getObservations(array $parameters = [])
@@ -109,7 +110,11 @@ class Fetcher
         $parameters += $this->parameters;
 
         $response = $seriesApi->observations($parameters);
-        $observations = ((array)$response->observation);
+        if (!is_object($response) || !property_exists($response, 'observation')) {
+            throw new NotFoundException();
+        }
+
+        $observations = (array)$response->observation;
 
         // Adjust for requests with limit = 1
         if (isset($observations['@attributes'])) {

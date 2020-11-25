@@ -1,6 +1,6 @@
 <?php
 /**
- * @var array $data
+ * @var array|bool $data
  * @var string $pageTitle
  */
 ?>
@@ -8,49 +8,55 @@
     <?= $pageTitle ?>
 </h1>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th></th>
-            <th>
-                Latest Value
-            </th>
-            <th>
-                Change
-                <br />
-                <small>
-                    from One Year Ago
-                </small>
-            </th>
-            <th>
-                % Change
-                <br />
-                <small>
-                    from One Year Ago
-                </small>
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($data as $name => $series): ?>
+<?php if ($data === false): ?>
+    <p class="alert alert-info">
+        Sorry, this data set is currently unavailable. Please check back for an update soon.
+    </p>
+<?php else: ?>
+    <table class="table observations">
+        <thead>
             <tr>
-                <td>
-                    <?= $name ?>
+                <th></th>
+                <th>
+                    Latest Value
+                </th>
+                <th>
+                    Change
                     <br />
                     <small>
-                        <?= $series['value']['date'] ?>
+                        from One Year Ago
                     </small>
-                </td>
-                <td>
-                    <?= number_format(round($series['value']['value'], 2)) ?>
-                </td>
-                <td>
-                    <?= number_format(round($series['change']['value'], 2)) ?>
-                </td>
-                <td>
-                    <?= round($series['percentChange']['value'], 2) ?>%
-                </td>
+                </th>
+                <th>
+                    % Change
+                    <br />
+                    <small>
+                        from One Year Ago
+                    </small>
+                </th>
             </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            <?php foreach ($data as $name => $series): ?>
+                <tr>
+                    <td>
+                        <?= $name ?>
+                        <br />
+                        <small>
+                            <?= $series['value']['date'] ?>
+                        </small>
+                    </td>
+                    <td>
+                        <?= number_format(round($series['value']['value'], 2)) ?>
+                    </td>
+                    <td>
+                        <?= number_format(round($series['change']['value'], 2)) ?>
+                    </td>
+                    <td>
+                        <?= round($series['percentChange']['value'], 2) ?>%
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+<?php endif; ?>
