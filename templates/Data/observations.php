@@ -5,6 +5,8 @@
  * @var string $pageTitle
  */
 
+use Cake\I18n\FrozenDate;
+
 $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
 
 function getArrow($value) {
@@ -58,7 +60,7 @@ function getArrow($value) {
                         <?= $name ?>
                         <br />
                         <small>
-                            <?= $series['value']['date'] ?>
+                            <?= (new FrozenDate($series['value']['date']))->format('F j, Y') ?>
                         </small>
                     </td>
                     <td>
