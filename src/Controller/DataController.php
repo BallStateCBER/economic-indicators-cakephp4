@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Fetcher\Fetcher;
+use App\Fetcher\FredEndpoints;
 use App\Fetcher\SeriesGroups;
 use Cake\Event\EventInterface;
 
@@ -23,7 +24,7 @@ class DataController extends AppController
     {
         $this->set([
             'data' => (new Fetcher())->getCachedValuesAndChanges('housing', SeriesGroups::HOUSING),
-            'pageTitle' => 'Housing',
+            'pageTitle' => FredEndpoints::VAR_HOUSING,
         ]);
 
         return $this->render('observations');
@@ -38,7 +39,7 @@ class DataController extends AppController
     {
         $this->set([
             'data' => (new Fetcher())->getCachedValuesAndChanges('vehicle_sales', SeriesGroups::VEHICLE_SALES),
-            'pageTitle' => 'Vehicle Sales',
+            'pageTitle' => FredEndpoints::VAR_VEHICLE_SALES,
         ]);
 
         return $this->render('observations');
