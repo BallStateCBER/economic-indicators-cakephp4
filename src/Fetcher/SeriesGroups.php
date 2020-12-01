@@ -75,4 +75,13 @@ class SeriesGroups
             FredEndpoints::EMP_GOVERNMENT,
         ],
     ];
+
+    public const ALL = [
+        self::HOUSING,
+        self::VEHICLE_SALES,
+        self::RETAIL_FOOD_SERVICES,
+        self::GDP,
+        self::UNEMPLOYMENT,
+        self::EMP_BY_SECTOR,
+    ];
 }
