@@ -37,6 +37,9 @@ function toLastSigDigit($value, $decimalLimit = 2) {
 <h1 id="page-title">
     <?= $pageTitle ?>
 </h1>
+<p>
+    Updated <?= strtolower(reset($data)['frequency']) ?>
+</p>
 
 <?php if ($data === false): ?>
     <p class="alert alert-info">
@@ -49,6 +52,10 @@ function toLastSigDigit($value, $decimalLimit = 2) {
                 <th></th>
                 <th>
                     Latest Value
+                    <br />
+                    <small>
+                        <?= reset($data)['units'] ?>
+                    </small>
                 </th>
                 <th>
                     Change

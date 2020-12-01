@@ -170,11 +170,14 @@ class Fetcher
         $data = [];
         try {
             foreach ($seriesGroup as $series) {
-                $this
-                    ->setSeries($series)
-                    ->latest();
+                $this->setSeries($series);
+                $seriesResponse = $this->getSeries();
+                $seriesMeta = (array)($seriesResponse->series);
+                $this->latest();
 
                 $data[$series['subvar']] = [
+                    'units' => $seriesMeta['@attributes']['units'],
+                    'frequency' => $seriesMeta['@attributes']['frequency'],
                     'value' => $series + $this->getObservations()[0],
                     'change' => $series + $this->changeFromYearAgo()->getObservations()[0],
                     'percentChange' => $series + $this->percentChangeFromYearAgo()->getObservations()[0],
