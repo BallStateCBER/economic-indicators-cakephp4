@@ -78,22 +78,22 @@ class FredEndpoints
 
     public const VAR_RETAIL_FOOD = 'Retail and food services';
     public const RETAIL_FOOD_TOTAL = [
-        'var' => self::VAR_VEHICLE_SALES,
+        'var' => self::VAR_RETAIL_FOOD,
         'subvar' => 'Advance retail sales: Retail and food services, Total',
         'seriesId' => 'RSAFS',
     ];
     public const RETAIL_FOOD_EX_DEALERS = [
-        'var' => self::VAR_VEHICLE_SALES,
+        'var' => self::VAR_RETAIL_FOOD,
         'subvar' => 'Advance retail sales: Retail and food services (excluding motor vehicle and parts dealers)',
         'seriesId' => 'RSFSXMV',
     ];
     public const RETAIL_FOOD_EX_FOOD = [
-        'var' => self::VAR_VEHICLE_SALES,
+        'var' => self::VAR_RETAIL_FOOD,
         'subvar' => 'Advance retail sales: Retail (excluding food services)',
         'seriesId' => 'RSXFS',
     ];
     public const RETAIL_FOOD_REAL_SALES = [
-        'var' => self::VAR_VEHICLE_SALES,
+        'var' => self::VAR_RETAIL_FOOD,
         'subvar' => 'Advance real retail and food services sales',
         'seriesId' => 'TOTALSA',
     ];
