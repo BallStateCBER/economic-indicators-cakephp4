@@ -74,4 +74,22 @@ class DataController extends AppController
 
         return $this->render('observations');
     }
+
+    /**
+     * Unemployment rate
+     *
+     * @return \Cake\Http\Response
+     */
+    public function unemployment()
+    {
+        $this->set([
+            'data' => (new Fetcher())->getCachedValuesAndChanges(
+                'unemployment',
+                [FredEndpoints::UNEMPLOYMENT_INDIANA]
+            ),
+            'pageTitle' => FredEndpoints::VAR_UNEMPLOYMENT,
+        ]);
+
+        return $this->render('observations');
+    }
 }

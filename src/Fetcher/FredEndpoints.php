@@ -119,4 +119,11 @@ class FredEndpoints
         'subvar' => 'Real personal consumption expenditures (2012) dollars',
         'seriesId' => 'PCEC96',
     ];
+
+    public const VAR_UNEMPLOYMENT = 'Unemployment Rate - Indiana';
+    public const UNEMPLOYMENT_INDIANA = [
+        'var' => self::VAR_UNEMPLOYMENT,
+        'subvar' => 'Unemployment rate (seasonally adjusted)',
+        'seriesId' => 'INUR',
+    ];
 }
