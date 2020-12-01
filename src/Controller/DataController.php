@@ -92,4 +92,22 @@ class DataController extends AppController
 
         return $this->render('observations');
     }
+
+    /**
+     * Employment by sector
+     *
+     * @return \Cake\Http\Response
+     */
+    public function employmentBySector()
+    {
+        $this->set([
+            'data' => (new Fetcher())->getCachedValuesAndChanges(
+                'emp_by_sector',
+                SeriesGroups::EMP_BY_SECTOR
+            ),
+            'pageTitle' => FredEndpoints::VAR_EMPLOYMENT_BY_SECTOR,
+        ]);
+
+        return $this->render('observations');
+    }
 }

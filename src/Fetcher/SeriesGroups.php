@@ -35,4 +35,24 @@ class SeriesGroups
         FredEndpoints::GDP_PERSONAL_CONSUMPTION,
         FredEndpoints::GDP_PERSONAL_CONSUMPTION_REAL,
     ];
+
+    public const EMP_BY_SECTOR = [
+        FredEndpoints::EMP_TOTAL_NONFARM,
+        FredEndpoints::EMP_MINING_LOGGING,
+        FredEndpoints::EMP_CONSTRUCTION,
+        FredEndpoints::EMP_MANUFACTURING,
+        FredEndpoints::EMP_DURABLE_GOODS,
+        FredEndpoints::EMP_NON_DURABLE_GOODS,
+        FredEndpoints::EMP_TRADE_TRANSP_UTILITIES,
+        FredEndpoints::EMP_WHOLESALE,
+        FredEndpoints::EMP_RETAIL,
+        FredEndpoints::EMP_TRANSP_WH_UTILITIES,
+        FredEndpoints::EMP_INFORMATION,
+        FredEndpoints::EMP_FINANCIAL,
+        FredEndpoints::EMP_PROFESSIONAL,
+        FredEndpoints::EMP_EDU_HEALTH,
+        FredEndpoints::EMP_LEISURE_HOSPITALITY,
+        FredEndpoints::EMP_OTHER_SERVICES,
+        FredEndpoints::EMP_GOVERNMENT,
+    ];
 }
