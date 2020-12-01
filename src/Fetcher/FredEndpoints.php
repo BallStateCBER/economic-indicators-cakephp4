@@ -97,4 +97,26 @@ class FredEndpoints
         'subvar' => 'Advance real retail and food services sales',
         'seriesId' => 'TOTALSA',
     ];
+
+    public const VAR_GDP = 'Gross Domestic Product';
+    public const GDP = [
+        'var' => self::VAR_GDP,
+        'subvar' => 'Gross Domestic Product',
+        'seriesId' => 'GDP',
+    ];
+    public const GDP_REAL = [
+        'var' => self::VAR_GDP,
+        'subvar' => 'Real Gross Domestic Product (2012) dollars',
+        'seriesId' => 'GDPC1',
+    ];
+    public const GDP_PERSONAL_CONSUMPTION = [
+        'var' => self::VAR_GDP,
+        'subvar' => 'Personal consumption expenditures',
+        'seriesId' => 'PCEC',
+    ];
+    public const GDP_PERSONAL_CONSUMPTION_REAL = [
+        'var' => self::VAR_GDP,
+        'subvar' => 'Real personal consumption expenditures (2012) dollars',
+        'seriesId' => 'PCEC96',
+    ];
 }

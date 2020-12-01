@@ -28,4 +28,11 @@ class SeriesGroups
         FredEndpoints::RETAIL_FOOD_EX_FOOD,
         FredEndpoints::RETAIL_FOOD_REAL_SALES,
     ];
+
+    public const GDP = [
+        FredEndpoints::GDP,
+        FredEndpoints::GDP_REAL,
+        FredEndpoints::GDP_PERSONAL_CONSUMPTION,
+        FredEndpoints::GDP_PERSONAL_CONSUMPTION_REAL,
+    ];
 }

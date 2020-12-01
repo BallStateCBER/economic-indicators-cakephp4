@@ -26,4 +26,13 @@
             ]
         ) ?>
     </li>
+    <li>
+        <?= $this->Html->link(
+            'Gross Domestic Product',
+            [
+                'controller' => 'Data',
+                'action' => 'gdp',
+            ]
+        ) ?>
+    </li>
 </ul>

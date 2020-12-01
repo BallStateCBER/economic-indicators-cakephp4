@@ -59,4 +59,19 @@ class DataController extends AppController
 
         return $this->render('observations');
     }
+
+    /**
+     * Gross domestic product
+     *
+     * @return \Cake\Http\Response
+     */
+    public function gdp()
+    {
+        $this->set([
+            'data' => (new Fetcher())->getCachedValuesAndChanges('gdp', SeriesGroups::GDP),
+            'pageTitle' => FredEndpoints::VAR_GDP,
+        ]);
+
+        return $this->render('observations');
+    }
 }
