@@ -21,18 +21,26 @@ function getArrow($value) {
     return null;
 }
 
-function toLastSigDigit($value, $decimalLimit = 2) {
+function formatValue($value, $prepend = null) {
+    $decimalLimit = 2;
+    $negative = (float)$value < 0;
     $value = round($value, $decimalLimit);
     $value = number_format($value, $decimalLimit);
-    if (strpos($value, '.')) {
+    if (str_contains($value, '.')) {
         $value = rtrim($value, '0');
     }
     if (substr($value, -1) === '.') {
         $value = rtrim($value, '.');
     }
+    if ($negative) {
+        return str_replace('-', '-' . $prepend, $value);
+    }
 
-    return $value;
+    return $prepend . $value;
 }
+
+$unit = reset($data)['units'];
+$prepend = str_contains(strtolower($unit), 'dollar') ? '$' : null;
 ?>
 <h1 id="page-title">
     <?= $pageTitle ?>
@@ -54,7 +62,7 @@ function toLastSigDigit($value, $decimalLimit = 2) {
                     Latest Value
                     <br />
                     <small>
-                        <?= reset($data)['units'] ?>
+                        <?= $unit ?>
                     </small>
                 </th>
                 <th>
@@ -84,14 +92,14 @@ function toLastSigDigit($value, $decimalLimit = 2) {
                         </small>
                     </td>
                     <td>
-                        <?= toLastSigDigit($series['value']['value']) ?>
+                        <?= formatValue($series['value']['value'], $prepend) ?>
                     </td>
                     <td>
-                        <?= toLastSigDigit($series['change']['value']) ?>
+                        <?= formatValue($series['change']['value'], $prepend) ?>
                         <?= getArrow($series['change']['value']) ?>
                     </td>
                     <td>
-                        <?= toLastSigDigit($series['percentChange']['value']) ?>%
+                        <?= formatValue($series['percentChange']['value']) ?>%
                         <?= getArrow($series['percentChange']['value']) ?>
                     </td>
                 </tr>
