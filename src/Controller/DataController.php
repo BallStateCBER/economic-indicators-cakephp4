@@ -15,7 +15,7 @@ class DataController extends AppController
     }
 
     /**
-     * Home page
+     * Housing
      *
      * @return \Cake\Http\Response
      */
@@ -24,6 +24,21 @@ class DataController extends AppController
         $this->set([
             'data' => (new Fetcher())->getCachedValuesAndChanges('housing', SeriesGroups::HOUSING),
             'pageTitle' => 'Housing',
+        ]);
+
+        return $this->render('observations');
+    }
+
+    /**
+     * Vehicle sales
+     *
+     * @return \Cake\Http\Response
+     */
+    public function vehicleSales()
+    {
+        $this->set([
+            'data' => (new Fetcher())->getCachedValuesAndChanges('vehicle_sales', SeriesGroups::VEHICLE_SALES),
+            'pageTitle' => 'Vehicle Sales',
         ]);
 
         return $this->render('observations');

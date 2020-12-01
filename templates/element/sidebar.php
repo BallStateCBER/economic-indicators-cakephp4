@@ -8,4 +8,13 @@
             ]
         ) ?>
     </li>
+    <li>
+        <?= $this->Html->link(
+            'Vehicle Sales',
+            [
+                'controller' => 'Data',
+                'action' => 'vehicleSales',
+            ]
+        ) ?>
+    </li>
 </ul>
