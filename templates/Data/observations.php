@@ -20,6 +20,19 @@ function getArrow($value) {
 
     return null;
 }
+
+function toLastSigDigit($value, $decimalLimit = 2) {
+    $value = round($value, $decimalLimit);
+    $value = number_format($value, $decimalLimit);
+    if (strpos($value, '.')) {
+        $value = rtrim($value, '0');
+    }
+    if (substr($value, -1) === '.') {
+        $value = rtrim($value, '.');
+    }
+
+    return $value;
+}
 ?>
 <h1 id="page-title">
     <?= $pageTitle ?>
@@ -64,14 +77,14 @@ function getArrow($value) {
                         </small>
                     </td>
                     <td>
-                        <?= number_format(round($series['value']['value'], 2)) ?>
+                        <?= toLastSigDigit($series['value']['value']) ?>
                     </td>
                     <td>
-                        <?= number_format(round($series['change']['value'], 2)) ?>
+                        <?= toLastSigDigit($series['change']['value']) ?>
                         <?= getArrow($series['change']['value']) ?>
                     </td>
                     <td>
-                        <?= round($series['percentChange']['value'], 2) ?>%
+                        <?= toLastSigDigit($series['percentChange']['value']) ?>%
                         <?= getArrow($series['percentChange']['value']) ?>
                     </td>
                 </tr>
