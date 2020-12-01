@@ -17,4 +17,13 @@
             ]
         ) ?>
     </li>
+    <li>
+        <?= $this->Html->link(
+            'Retail and Food Services',
+            [
+                'controller' => 'Data',
+                'action' => 'retailFoodServices',
+            ]
+        ) ?>
+    </li>
 </ul>

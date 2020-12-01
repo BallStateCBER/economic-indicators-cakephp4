@@ -19,6 +19,13 @@ class SeriesGroups
         FredEndpoints::VEHICLE_SALES_LW_TRUCKS,
         FredEndpoints::VEHICLE_SALES_LW_TRUCKS_DOMESTIC,
         FredEndpoints::VEHICLE_SALES_LW_TRUCKS_FOREIGN,
-        FredEndpoints::VEHICLE_SALES_HW_TRUCKS
+        FredEndpoints::VEHICLE_SALES_HW_TRUCKS,
+    ];
+
+    public const RETAIL_FOOD_SERVICES = [
+        FredEndpoints::RETAIL_FOOD_TOTAL,
+        FredEndpoints::RETAIL_FOOD_EX_DEALERS,
+        FredEndpoints::RETAIL_FOOD_EX_FOOD,
+        FredEndpoints::RETAIL_FOOD_REAL_SALES,
     ];
 }

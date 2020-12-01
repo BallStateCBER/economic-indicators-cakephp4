@@ -44,4 +44,19 @@ class DataController extends AppController
 
         return $this->render('observations');
     }
+
+    /**
+     * Retail and food services
+     *
+     * @return \Cake\Http\Response
+     */
+    public function retailFoodServices()
+    {
+        $this->set([
+            'data' => (new Fetcher())->getCachedValuesAndChanges('retail_food', SeriesGroups::RETAIL_FOOD_SERVICES),
+            'pageTitle' => FredEndpoints::VAR_RETAIL_FOOD,
+        ]);
+
+        return $this->render('observations');
+    }
 }
