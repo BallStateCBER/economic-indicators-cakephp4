@@ -179,8 +179,8 @@ class Fetcher
                     'units' => $seriesMeta['@attributes']['units'],
                     'frequency' => $seriesMeta['@attributes']['frequency'],
                     'value' => $series + $this->getObservations()[0],
-                    'change' => $series + $this->changeFromYearAgo()->getObservations()[0],
-                    'percentChange' => $series + $this->percentChangeFromYearAgo()->getObservations()[0],
+                    'change' => $series + (clone $this)->changeFromYearAgo()->getObservations()[0],
+                    'percentChange' => $series + (clone $this)->percentChangeFromYearAgo()->getObservations()[0],
                 ];
             }
         } catch (NotFoundException | fred_api_exception $e) {
