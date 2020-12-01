@@ -76,6 +76,23 @@ class SeriesGroups
         ],
     ];
 
+    public const EARNINGS = [
+        'cacheKey' => 'earnings',
+        'endpoints' => [
+            FredEndpoints::EARNINGS_PRIVATE,
+            FredEndpoints::EARNINGS_GOODS,
+            FredEndpoints::EARNINGS_SERVICE,
+            FredEndpoints::EARNINGS_CONSTRUCTION,
+            FredEndpoints::EARNINGS_MANUFACTURING,
+            FredEndpoints::EARNINGS_TRADE_TRANSPORT_UTILITIES,
+            FredEndpoints::EARNINGS_FINANCIAL,
+            FredEndpoints::EARNINGS_PROFESSIONAL,
+            FredEndpoints::EARNINGS_EDUCATION_HEALTH,
+            FredEndpoints::EARNINGS_LEISURE,
+            FredEndpoints::EARNINGS_OTHER,
+        ],
+    ];
+
     public const ALL = [
         self::HOUSING,
         self::VEHICLE_SALES,
@@ -83,5 +100,6 @@ class SeriesGroups
         self::GDP,
         self::UNEMPLOYMENT,
         self::EMP_BY_SECTOR,
+        self::EARNINGS,
     ];
 }

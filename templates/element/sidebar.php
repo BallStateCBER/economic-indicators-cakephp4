@@ -62,4 +62,13 @@
             ]
         ) ?>
     </li>
+    <li>
+        <?= $this->Html->link(
+            'Weekly Earnings',
+            [
+                'controller' => 'Data',
+                'action' => 'earnings',
+            ]
+        ) ?>
+    </li>
 </ul>

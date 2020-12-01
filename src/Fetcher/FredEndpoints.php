@@ -213,4 +213,61 @@ class FredEndpoints
         'subvar' => 'Government',
         'seriesId' => 'INGOVT',
     ];
+
+    public const VAR_EARNINGS = 'Average weekly earnings (seasonally adjusted)';
+    public const EARNINGS_PRIVATE = [
+        'var' => self::VAR_EARNINGS,
+        'subvar' => 'Total private',
+        'seriesId' => 'SMU18000000500000011SA',
+    ];
+    public const EARNINGS_GOODS = [
+        'var' => self::VAR_EARNINGS,
+        'subvar' => 'Goods producing',
+        'seriesId' => 'SMU18000000600000011SA',
+    ];
+    public const EARNINGS_SERVICE = [
+        'var' => self::VAR_EARNINGS,
+        'subvar' => 'Private service providing',
+        'seriesId' => 'SMU18000000800000011SA',
+    ];
+    public const EARNINGS_CONSTRUCTION = [
+        'var' => self::VAR_EARNINGS,
+        'subvar' => 'Construction',
+        'seriesId' => 'SMU18000002000000011SA',
+    ];
+    public const EARNINGS_MANUFACTURING = [
+        'var' => self::VAR_EARNINGS,
+        'subvar' => 'Manufacturing',
+        'seriesId' => 'SMU18000003000000011SA',
+    ];
+    public const EARNINGS_TRADE_TRANSPORT_UTILITIES = [
+        'var' => self::VAR_EARNINGS,
+        'subvar' => 'Trade, transportation and utilities',
+        'seriesId' => 'SMU18000004000000011SA',
+    ];
+    public const EARNINGS_FINANCIAL = [
+        'var' => self::VAR_EARNINGS,
+        'subvar' => 'Financial activities',
+        'seriesId' => 'SMU18000005500000011SA',
+    ];
+    public const EARNINGS_PROFESSIONAL = [
+        'var' => self::VAR_EARNINGS,
+        'subvar' => 'Professional and business services',
+        'seriesId' => 'SMU18000006000000011SA',
+    ];
+    public const EARNINGS_EDUCATION_HEALTH = [
+        'var' => self::VAR_EARNINGS,
+        'subvar' => 'Education and health service',
+        'seriesId' => 'SMU18000006500000011SA',
+    ];
+    public const EARNINGS_LEISURE = [
+        'var' => self::VAR_EARNINGS,
+        'subvar' => 'Leisure and Hospitality',
+        'seriesId' => 'SMU18000007000000011SA',
+    ];
+    public const EARNINGS_OTHER = [
+        'var' => self::VAR_EARNINGS,
+        'subvar' => 'Other services',
+        'seriesId' => 'SMU18000008000000011SA',
+    ];
 }

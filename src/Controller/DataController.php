@@ -104,4 +104,19 @@ class DataController extends AppController
 
         return $this->render('observations');
     }
+
+    /**
+     * Earnings
+     *
+     * @return \Cake\Http\Response
+     */
+    public function earnings()
+    {
+        $this->set([
+            'data' => (new Fetcher())->getCachedValuesAndChanges(SeriesGroups::EARNINGS),
+            'pageTitle' => FredEndpoints::VAR_EARNINGS,
+        ]);
+
+        return $this->render('observations');
+    }
 }
