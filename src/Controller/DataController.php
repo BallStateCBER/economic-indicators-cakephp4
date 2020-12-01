@@ -23,7 +23,7 @@ class DataController extends AppController
     public function housing()
     {
         $this->set([
-            'data' => (new Fetcher())->getCachedValuesAndChanges('housing', SeriesGroups::HOUSING),
+            'data' => (new Fetcher())->getCachedValuesAndChanges(SeriesGroups::HOUSING),
             'pageTitle' => FredEndpoints::VAR_HOUSING,
         ]);
 
@@ -38,7 +38,7 @@ class DataController extends AppController
     public function vehicleSales()
     {
         $this->set([
-            'data' => (new Fetcher())->getCachedValuesAndChanges('vehicle_sales', SeriesGroups::VEHICLE_SALES),
+            'data' => (new Fetcher())->getCachedValuesAndChanges(SeriesGroups::VEHICLE_SALES),
             'pageTitle' => FredEndpoints::VAR_VEHICLE_SALES,
         ]);
 
@@ -53,7 +53,7 @@ class DataController extends AppController
     public function retailFoodServices()
     {
         $this->set([
-            'data' => (new Fetcher())->getCachedValuesAndChanges('retail_food', SeriesGroups::RETAIL_FOOD_SERVICES),
+            'data' => (new Fetcher())->getCachedValuesAndChanges(SeriesGroups::RETAIL_FOOD_SERVICES),
             'pageTitle' => FredEndpoints::VAR_RETAIL_FOOD,
         ]);
 
@@ -68,7 +68,7 @@ class DataController extends AppController
     public function gdp()
     {
         $this->set([
-            'data' => (new Fetcher())->getCachedValuesAndChanges('gdp', SeriesGroups::GDP),
+            'data' => (new Fetcher())->getCachedValuesAndChanges(SeriesGroups::GDP),
             'pageTitle' => FredEndpoints::VAR_GDP,
         ]);
 
@@ -83,10 +83,7 @@ class DataController extends AppController
     public function unemployment()
     {
         $this->set([
-            'data' => (new Fetcher())->getCachedValuesAndChanges(
-                'unemployment',
-                [FredEndpoints::UNEMPLOYMENT_INDIANA]
-            ),
+            'data' => (new Fetcher())->getCachedValuesAndChanges(SeriesGroups::UNEMPLOYMENT),
             'pageTitle' => FredEndpoints::VAR_UNEMPLOYMENT,
         ]);
 
@@ -101,10 +98,7 @@ class DataController extends AppController
     public function employmentBySector()
     {
         $this->set([
-            'data' => (new Fetcher())->getCachedValuesAndChanges(
-                'emp_by_sector',
-                SeriesGroups::EMP_BY_SECTOR
-            ),
+            'data' => (new Fetcher())->getCachedValuesAndChanges(SeriesGroups::EMP_BY_SECTOR),
             'pageTitle' => FredEndpoints::VAR_EMPLOYMENT_BY_SECTOR,
         ]);
 

@@ -193,18 +193,18 @@ class Fetcher
     /**
      * A cache wrapper for getValuesAndChanges
      *
-     * @param string $cacheKey Cache key
-     * @param array $seriesGroup An array of series IDs or of arrays that contain the 'seriesId' key
+     * @param array $seriesGroup Series information
      * @return array|bool
      */
-    public function getCachedValuesAndChanges(string $cacheKey, array $seriesGroup)
+    public function getCachedValuesAndChanges(array $seriesGroup)
     {
+        $cacheKey = $seriesGroup['cacheKey'];
         $data = Cache::read($cacheKey, 'observations');
         if ($data) {
             return $data;
         }
 
-        $data = $this->getValuesAndChanges($seriesGroup);
+        $data = $this->getValuesAndChanges($seriesGroup['endpoints']);
         if ($data) {
             Cache::write($cacheKey, $data, 'observations');
 
