@@ -9,6 +9,8 @@ use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Http\Exception\NotFoundException;
+use fred_api_exception;
 
 /**
  * DataUpdater command.
@@ -46,7 +48,11 @@ class DataUpdaterCommand extends Command
         $groups = (new SeriesGroups())->getAll();
         foreach ($groups as $group) {
             $io->info(sprintf('Processing %s...', $group['endpoints'][0]['var']));
-            $fetcher->getCachedValuesAndChanges($group);
+            try {
+                $fetcher->getCachedValuesAndChanges($group);
+            } catch (NotFoundException | fred_api_exception $e) {
+                $io->err($e->getMessage());
+            }
             $io->out(' - Done');
         }
 
