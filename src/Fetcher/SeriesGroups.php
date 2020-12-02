@@ -93,13 +93,44 @@ class SeriesGroups
         ],
     ];
 
-    public const ALL = [
-        self::HOUSING,
-        self::VEHICLE_SALES,
-        self::RETAIL_FOOD_SERVICES,
-        self::GDP,
-        self::UNEMPLOYMENT,
-        self::EMP_BY_SECTOR,
-        self::EARNINGS,
-    ];
+    /**
+     * Returns the county unemployment group of endpoints
+     *
+     * @return array
+     */
+    public static function getCountyUnemployment()
+    {
+        $endpoints = [];
+        foreach (FredEndpoints::COUNTY_UNEMPLOYMENT_IDS as $countyName => $seriesId) {
+            $endpoints[] = [
+                'var' => FredEndpoints::VAR_COUNTY_UNEMPLOYMENT,
+                'subvar' => $countyName,
+                'seriesId' => $seriesId,
+            ];
+        }
+
+        return [
+            'cacheKey' => 'county_unemployment',
+            'endpoints' => $endpoints,
+        ];
+    }
+
+    /**
+     * Returns an array of endpoint groups
+     *
+     * @return array
+     */
+    public function getAll()
+    {
+        return [
+            self::HOUSING,
+            self::VEHICLE_SALES,
+            self::RETAIL_FOOD_SERVICES,
+            self::GDP,
+            self::UNEMPLOYMENT,
+            self::EMP_BY_SECTOR,
+            self::EARNINGS,
+            self::getCountyUnemployment(),
+        ];
+    }
 }

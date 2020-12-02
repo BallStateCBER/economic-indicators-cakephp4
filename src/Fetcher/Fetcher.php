@@ -164,27 +164,32 @@ class Fetcher
      *
      * @param array $seriesGroup An array of series IDs or of arrays that contain the 'seriesId' key
      * @return array|false
+     * @throws \Cake\Http\Exception\NotFoundException
+     * @throws \fred_api_exception
      */
     public function getValuesAndChanges(array $seriesGroup)
     {
         $data = [];
-        try {
-            foreach ($seriesGroup as $series) {
-                $this->setSeries($series);
-                $seriesResponse = $this->getSeries();
-                $seriesMeta = (array)($seriesResponse->series);
-                $this->latest();
-
-                $data[$series['subvar']] = [
-                    'units' => $seriesMeta['@attributes']['units'],
-                    'frequency' => $seriesMeta['@attributes']['frequency'],
-                    'value' => $series + $this->getObservations()[0],
-                    'change' => $series + (clone $this)->changeFromYearAgo()->getObservations()[0],
-                    'percentChange' => $series + (clone $this)->percentChangeFromYearAgo()->getObservations()[0],
-                ];
+        foreach ($seriesGroup as $series) {
+            $this->setSeries($series);
+            $seriesResponse = $this->getSeries();
+            if (!property_exists($seriesResponse, 'series')) {
+                throw new NotFoundException(sprintf(
+                    'Series data not found for %s >%s',
+                    $series['var'],
+                    $series['subvar']
+                ));
             }
-        } catch (NotFoundException | fred_api_exception $e) {
-            return false;
+            $seriesMeta = (array)($seriesResponse->series);
+            $this->latest();
+
+            $data[$series['subvar']] = [
+                'units' => $seriesMeta['@attributes']['units'],
+                'frequency' => $seriesMeta['@attributes']['frequency'],
+                'value' => $series + $this->getObservations()[0],
+                'change' => $series + (clone $this)->changeFromYearAgo()->getObservations()[0],
+                'percentChange' => $series + (clone $this)->percentChangeFromYearAgo()->getObservations()[0],
+            ];
         }
 
         return $data;
@@ -195,6 +200,8 @@ class Fetcher
      *
      * @param array $seriesGroup Series information
      * @return array|bool
+     * @throws \Cake\Http\Exception\NotFoundException
+     * @throws \fred_api_exception
      */
     public function getCachedValuesAndChanges(array $seriesGroup)
     {

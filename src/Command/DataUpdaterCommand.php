@@ -43,7 +43,8 @@ class DataUpdaterCommand extends Command
         $io->out();
 
         $fetcher = new Fetcher();
-        foreach (SeriesGroups::ALL as $group) {
+        $groups = (new SeriesGroups())->getAll();
+        foreach ($groups as $group) {
             $io->info(sprintf('Processing %s...', $group['endpoints'][0]['var']));
             $fetcher->getCachedValuesAndChanges($group);
             $io->out(' - Done');
