@@ -44,14 +44,14 @@ class DataUpdaterCommand extends Command
         $io->info('Updating data for pages with expired caches');
         $io->out();
 
-        $fetcher = new Fetcher();
+        $fetcher = new Fetcher($io);
         $groups = (new SeriesGroups())->getAll();
         foreach ($groups as $group) {
             $io->info(sprintf('Processing %s...', $group['endpoints'][0]['var']));
             try {
                 $fetcher->getCachedValuesAndChanges($group);
             } catch (NotFoundException | fred_api_exception $e) {
-                $io->err($e->getMessage());
+                $io->error($e->getMessage());
             }
             $io->out(' - Done');
         }

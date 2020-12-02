@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Fetcher;
 
 use Cake\Cache\Cache;
+use Cake\Console\ConsoleIo;
 use Cake\Core\Configure;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\Http\Exception\NotFoundException;
@@ -15,26 +16,33 @@ use fred_api_exception;
  *
  * Used for pulling data from external APIs
  *
+ * @property array $parameters
+ * @property \Cake\Console\ConsoleIo|null $io
+ * @property \fred_api $api
  * @package App\Fetcher
  */
 class Fetcher
 {
     public fred_api $api;
     private array $parameters;
+    private ?ConsoleIo $io;
 
     /**
      * Fetcher constructor.
      *
+     * @param \Cake\Console\ConsoleIo|null $io Optional console output
      * @throws \Cake\Http\Exception\InternalErrorException
      */
-    public function __construct()
+    public function __construct(?ConsoleIo $io = null)
     {
+        $this->io = $io;
+
         // Used in calls to file_exists() in the FredApi library
         if (!defined('FRED_API_ROOT')) {
             define('FRED_API_ROOT', ROOT . DS . 'lib' . DS . 'FredApi' . DS);
         }
 
-        require_once(ROOT . DS . 'lib' . DS . 'FredApi' . DS . 'fred_api.php');
+        require_once ROOT . DS . 'lib' . DS . 'FredApi' . DS . 'fred_api.php';
         $apiKey = Configure::read('fred_api_key');
         try {
             $this->api = new fred_api($apiKey);
@@ -170,8 +178,10 @@ class Fetcher
     public function getValuesAndChanges(array $seriesGroup)
     {
         $data = [];
+        $this->consoleOutput('Retrieving...');
         foreach ($seriesGroup as $series) {
             $this->setSeries($series);
+            $this->consoleOutput(sprintf('%s > %s metadata', $series['var'], $series['subvar']));
             $seriesResponse = $this->getSeries();
             if (!property_exists($seriesResponse, 'series')) {
                 throw new NotFoundException(sprintf(
@@ -183,12 +193,19 @@ class Fetcher
             $seriesMeta = (array)($seriesResponse->series);
             $this->latest();
 
+            $this->consoleOutput('Value');
+            $value = $series + $this->getObservations()[0];
+            $this->consoleOutput('Change');
+            $change = $series + (clone $this)->changeFromYearAgo()->getObservations()[0];
+            $this->consoleOutput('Percent change');
+            $percentChange = $series + (clone $this)->percentChangeFromYearAgo()->getObservations()[0];
+
             $data[$series['subvar']] = [
                 'units' => $seriesMeta['@attributes']['units'],
                 'frequency' => $seriesMeta['@attributes']['frequency'],
-                'value' => $series + $this->getObservations()[0],
-                'change' => $series + (clone $this)->changeFromYearAgo()->getObservations()[0],
-                'percentChange' => $series + (clone $this)->percentChangeFromYearAgo()->getObservations()[0],
+                'value' => $value,
+                'change' => $change,
+                'percentChange' => $percentChange,
             ];
         }
 
@@ -208,16 +225,39 @@ class Fetcher
         $cacheKey = $seriesGroup['cacheKey'];
         $data = Cache::read($cacheKey, 'observations');
         if ($data) {
+            $this->consoleOutput('Results are still cached');
+
             return $data;
         }
 
         $data = $this->getValuesAndChanges($seriesGroup['endpoints']);
         if ($data) {
             Cache::write($cacheKey, $data, 'observations');
+            $this->consoleOutput('Wrote results to cache');
 
             return $data;
         }
 
+        $this->consoleOutput('No results could be retrieved', true);
+
         return false;
+    }
+
+    /**
+     * Displays a console message if this is being run in the console
+     *
+     * @param string $msg Message
+     * @param bool $error TRUE if the message is an error message
+     * @return void
+     */
+    private function consoleOutput($msg, $error = false)
+    {
+        if (!$this->io) {
+            return;
+        }
+        if ($error) {
+            $this->io->error(" - $msg");
+        }
+        $this->io->out(" - $msg");
     }
 }
