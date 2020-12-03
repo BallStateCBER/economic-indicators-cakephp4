@@ -22,7 +22,7 @@
     </li>
     <li>
         <?= $this->Html->link(
-            'Retail and Food Services',
+            'Retail & Food Services',
             [
                 'controller' => 'Data',
                 'action' => 'retailFoodServices',
