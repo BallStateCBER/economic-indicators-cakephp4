@@ -28,6 +28,11 @@ class Fetcher
     private ?ConsoleIo $io;
 
     /**
+     * @var int The number of times to retry a failing API call after the first attempt
+     */
+    private int $apiRetryCount = 2;
+
+    /**
      * @var float Seconds to wait between each API call
      */
     private float $rateThrottle = 1;
@@ -117,7 +122,28 @@ class Fetcher
         $parameters += $this->parameters;
         $this->throttle();
 
-        return $seriesApi->get($parameters);
+        for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts--) {
+            $finalAttempt = $attempts == 1;
+            try {
+                $response = $seriesApi->get($parameters);
+                if (property_exists($response, 'series')) {
+                    return $response;
+                }
+                if ($finalAttempt) {
+                    throw new NotFoundException('Series data not found');
+                } else {
+                    $this->consoleOutput('Failed, retrying', true);
+                    continue;
+                }
+            } catch (fred_api_exception $e) {
+                if ($finalAttempt) {
+                    throw $e;
+                } else {
+                    $this->consoleOutput('Failed, retrying', true);
+                    continue;
+                }
+            }
+        }
     }
 
     /**
@@ -131,32 +157,40 @@ class Fetcher
      */
     public function getObservations(array $parameters = [])
     {
-        /** @var \fred_api_series $seriesApi */
-        $seriesApi = $this->api->factory('series');
-        $parameters += $this->parameters;
+        for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts++) {
+            $finalAttempt = $attempts == 1;
+            /** @var \fred_api_series $seriesApi */
+            $seriesApi = $this->api->factory('series');
+            $parameters += $this->parameters;
 
-        $this->throttle();
-        $response = $seriesApi->observations($parameters);
-        if (!is_object($response) || !property_exists($response, 'observation')) {
-            throw new NotFoundException();
+            $this->throttle();
+            $response = $seriesApi->observations($parameters);
+            if (!is_object($response) || !property_exists($response, 'observation')) {
+                if ($finalAttempt) {
+                    throw new NotFoundException();
+                } else {
+                    $this->consoleOutput('Failed, retrying', true);
+                    continue;
+                }
+            }
+
+            $observations = (array)$response->observation;
+
+            // Adjust for requests with limit = 1
+            if (isset($observations['@attributes'])) {
+                $observations = [$observations];
+            }
+
+            $retval = [];
+            foreach ($observations as $observation) {
+                $retval[] = [
+                    'date' => $observation['@attributes']['date'],
+                    'value' => $observation['@attributes']['value'],
+                ];
+            }
+
+            return $retval;
         }
-
-        $observations = (array)$response->observation;
-
-        // Adjust for requests with limit = 1
-        if (isset($observations['@attributes'])) {
-            $observations = [$observations];
-        }
-
-        $retval = [];
-        foreach ($observations as $observation) {
-            $retval[] = [
-                'date' => $observation['@attributes']['date'],
-                'value' => $observation['@attributes']['value'],
-            ];
-        }
-
-        return $retval;
     }
 
     /**
@@ -201,13 +235,6 @@ class Fetcher
             $this->setSeries($series);
             $this->consoleOutput(sprintf('%s > %s metadata', $series['var'], $series['subvar']));
             $seriesResponse = $this->getSeries();
-            if (!property_exists($seriesResponse, 'series')) {
-                throw new NotFoundException(sprintf(
-                    'Series data not found for %s >%s',
-                    $series['var'],
-                    $series['subvar']
-                ));
-            }
             $seriesMeta = (array)($seriesResponse->series);
             $this->latest();
 
