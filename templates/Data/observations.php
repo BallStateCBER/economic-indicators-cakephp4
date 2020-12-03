@@ -6,6 +6,7 @@
  */
 
 use Cake\I18n\FrozenDate;
+use Cake\I18n\FrozenTime;
 
 $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
 
@@ -46,7 +47,8 @@ $prepend = str_contains(strtolower($unit), 'dollar') ? '$' : null;
     <?= $pageTitle ?>
 </h1>
 <p>
-    Updated <?= strtolower(reset($data['observations'])['frequency']) ?>
+    Updated <?= strtolower(reset($data['observations'])['frequency']) ?> -
+    Last updated <?= (new FrozenTime($data['updated']))->format('F j, Y') ?>
 </p>
 
 <?php if ($data === false): ?>
