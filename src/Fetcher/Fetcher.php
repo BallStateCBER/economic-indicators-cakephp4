@@ -216,15 +216,16 @@ class Fetcher
      * A cache wrapper for getValuesAndChanges
      *
      * @param array $seriesGroup Series information
+     * @param bool $forceOverwrite Set to TRUE to overwrite the cached value
      * @return array|bool
      * @throws \Cake\Http\Exception\NotFoundException
      * @throws \fred_api_exception
      */
-    public function getCachedValuesAndChanges(array $seriesGroup)
+    public function getCachedValuesAndChanges(array $seriesGroup, bool $forceOverwrite = false)
     {
         $cacheKey = $seriesGroup['cacheKey'];
         $data = Cache::read($cacheKey, 'observations');
-        if ($data) {
+        if (!$forceOverwrite && $data) {
             $this->consoleOutput('Results are still cached');
 
             return $data;

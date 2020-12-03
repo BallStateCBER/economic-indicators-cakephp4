@@ -11,9 +11,15 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Http\Exception\NotFoundException;
 use fred_api_exception;
+use SplFileInfo;
 
 /**
  * DataUpdater command.
+ *
+ * This command is intended to be run via a cron job and overwrite cached values every 24 hours.
+ * This application's cache configuration has cached values retained for a longer period of time so that in the event
+ * of an update failure, cached values are retained and used instead of forcing new data to be fetched during a user
+ * request.
  */
 class DataUpdaterCommand extends Command
 {
@@ -48,8 +54,9 @@ class DataUpdaterCommand extends Command
         $groups = (new SeriesGroups())->getAll();
         foreach ($groups as $group) {
             $io->info(sprintf('Processing %s...', $group['endpoints'][0]['var']));
+            $expired = $this->cachedValueIsExpired($group['cacheKey']);
             try {
-                $fetcher->getCachedValuesAndChanges($group);
+                $fetcher->getCachedValuesAndChanges($group, $expired);
             } catch (NotFoundException | fred_api_exception $e) {
                 $io->error($e->getMessage());
             }
@@ -57,5 +64,23 @@ class DataUpdaterCommand extends Command
         }
 
         $io->success('Finished');
+    }
+
+    /**
+     * Returns TRUE if the cached value should be overwritten
+     *
+     * @param string $cacheKey Cache key
+     * @return bool
+     */
+    private function cachedValueIsExpired(string $cacheKey)
+    {
+        $cacheFile = new SplFileInfo(CACHE . 'observations' . DS . 'observations_' . $cacheKey);
+        if (!$cacheFile->isFile()) {
+            return true;
+        }
+        $age = time() - $cacheFile->getMTime();
+        $cacheDuration = 60 * 60 * 23; // 23 hours (does not necessarily reflect Configure-level setting)
+
+        return $age > $cacheDuration;
     }
 }
