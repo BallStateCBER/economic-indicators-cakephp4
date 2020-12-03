@@ -10,7 +10,14 @@ use Cake\I18n\FrozenTime;
 
 $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
 
-function getArrow($value) {
+/**
+ * Returns an up or down arrow to indicate positive or negative, or no arrow for zero
+ *
+ * @param mixed $value Observation value
+ * @return string|null
+ */
+function getArrow($value): ?string
+{
     if ($value > 0) {
         return '<i class="fas fa-arrow-circle-up"></i>';
     }
@@ -22,7 +29,15 @@ function getArrow($value) {
     return null;
 }
 
-function formatValue($value, $prepend = null) {
+/**
+ * Returns a formatted observation value
+ *
+ * @param mixed $value Observation value
+ * @param ?string $prepend String to apply before numeric part of return value
+ * @return string
+ */
+function formatValue($value, $prepend = null): string
+{
     $decimalLimit = 2;
     $negative = (float)$value < 0;
     $value = round($value, $decimalLimit);
