@@ -40,14 +40,41 @@ function formatValue($value, $prepend = null) {
     return $prepend . $value;
 }
 
+/**
+ * Returns a formatted date string for the provided series
+ *
+ * @param string $date Date string
+ * @param string $frequency e.g. 'monthly'
+ * @return string
+ */
+function getFormattedDate(string $date, string $frequency): string
+{
+    if (str_contains($frequency, 'quarterly')) {
+        $dateObj = new FrozenDate($date);
+        $month = $dateObj->format('n');
+        $quarter = ceil($month / 3);
+
+        return sprintf('Q%s %s', $quarter, $dateObj->format('Y'));
+    }
+
+    if (str_contains($frequency, 'monthly')) {
+        $format = 'F Y';
+    } else {
+        $format = 'F j, Y';
+    }
+
+    return (new FrozenDate($date))->format($format);
+}
+
 $unit = reset($data['observations'])['units'];
 $prepend = str_contains(strtolower($unit), 'dollar') ? '$' : null;
+$frequency = strtolower(reset($data['observations'])['frequency']);
 ?>
 <h1 id="page-title">
     <?= $pageTitle ?>
 </h1>
 <p>
-    Updated <?= strtolower(reset($data['observations'])['frequency']) ?> -
+    Updated <?= strtolower($frequency) ?> -
     Last updated <?= (new FrozenTime($data['updated']))->format('F j, Y') ?>
 </p>
 
@@ -90,7 +117,7 @@ $prepend = str_contains(strtolower($unit), 'dollar') ? '$' : null;
                         <?= $name ?>
                         <br />
                         <small>
-                            <?= (new FrozenDate($series['value']['date']))->format('F j, Y') ?>
+                            <?= getFormattedDate($series['value']['date'], $frequency) ?>
                         </small>
                     </td>
                     <td>
