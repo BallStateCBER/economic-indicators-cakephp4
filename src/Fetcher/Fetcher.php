@@ -8,6 +8,7 @@ use Cake\Console\ConsoleIo;
 use Cake\Core\Configure;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\Http\Exception\NotFoundException;
+use Cake\I18n\FrozenTime;
 use fred_api;
 use fred_api_exception;
 
@@ -218,47 +219,6 @@ class Fetcher
     }
 
     /**
-     * Returns an array of observations, with value, change from year ago, and percent change from year ago
-     *
-     * Returns FALSE if there's an error getting this data
-     *
-     * @param array $seriesGroup An array of series IDs or of arrays that contain the 'seriesId' key
-     * @return array|false
-     * @throws \Cake\Http\Exception\NotFoundException
-     * @throws \fred_api_exception
-     */
-    public function getValuesAndChanges(array $seriesGroup)
-    {
-        $data = [];
-        //"last_updated": "2013-07-31 09:26:16-05",
-        $this->consoleOutput('Retrieving...');
-        foreach ($seriesGroup as $series) {
-            $this->setSeries($series);
-            $this->consoleOutput(sprintf('%s > %s metadata', $series['var'], $series['subvar']));
-            $seriesResponse = $this->getSeries();
-            $seriesMeta = (array)($seriesResponse->series);
-            $this->latest();
-
-            $this->consoleOutput('Value');
-            $value = $series + $this->getObservations()[0];
-            $this->consoleOutput('Change');
-            $change = $series + (clone $this)->changeFromYearAgo()->getObservations()[0];
-            $this->consoleOutput('Percent change');
-            $percentChange = $series + (clone $this)->percentChangeFromYearAgo()->getObservations()[0];
-
-            $data[$series['subvar']] = [
-                'units' => $seriesMeta['@attributes']['units'],
-                'frequency' => $seriesMeta['@attributes']['frequency'],
-                'value' => $value,
-                'change' => $change,
-                'percentChange' => $percentChange,
-            ];
-        }
-
-        return $data;
-    }
-
-    /**
      * A cache wrapper for getValuesAndChanges
      *
      * @param array $seriesGroup Series information
@@ -269,15 +229,50 @@ class Fetcher
      */
     public function getCachedValuesAndChanges(array $seriesGroup, bool $forceOverwrite = false)
     {
+        // Attempt to pull from cache
         $cacheKey = $seriesGroup['cacheKey'];
-        $data = Cache::read($cacheKey, 'observations');
-        if (!$forceOverwrite && $data) {
+        $cachedData = Cache::read($cacheKey, 'observations');
+        if (!$forceOverwrite && $cachedData) {
             $this->consoleOutput('Results are still cached');
 
-            return $data;
+            return $cachedData;
         }
 
-        $data = $this->getValuesAndChanges($seriesGroup['endpoints']);
+        // Fetch from API
+        $data = [
+            /* Stores the last_updated date for the first series in this group
+             * Assumes that all series in this group are updated at roughly the same time */
+            'updated' => null,
+            'observations' => [],
+        ];
+        $this->consoleOutput('Retrieving...');
+        foreach ($seriesGroup['endpoints'] as $series) {
+            $this->setSeries($series);
+            $this->consoleOutput(sprintf('%s > %s metadata', $series['var'], $series['subvar']));
+            $seriesResponse = $this->getSeries();
+            $seriesMeta = (array)($seriesResponse->series);
+            if (!$data['updated']) {
+                $data['updated'] = $seriesMeta['@attributes']['last_updated'];
+            }
+            $this->latest();
+
+            $this->consoleOutput('Value');
+            $value = $series + $this->getObservations()[0];
+            $this->consoleOutput('Change');
+            $change = $series + (clone $this)->changeFromYearAgo()->getObservations()[0];
+            $this->consoleOutput('Percent change');
+            $percentChange = $series + (clone $this)->percentChangeFromYearAgo()->getObservations()[0];
+
+            $data['observations'][$series['subvar']] = [
+                'units' => $seriesMeta['@attributes']['units'],
+                'frequency' => $seriesMeta['@attributes']['frequency'],
+                'value' => $value,
+                'change' => $change,
+                'percentChange' => $percentChange,
+            ];
+        }
+
+        // Cache and return
         if ($data) {
             Cache::write($cacheKey, $data, 'observations');
             $this->consoleOutput('Wrote results to cache');

@@ -39,14 +39,14 @@ function formatValue($value, $prepend = null) {
     return $prepend . $value;
 }
 
-$unit = reset($data)['units'];
+$unit = reset($data['observations'])['units'];
 $prepend = str_contains(strtolower($unit), 'dollar') ? '$' : null;
 ?>
 <h1 id="page-title">
     <?= $pageTitle ?>
 </h1>
 <p>
-    Updated <?= strtolower(reset($data)['frequency']) ?>
+    Updated <?= strtolower(reset($data['observations'])['frequency']) ?>
 </p>
 
 <?php if ($data === false): ?>
@@ -82,7 +82,7 @@ $prepend = str_contains(strtolower($unit), 'dollar') ? '$' : null;
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($data as $name => $series): ?>
+            <?php foreach ($data['observations'] as $name => $series): ?>
                 <tr>
                     <td>
                         <?= $name ?>

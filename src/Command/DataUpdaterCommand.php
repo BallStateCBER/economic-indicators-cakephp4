@@ -5,11 +5,13 @@ namespace App\Command;
 
 use App\Fetcher\Fetcher;
 use App\Fetcher\SeriesGroups;
+use Cake\Cache\Cache;
 use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Http\Exception\NotFoundException;
+use Cake\I18n\FrozenTime;
 use fred_api_exception;
 use SplFileInfo;
 
@@ -23,6 +25,8 @@ use SplFileInfo;
  */
 class DataUpdaterCommand extends Command
 {
+    private Fetcher $fetcher;
+
     /**
      * Hook method for defining this command's option parser.
      *
@@ -44,19 +48,27 @@ class DataUpdaterCommand extends Command
      * @param \Cake\Console\Arguments $args The command arguments.
      * @param \Cake\Console\ConsoleIo $io The console io
      * @return null|void|int The exit code or null for success
+     * @throws \fred_api_exception
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
-        $io->info('Updating data for pages with expired caches');
-        $io->out();
-
-        $fetcher = new Fetcher($io);
+        $this->fetcher = new Fetcher($io);
         $groups = (new SeriesGroups())->getAll();
         foreach ($groups as $group) {
-            $io->info(sprintf('Processing %s...', $group['endpoints'][0]['var']));
-            $expired = $this->cachedValueIsExpired($group['cacheKey']);
+            $io->info($group['endpoints'][0]['var']);
+            $expired = $this->waitingPeriodHasPassed($group['cacheKey']);
+            if (!$expired) {
+                $io->out(' - Data retrieved too recently to try again');
+                continue;
+            }
+            $io->out(' - Checking for updates');
+            if (!$this->updateIsAvailable($group)) {
+                $io->out(' - API does not yet have an update');
+                continue;
+            }
+
             try {
-                $fetcher->getCachedValuesAndChanges($group, $expired);
+                $this->fetcher->getCachedValuesAndChanges($group, true);
             } catch (NotFoundException | fred_api_exception $e) {
                 $io->error($e->getMessage());
             }
@@ -67,20 +79,44 @@ class DataUpdaterCommand extends Command
     }
 
     /**
-     * Returns TRUE if the cached value should be overwritten
+     * Returns TRUE if enough time has passed to check for updates
      *
      * @param string $cacheKey Cache key
      * @return bool
      */
-    private function cachedValueIsExpired(string $cacheKey)
+    private function waitingPeriodHasPassed(string $cacheKey)
     {
         $cacheFile = new SplFileInfo(CACHE . 'observations' . DS . 'observations_' . $cacheKey);
         if (!$cacheFile->isFile()) {
             return true;
         }
         $age = time() - $cacheFile->getMTime();
-        $cacheDuration = 60 * 60 * 23; // 23 hours (does not necessarily reflect Configure-level setting)
+        $waitingPeriod = 60 * 60 * 23; // 23 hours
 
-        return $age > $cacheDuration;
+        return $age > $waitingPeriod;
+    }
+
+    /**
+     * Returns TRUE if the API has more recently-updated data than the cache
+     *
+     * @param array $seriesGroup Array of data about a group of data series
+     * @return bool
+     * @throws \fred_api_exception
+     */
+    private function updateIsAvailable(array $seriesGroup)
+    {
+        $cacheKey = $seriesGroup['cacheKey'];
+        $cachedData = Cache::read($cacheKey, 'observations');
+        if (!$cachedData) {
+            return true;
+        }
+
+        $this->fetcher->setSeries($seriesGroup);
+        $seriesResponse = $this->fetcher->getSeries();
+        $seriesMeta = (array)($seriesResponse->series);
+        $responseUpdated = $seriesMeta['@attributes']['updated'];
+        $cachedDate = new FrozenTime($cachedData['updated']);
+
+        return (new FrozenTime($responseUpdated))->gt($cachedDate);
     }
 }
