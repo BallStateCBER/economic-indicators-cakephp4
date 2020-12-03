@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "29150bb0ebcadcead5c24ee45f40837d",
+    "content-hash": "e4ca7813545596f818a3c156612f5776",
     "packages": [
         {
             "name": "aura/intl",
@@ -58,12 +58,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/BallStateCBER/datacenter-plugin-cakephp4.git",
-                "reference": "b5f50cedb1956fdff4d0ba076301086fbc61df0a"
+                "reference": "47f250ac64e6a59b738778e3008bd982d62dc1f0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BallStateCBER/datacenter-plugin-cakephp4/zipball/b5f50cedb1956fdff4d0ba076301086fbc61df0a",
-                "reference": "b5f50cedb1956fdff4d0ba076301086fbc61df0a",
+                "url": "https://api.github.com/repos/BallStateCBER/datacenter-plugin-cakephp4/zipball/47f250ac64e6a59b738778e3008bd982d62dc1f0",
+                "reference": "47f250ac64e6a59b738778e3008bd982d62dc1f0",
                 "shasum": ""
             },
             "require": {
@@ -88,7 +88,7 @@
                 "MIT"
             ],
             "description": "Ball State CBER DataCenter plugin for CakePHP 4",
-            "time": "2020-11-12T23:57:47+00:00"
+            "time": "2020-11-24T22:27:07+00:00"
         },
         {
             "name": "cakephp/cakephp",
@@ -5237,7 +5237,8 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.2"
+        "php": ">=7.2",
+        "ext-simplexml": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "1.1.0"
