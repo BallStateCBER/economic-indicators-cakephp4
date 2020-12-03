@@ -27,7 +27,7 @@ $this->append('subsite_title');
 </div>
 
 <?php $this->append('below_content'); ?>
-    <div id="data-disclaimer">
+    <div id="data-disclaimer" class="max_width">
         This website uses the FRED&reg; API but is not endorsed or certified by the Federal Reserve Bank of St. Louis.
         By using this website, you agree to be bound by the
         <a href="https://research.stlouisfed.org/docs/api/terms_of_use.html">FRED&reg; API Terms of Use</a>.
