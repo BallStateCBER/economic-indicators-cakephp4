@@ -230,6 +230,7 @@ class Fetcher
     public function getValuesAndChanges(array $seriesGroup)
     {
         $data = [];
+        //"last_updated": "2013-07-31 09:26:16-05",
         $this->consoleOutput('Retrieving...');
         foreach ($seriesGroup as $series) {
             $this->setSeries($series);
@@ -296,7 +297,7 @@ class Fetcher
      * @param bool $error TRUE if the message is an error message
      * @return void
      */
-    private function consoleOutput($msg, $error = false)
+    private function consoleOutput(string $msg, $error = false)
     {
         if (!$this->io) {
             return;

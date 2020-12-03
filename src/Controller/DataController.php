@@ -12,6 +12,12 @@ use fred_api_exception;
 
 class DataController extends AppController
 {
+    /**
+     * beforeRender callback
+     *
+     * @param \Cake\Event\EventInterface $event Event object
+     * @return \Cake\Http\Response|void|null
+     */
     public function beforeRender(EventInterface $event)
     {
         parent::beforeRender($event);
@@ -23,7 +29,7 @@ class DataController extends AppController
      * @param array $series Series data
      * @return array|bool
      */
-    private function getData($series)
+    private function getData(array $series)
     {
         try {
             return (new Fetcher())->getCachedValuesAndChanges($series);
