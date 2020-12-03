@@ -89,7 +89,7 @@ $frequency = strtolower(reset($data['observations'])['frequency']);
     <?= $pageTitle ?>
 </h1>
 <p>
-    Updated <?= strtolower($frequency) ?> -
+    <?= ucfirst($frequency) ?> data -
     Last updated <?= (new FrozenTime($data['updated']))->format('F j, Y') ?>
 </p>
 
