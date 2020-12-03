@@ -303,6 +303,8 @@ class Fetcher
         }
         if ($error) {
             $this->io->error(" - $msg");
+
+            return;
         }
         $this->io->out(" - $msg");
     }
