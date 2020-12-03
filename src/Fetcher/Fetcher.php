@@ -28,6 +28,11 @@ class Fetcher
     private ?ConsoleIo $io;
 
     /**
+     * @var float Seconds to wait between each API call
+     */
+    private float $rateThrottle = 1;
+
+    /**
      * Fetcher constructor.
      *
      * @param \Cake\Console\ConsoleIo|null $io Optional console output
@@ -49,6 +54,17 @@ class Fetcher
         } catch (fred_api_exception $e) {
             throw new InternalErrorException('Error creating FRED API object: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Pauses execution for $this->rateThrottle seconds
+     *
+     * @return void
+     */
+    private function throttle()
+    {
+        $microseconds = (int)($this->rateThrottle * 1000000);
+        usleep($microseconds);
     }
 
     /**
@@ -99,6 +115,7 @@ class Fetcher
         /** @var \fred_api_series $seriesApi */
         $seriesApi = $this->api->factory('series');
         $parameters += $this->parameters;
+        $this->throttle();
 
         return $seriesApi->get($parameters);
     }
@@ -118,6 +135,7 @@ class Fetcher
         $seriesApi = $this->api->factory('series');
         $parameters += $this->parameters;
 
+        $this->throttle();
         $response = $seriesApi->observations($parameters);
         if (!is_object($response) || !property_exists($response, 'observation')) {
             throw new NotFoundException();
