@@ -1,7 +1,7 @@
 {
-    "name": "cakephp/app",
-    "description": "CakePHP skeleton app",
-    "homepage": "https://cakephp.org",
+    "name": "ballstatecber/economic-indicators-cakephp4",
+    "description": "Economic Indicators",
+    "homepage": "https://indicators.cberdata.org",
     "type": "project",
     "license": "MIT",
     "require": {
