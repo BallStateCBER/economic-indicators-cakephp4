@@ -111,10 +111,11 @@ class DataUpdaterCommand extends Command
             return true;
         }
 
-        $this->fetcher->setSeries($seriesGroup);
+        $firstSeries = $seriesGroup['endpoints'][0];
+        $this->fetcher->setSeries($firstSeries);
         $seriesResponse = $this->fetcher->getSeries();
         $seriesMeta = (array)($seriesResponse->series);
-        $responseUpdated = $seriesMeta['@attributes']['updated'];
+        $responseUpdated = $seriesMeta['@attributes']['last_updated'];
         $cachedDate = new FrozenTime($cachedData['updated']);
 
         return (new FrozenTime($responseUpdated))->gt($cachedDate);
