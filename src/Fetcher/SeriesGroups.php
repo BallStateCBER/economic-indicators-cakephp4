@@ -18,6 +18,7 @@ class SeriesGroups
     public const VEHICLE_SALES = [
         'cacheKey' => 'vehicle_sales',
         'endpoints' => [
+            FredEndpoints::VEHICLE_SALES_TOTAL,
             FredEndpoints::VEHICLE_SALES_AUTOS,
             FredEndpoints::VEHICLE_SALES_AUTOS_DOMESTIC,
             FredEndpoints::VEHICLE_SALES_AUTOS_FOREIGN,
