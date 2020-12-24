@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Fetcher\Fetcher;
-use App\Fetcher\FredEndpoints;
 use App\Fetcher\SeriesGroups;
 use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;
@@ -28,18 +27,29 @@ class DataController extends AppController
     }
 
     /**
+     * Sets up and renders an observations page
+     *
+     * @param array $group Series group metadata
+     * @return \Cake\Http\Response
+     */
+    private function renderObservations(array $group): Response
+    {
+        $this->set([
+            'data' => $this->getData($group),
+            'pageTitle' => $group['title'],
+        ]);
+
+        return $this->render('observations');
+    }
+
+    /**
      * Housing
      *
      * @return \Cake\Http\Response
      */
     public function housing(): Response
     {
-        $this->set([
-            'data' => $this->getData(SeriesGroups::HOUSING),
-            'pageTitle' => FredEndpoints::VAR_HOUSING,
-        ]);
-
-        return $this->render('observations');
+        return $this->renderObservations(SeriesGroups::HOUSING);
     }
 
     /**
@@ -49,12 +59,7 @@ class DataController extends AppController
      */
     public function vehicleSales(): Response
     {
-        $this->set([
-            'data' => $this->getData(SeriesGroups::VEHICLE_SALES),
-            'pageTitle' => FredEndpoints::VAR_VEHICLE_SALES,
-        ]);
-
-        return $this->render('observations');
+        return $this->renderObservations(SeriesGroups::VEHICLE_SALES);
     }
 
     /**
@@ -64,12 +69,7 @@ class DataController extends AppController
      */
     public function retailFoodServices(): Response
     {
-        $this->set([
-            'data' => $this->getData(SeriesGroups::RETAIL_FOOD_SERVICES),
-            'pageTitle' => FredEndpoints::VAR_RETAIL_FOOD,
-        ]);
-
-        return $this->render('observations');
+        return $this->renderObservations(SeriesGroups::RETAIL_FOOD_SERVICES);
     }
 
     /**
@@ -79,12 +79,7 @@ class DataController extends AppController
      */
     public function gdp(): Response
     {
-        $this->set([
-            'data' => $this->getData(SeriesGroups::GDP),
-            'pageTitle' => FredEndpoints::VAR_GDP,
-        ]);
-
-        return $this->render('observations');
+        return $this->renderObservations(SeriesGroups::GDP);
     }
 
     /**
@@ -94,12 +89,7 @@ class DataController extends AppController
      */
     public function unemployment(): Response
     {
-        $this->set([
-            'data' => $this->getData(SeriesGroups::UNEMPLOYMENT),
-            'pageTitle' => FredEndpoints::VAR_UNEMPLOYMENT,
-        ]);
-
-        return $this->render('observations');
+        return $this->renderObservations(SeriesGroups::UNEMPLOYMENT);
     }
 
     /**
@@ -109,12 +99,7 @@ class DataController extends AppController
      */
     public function employmentBySector(): Response
     {
-        $this->set([
-            'data' => $this->getData(SeriesGroups::EMP_BY_SECTOR),
-            'pageTitle' => FredEndpoints::VAR_EMPLOYMENT_BY_SECTOR,
-        ]);
-
-        return $this->render('observations');
+        return $this->renderObservations(SeriesGroups::EMP_BY_SECTOR);
     }
 
     /**
@@ -124,12 +109,7 @@ class DataController extends AppController
      */
     public function earnings(): Response
     {
-        $this->set([
-            'data' => $this->getData(SeriesGroups::EARNINGS),
-            'pageTitle' => FredEndpoints::VAR_EARNINGS,
-        ]);
-
-        return $this->render('observations');
+        return $this->renderObservations(SeriesGroups::EARNINGS);
     }
 
     /**
@@ -139,11 +119,6 @@ class DataController extends AppController
      */
     public function countyUnemployment(): Response
     {
-        $this->set([
-            'data' => $this->getData(SeriesGroups::getCountyUnemployment()),
-            'pageTitle' => FredEndpoints::VAR_COUNTY_UNEMPLOYMENT,
-        ]);
-
-        return $this->render('observations');
+        return $this->renderObservations(SeriesGroups::getCountyUnemployment());
     }
 }

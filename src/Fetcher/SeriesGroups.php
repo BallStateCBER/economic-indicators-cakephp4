@@ -6,6 +6,7 @@ namespace App\Fetcher;
 class SeriesGroups
 {
     public const HOUSING = [
+        'title' => FredEndpoints::VAR_HOUSING,
         'cacheKey' => 'housing',
         'endpoints' => [
             FredEndpoints::HOUSING_TOTAL,
@@ -16,6 +17,7 @@ class SeriesGroups
     ];
 
     public const VEHICLE_SALES = [
+        'title' => FredEndpoints::VAR_VEHICLE_SALES,
         'cacheKey' => 'vehicle_sales',
         'endpoints' => [
             FredEndpoints::VEHICLE_SALES_TOTAL,
@@ -30,6 +32,7 @@ class SeriesGroups
     ];
 
     public const RETAIL_FOOD_SERVICES = [
+        'title' => FredEndpoints::VAR_RETAIL_FOOD,
         'cacheKey' => 'retail',
         'endpoints' => [
             FredEndpoints::RETAIL_FOOD_TOTAL,
@@ -40,6 +43,7 @@ class SeriesGroups
     ];
 
     public const GDP = [
+        'title' => FredEndpoints::VAR_GDP,
         'cacheKey' => 'gdp',
         'endpoints' => [
             FredEndpoints::GDP,
@@ -50,11 +54,13 @@ class SeriesGroups
     ];
 
     public const UNEMPLOYMENT = [
+        'title' => FredEndpoints::VAR_UNEMPLOYMENT,
         'cacheKey' => 'unemployment',
         'endpoints' => [FredEndpoints::UNEMPLOYMENT_INDIANA],
     ];
 
     public const EMP_BY_SECTOR = [
+        'title' => FredEndpoints::VAR_EMPLOYMENT_BY_SECTOR,
         'cacheKey' => 'employment_by_sector',
         'endpoints' => [
             FredEndpoints::EMP_TOTAL_NONFARM,
@@ -78,6 +84,7 @@ class SeriesGroups
     ];
 
     public const EARNINGS = [
+        'title' => FredEndpoints::VAR_EARNINGS,
         'cacheKey' => 'earnings',
         'endpoints' => [
             FredEndpoints::EARNINGS_PRIVATE,
