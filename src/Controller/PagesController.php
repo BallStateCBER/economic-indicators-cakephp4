@@ -30,7 +30,7 @@ class PagesController extends AppController
      *
      * @return void
      */
-    public function home()
+    public function home(): void
     {
     }
 }

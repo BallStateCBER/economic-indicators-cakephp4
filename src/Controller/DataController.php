@@ -6,23 +6,12 @@ namespace App\Controller;
 use App\Fetcher\Fetcher;
 use App\Fetcher\FredEndpoints;
 use App\Fetcher\SeriesGroups;
-use Cake\Event\EventInterface;
 use Cake\Http\Exception\NotFoundException;
+use Cake\Http\Response;
 use fred_api_exception;
 
 class DataController extends AppController
 {
-    /**
-     * beforeRender callback
-     *
-     * @param \Cake\Event\EventInterface $event Event object
-     * @return \Cake\Http\Response|void|null
-     */
-    public function beforeRender(EventInterface $event)
-    {
-        parent::beforeRender($event);
-    }
-
     /**
      * Returns data from the cache or API, or FALSE in the event of an error fetching data
      *
@@ -43,7 +32,7 @@ class DataController extends AppController
      *
      * @return \Cake\Http\Response
      */
-    public function housing()
+    public function housing(): Response
     {
         $this->set([
             'data' => $this->getData(SeriesGroups::HOUSING),
@@ -58,7 +47,7 @@ class DataController extends AppController
      *
      * @return \Cake\Http\Response
      */
-    public function vehicleSales()
+    public function vehicleSales(): Response
     {
         $this->set([
             'data' => $this->getData(SeriesGroups::VEHICLE_SALES),
@@ -73,7 +62,7 @@ class DataController extends AppController
      *
      * @return \Cake\Http\Response
      */
-    public function retailFoodServices()
+    public function retailFoodServices(): Response
     {
         $this->set([
             'data' => $this->getData(SeriesGroups::RETAIL_FOOD_SERVICES),
@@ -88,7 +77,7 @@ class DataController extends AppController
      *
      * @return \Cake\Http\Response
      */
-    public function gdp()
+    public function gdp(): Response
     {
         $this->set([
             'data' => $this->getData(SeriesGroups::GDP),
@@ -103,7 +92,7 @@ class DataController extends AppController
      *
      * @return \Cake\Http\Response
      */
-    public function unemployment()
+    public function unemployment(): Response
     {
         $this->set([
             'data' => $this->getData(SeriesGroups::UNEMPLOYMENT),
@@ -118,7 +107,7 @@ class DataController extends AppController
      *
      * @return \Cake\Http\Response
      */
-    public function employmentBySector()
+    public function employmentBySector(): Response
     {
         $this->set([
             'data' => $this->getData(SeriesGroups::EMP_BY_SECTOR),
@@ -133,7 +122,7 @@ class DataController extends AppController
      *
      * @return \Cake\Http\Response
      */
-    public function earnings()
+    public function earnings(): Response
     {
         $this->set([
             'data' => $this->getData(SeriesGroups::EARNINGS),
@@ -148,7 +137,7 @@ class DataController extends AppController
      *
      * @return \Cake\Http\Response
      */
-    public function countyUnemployment()
+    public function countyUnemployment(): Response
     {
         $this->set([
             'data' => $this->getData(SeriesGroups::getCountyUnemployment()),
