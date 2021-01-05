@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Spreadsheet;
 
+use App\Formatter\Formatter;
 use DataCenter\Spreadsheet\Spreadsheet as DataCenterSpreadsheet;
 use Exception;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -28,11 +29,12 @@ class Spreadsheet extends DataCenterSpreadsheet
 
         $title = $seriesGroup['title'];
         $author = 'Center for Business and Economic Research, Ball State University';
+        $unit = Formatter::getUnit($data);
         $columnTitles = [
             'Metric',
-            'Latest Value',
-            'Change',
-            'Percent Change',
+            "Latest Value in $unit",
+            'Change from One Year Ago',
+            'Percent Change from One Year Ago',
             'Date',
         ];
         $this
@@ -56,14 +58,16 @@ class Spreadsheet extends DataCenterSpreadsheet
             ])
             ->nextRow();
 
+        $prepend = Formatter::getPrepend($unit);
+        $frequency = Formatter::getFrequency($data);
         foreach ($data['observations'] as $name => $series) {
             $this
                 ->writeRow([
                     $name,
-                    $series['value']['value'],
-                    $series['change']['value'],
-                    $series['percentChange']['value'] . '%',
-                    $series['value']['date'],
+                    Formatter::formatValue($series['value']['value'], $prepend),
+                    Formatter::formatValue($series['change']['value'], $prepend),
+                    Formatter::formatValue($series['percentChange']['value']) . '%',
+                    Formatter::getFormattedDate($series['value']['date'], $frequency),
                 ])
                 ->nextRow();
         }
