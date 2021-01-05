@@ -151,3 +151,11 @@ $frequency = strtolower(reset($data['observations'])['frequency']);
         </tbody>
     </table>
 <?php endif; ?>
+
+<p id="download-link">
+    <?= $this->Html->link(
+        '<i class="fas fa-download"></i> Download this data as an Excel spreadsheet',
+        ['_ext' => 'xlsx'],
+        ['escape' => false, 'class' => 'alert alert-info']
+    ) ?>
+</p>
