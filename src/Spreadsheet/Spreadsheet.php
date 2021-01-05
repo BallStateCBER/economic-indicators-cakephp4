@@ -6,6 +6,7 @@ namespace App\Spreadsheet;
 use App\Formatter\Formatter;
 use DataCenter\Spreadsheet\Spreadsheet as DataCenterSpreadsheet;
 use Exception;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
@@ -67,9 +68,18 @@ class Spreadsheet extends DataCenterSpreadsheet
                     Formatter::formatValue($series['value']['value'], $prepend),
                     Formatter::formatValue($series['change']['value'], $prepend),
                     Formatter::formatValue($series['percentChange']['value']) . '%',
-                    Formatter::getFormattedDate($series['value']['date'], $frequency),
-                ])
-                ->nextRow();
+                ]);
+
+                // Write date explicitly as a string so it doesn't get reformatted into a different date format by Excel
+                $date = Formatter::getFormattedDate($series['value']['date'], $frequency);
+                $dateCol = 5;
+                $cell = $this->getColumnKey($dateCol) . $this->currentRow;
+                $this->objPHPExcel
+                    ->getActiveSheet()
+                    ->getCell($cell)
+                    ->setValueExplicit($date, DataType::TYPE_STRING);
+
+            $this->nextRow();
         }
 
         $this->setCellWidth();
