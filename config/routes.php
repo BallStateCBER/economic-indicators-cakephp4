@@ -45,23 +45,16 @@ use Cake\Routing\RouteBuilder;
 $routes->setRouteClass(DashedRoute::class);
 
 $routes->scope('/', function (RouteBuilder $builder) {
+    $builder->setExtensions(['xlsx']);
     $builder->connect('/', ['controller' => 'Pages', 'action' => 'home']);
-
-    /*
-     * Connect catchall routes for all controllers.
-     *
-     * The `fallbacks` method is a shortcut for
-     *
-     * ```
-     * $builder->connect('/:controller', ['action' => 'index']);
-     * $builder->connect('/:controller/:action/*', []);
-     * ```
-     *
-     * You can remove these routes once you've connected the
-     * routes you want in your application.
-     */
     $builder->fallbacks();
 });
+
+/*$routes->scope('/data', function (RouteBuilder $builder) {
+
+    $builder->connect('/:action/*', ['controller' => 'Data']);
+    $builder->fallbacks();
+});*/
 
 /*
  * If you need a different set of middleware or none at all,
