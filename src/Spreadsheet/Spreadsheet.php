@@ -33,9 +33,9 @@ class Spreadsheet extends DataCenterSpreadsheet
         $unit = Formatter::getUnit($data);
         $columnTitles = [
             'Metric',
-            "Latest Value in $unit",
-            'Change from One Year Ago',
-            'Percent Change from One Year Ago',
+            "$unit",
+            'Change from One Year Prior',
+            'Percent Change from One Year Prior',
             'Date',
         ];
         $this
