@@ -47,6 +47,9 @@ class Spreadsheet extends DataCenterSpreadsheet
             ->nextRow()
             ->writeSheetSubtitle($author)
             ->nextRow()
+            ->writeRow(['Data provided by the Economic Research Division of the Federal Reserve Bank of St. Louis'])
+            ->nextRow()
+            ->nextRow()
             ->writeRow($columnTitles)
             ->styleRow([
                 'alignment' => [
