@@ -44,6 +44,7 @@ class Spreadsheet extends DataCenterSpreadsheet
             ->setColumnTitles($columnTitles)
             ->setActiveSheetTitle($title)
             ->writeSheetTitle($title)
+            ->nextRow()
             ->writeSheetSubtitle($author)
             ->nextRow()
             ->writeRow($columnTitles)
