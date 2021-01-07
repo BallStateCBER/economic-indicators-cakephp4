@@ -83,7 +83,8 @@ class Spreadsheet extends DataCenterSpreadsheet
                     Formatter::formatValue($series['value']['value'], $prepend),
                     Formatter::formatValue($series['change']['value'], $prepend),
                     Formatter::formatValue($series['percentChange']['value']) . '%',
-                ]);
+                ])
+                ->alignHorizontal('right', 2);
 
                 // Write date explicitly as a string so it doesn't get reformatted into a different date format by Excel
                 $date = Formatter::getFormattedDate($series['value']['date'], $frequency);
