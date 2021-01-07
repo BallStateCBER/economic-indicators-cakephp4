@@ -47,7 +47,18 @@ class Spreadsheet extends DataCenterSpreadsheet
             ->nextRow()
             ->writeSheetSubtitle($author)
             ->nextRow()
-            ->writeRow(['Data provided by the Economic Research Division of the Federal Reserve Bank of St. Louis'])
+            ->writeRow(['Data provided by the Economic Research Division of the Federal Reserve Bank of St. Louis']);
+
+        // Set attribution cell to span all columns
+        $span = sprintf(
+            'A%s:%s%s',
+            $this->currentRow,
+            $this->getLastColumnLetter(),
+            $this->currentRow
+        );
+        $this->objPHPExcel->getActiveSheet()->mergeCells($span);
+
+        $this
             ->nextRow()
             ->nextRow()
             ->writeRow($columnTitles)
