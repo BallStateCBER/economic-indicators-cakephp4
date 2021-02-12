@@ -2,7 +2,7 @@
     <h2>
         United States
     </h2>
-    <ul class="unstyled">
+    <ul>
         <li>
             <?= $this->Html->link(
                 'Housing',
@@ -46,7 +46,7 @@
     <h2>
         Indiana
     </h2>
-    <ul class="unstyled">
+    <ul>
         <li>
             <?= $this->Html->link(
                 'Unemployment Rate',
@@ -81,7 +81,7 @@
     <h2>
         Indiana Counties
     </h2>
-    <ul class="unstyled">
+    <ul>
         <li>
             <?= $this->Html->link(
                 'Unemployment ',
