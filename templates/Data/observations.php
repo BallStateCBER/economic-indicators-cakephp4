@@ -2,7 +2,6 @@
 /**
  * @var \App\View\AppView $this
  * @var array|bool $data
- * @var string $pageTitle
  */
 
 use App\Formatter\Formatter;
@@ -13,9 +12,7 @@ $unit = Formatter::getUnit($data);
 $prepend = Formatter::getPrepend($unit);
 $frequency = Formatter::getFrequency($data);
 ?>
-<h1 id="page-title">
-    <?= $pageTitle ?>
-</h1>
+
 <p>
     <?= ucfirst($frequency) ?> data -
     Last updated <?= Formatter::getLastUpdated($data) ?>
