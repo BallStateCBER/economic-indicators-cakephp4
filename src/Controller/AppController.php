@@ -16,6 +16,7 @@ declare(strict_types=1);
  */
 namespace App\Controller;
 
+use Cake\Event\EventInterface;
 use DataCenter\Controller\AppController as DataCenterController;
 
 /**
@@ -49,5 +50,20 @@ class AppController extends DataCenterController
          * see https://book.cakephp.org/4/en/controllers/components/form-protection.html
          */
         //$this->loadComponent('FormProtection');
+    }
+
+    /**
+     * beforeFilter callback
+     *
+     * @param \Cake\Event\EventInterface $event Event object
+     * @return void
+     */
+    public function beforeFilter(EventInterface $event)
+    {
+        parent::beforeFilter($event);
+        $this->set([
+            'navClassNames' => 'col-lg-3 col-md-3 col-12 mb-5 mb-md-0',
+            'mainClassNames' => 'col-lg-9 col-md-9 col-12 px-0 pl-md-4',
+        ]);
     }
 }
