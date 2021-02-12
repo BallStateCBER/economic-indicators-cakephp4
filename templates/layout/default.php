@@ -18,9 +18,7 @@ $this->assign('sidebar', $this->element('sidebar'));
     </h1>
 <?php $this->end(); ?>
 
-<div id="content">
-    <?= $this->fetch('content') ?>
-</div>
+<?= $this->fetch('content') ?>
 
 <?php $this->append('below_content'); ?>
     <div id="data-disclaimer" class="container">
