@@ -61,9 +61,6 @@ class AppController extends DataCenterController
     public function beforeFilter(EventInterface $event)
     {
         parent::beforeFilter($event);
-        $this->set([
-            'navClassNames' => 'col-lg-3 col-md-3 col-12 mb-5 mb-md-0',
-            'mainClassNames' => 'col-lg-9 col-md-9 col-12 px-0 pl-md-4',
-        ]);
+        $this->set(['lgSidebarWidth' => 3]);
     }
 }
