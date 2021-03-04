@@ -38,7 +38,7 @@ class Formatter
     {
         $decimalLimit = 2;
         $negative = (float)$value < 0;
-        $value = round($value, $decimalLimit);
+        $value = round((float)$value, $decimalLimit);
         $value = number_format($value, $decimalLimit);
         if (str_contains($value, '.')) {
             $value = rtrim($value, '0');
