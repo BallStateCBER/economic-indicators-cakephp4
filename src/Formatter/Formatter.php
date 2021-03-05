@@ -87,18 +87,22 @@ class Formatter
      */
     public static function getFrequency(array $data): string
     {
-        return strtolower(reset($data['observations'])['frequency']);
+        $firstSeries = reset($data['series']);
+
+        return strtolower($firstSeries['frequency']);
     }
 
     /**
-     * Returns a string expressing the units used in this series
+     * Returns a string expressing the units used in this group of series
      *
      * @param array $data Series observation data
      * @return string
      */
     public static function getUnit(array $data): string
     {
-        return reset($data['observations'])['units'];
+        $firstSeries = reset($data['series']);
+
+        return $firstSeries['units'];
     }
 
     /**

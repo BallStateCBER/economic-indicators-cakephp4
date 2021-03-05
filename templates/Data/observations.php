@@ -51,25 +51,31 @@ $frequency = Formatter::getFrequency($data);
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($data['observations'] as $name => $series): ?>
+            <?php foreach ($data['series'] as $name => $series): ?>
+                <?php
+                    $lastObservations = [];
+                    foreach (['value', 'change', 'percentChange'] as $type) {
+                        $lastObservations[$type] = end($series[$type]);
+                    }
+                ?>
                 <tr>
                     <td>
                         <?= $name ?>
                         <br />
                         <small>
-                            <?= Formatter::getFormattedDate($series['value']['date'], $frequency) ?>
+                            <?= Formatter::getFormattedDate($lastObservations['value']['date'], $frequency) ?>
                         </small>
                     </td>
                     <td>
-                        <?= Formatter::formatValue($series['value']['value'], $prepend) ?>
+                        <?= Formatter::formatValue($lastObservations['value']['value'], $prepend) ?>
                     </td>
                     <td>
-                        <?= Formatter::formatValue($series['change']['value'], $prepend) ?>
-                        <?= Formatter::getArrow($series['change']['value']) ?>
+                        <?= Formatter::formatValue($lastObservations['change']['value'], $prepend) ?>
+                        <?= Formatter::getArrow($lastObservations['change']['value']) ?>
                     </td>
                     <td>
-                        <?= Formatter::formatValue($series['percentChange']['value']) ?>%
-                        <?= Formatter::getArrow($series['percentChange']['value']) ?>
+                        <?= Formatter::formatValue($lastObservations['percentChange']['value']) ?>%
+                        <?= Formatter::getArrow($lastObservations['percentChange']['value']) ?>
                     </td>
                 </tr>
             <?php endforeach; ?>
