@@ -8,7 +8,6 @@ use Cake\Console\ConsoleIo;
 use Cake\Core\Configure;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\Http\Exception\NotFoundException;
-use Cake\I18n\FrozenTime;
 use fred_api;
 use fred_api_exception;
 
@@ -96,19 +95,6 @@ class Fetcher
     }
 
     /**
-     * Sets the next request to only return the most recent observation
-     *
-     * @return $this
-     */
-    public function latest()
-    {
-        $this->parameters['sort_order'] = 'desc';
-        $this->parameters['limit'] = 1;
-
-        return $this;
-    }
-
-    /**
      * Returns information about a data series
      *
      * @param array $parameters Additional optional parameters
@@ -163,10 +149,14 @@ class Fetcher
             /** @var \fred_api_series $seriesApi */
             $seriesApi = $this->api->factory('series');
             $parameters += $this->parameters;
+            $parameters['file_type'] = 'json';
 
             $this->throttle();
             $response = $seriesApi->observations($parameters);
-            if (!is_object($response) || !property_exists($response, 'observation')) {
+            $response = json_decode($response);
+            $responseIsValid = json_last_error() != JSON_ERROR_NONE;
+            $responseIsValid = $responseIsValid && !is_object($response) || !property_exists($response, 'observations');
+            if ($responseIsValid) {
                 if ($finalAttempt) {
                     throw new NotFoundException();
                 } else {
@@ -175,7 +165,7 @@ class Fetcher
                 }
             }
 
-            $observations = (array)$response->observation;
+            $observations = $response->observations;
 
             // Adjust for requests with limit = 1
             if (isset($observations['@attributes'])) {
@@ -185,13 +175,15 @@ class Fetcher
             $retval = [];
             foreach ($observations as $observation) {
                 $retval[] = [
-                    'date' => $observation['@attributes']['date'],
-                    'value' => $observation['@attributes']['value'],
+                    'date' => $observation->date,
+                    'value' => $observation->value,
                 ];
             }
 
             return $retval;
         }
+
+        return [];
     }
 
     /**
@@ -243,7 +235,7 @@ class Fetcher
             /* Stores the last_updated date for the first series in this group
              * Assumes that all series in this group are updated at roughly the same time */
             'updated' => null,
-            'observations' => [],
+            'series' => [],
         ];
         $this->consoleOutput('Retrieving...');
         foreach ($seriesGroup['endpoints'] as $series) {
@@ -254,21 +246,21 @@ class Fetcher
             if (!$data['updated']) {
                 $data['updated'] = $seriesMeta['@attributes']['last_updated'];
             }
-            $this->latest();
+            $this->parameters['sort_order'] = 'asc';
 
             $this->consoleOutput('Value');
-            $value = $series + $this->getObservations()[0];
+            $values = $this->getObservations();
             $this->consoleOutput('Change');
-            $change = $series + (clone $this)->changeFromYearAgo()->getObservations()[0];
+            $changes = (clone $this)->changeFromYearAgo()->getObservations();
             $this->consoleOutput('Percent change');
-            $percentChange = $series + (clone $this)->percentChangeFromYearAgo()->getObservations()[0];
+            $percentChanges = (clone $this)->percentChangeFromYearAgo()->getObservations();
 
-            $data['observations'][$series['subvar']] = [
+            $data['series'][$series['subvar']] = $series + [
                 'units' => $seriesMeta['@attributes']['units'],
                 'frequency' => $seriesMeta['@attributes']['frequency'],
-                'value' => $value,
-                'change' => $change,
-                'percentChange' => $percentChange,
+                'value' => $values,
+                'change' => $changes,
+                'percentChange' => $percentChanges,
             ];
         }
 
