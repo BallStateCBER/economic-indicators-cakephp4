@@ -5,6 +5,8 @@ namespace App\Spreadsheet;
 
 use App\Formatter\Formatter;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class SpreadsheetSingleDate extends Spreadsheet
 {
@@ -21,17 +23,28 @@ class SpreadsheetSingleDate extends Spreadsheet
         parent::__construct($data);
 
         $unit = Formatter::getUnit($data);
-
-        $this->setUpMetaAndHeaders(
-            title: $seriesGroup['title'],
-            columnTitles: [
-                'Metric',
-                "$unit",
-                'Change from One Year Prior',
-                'Percent Change from One Year Prior',
-                'Date',
-            ]
-        );
+        $columnTitles = [
+            'Metric',
+            $unit,
+            'Change from One Year Prior',
+            'Percent Change from One Year Prior',
+            'Date',
+        ];
+        $this
+            ->setUpMetaAndHeaders($seriesGroup['title'], $columnTitles)
+            ->nextRow()
+            ->writeRow($columnTitles)
+            ->styleRow([
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                ],
+                'borders' => [
+                    'outline' => ['style' => Border::BORDER_THIN],
+                ],
+                'font' => ['bold' => true],
+            ])
+            ->nextRow();
 
         $prepend = Formatter::getPrepend($unit);
         $frequency = Formatter::getFrequency($data);

@@ -2,6 +2,8 @@
 /**
  * @var \App\View\AppView $this
  * @var array|bool $data
+ * @var string $dateRange
+ * @var string $frequency
  */
 
 use App\Formatter\Formatter;
@@ -10,7 +12,6 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
 
 $unit = Formatter::getUnit($data);
 $prepend = Formatter::getPrepend($unit);
-$frequency = Formatter::getFrequency($data);
 ?>
 
 <p>
@@ -83,10 +84,20 @@ $frequency = Formatter::getFrequency($data);
     </table>
 <?php endif; ?>
 
-<p id="download-link">
+<p class="download-link">
     <?= $this->Html->link(
         '<i class="fas fa-download"></i> Download this data as an Excel spreadsheet',
         ['_ext' => 'xlsx'],
+        ['escape' => false, 'class' => 'alert alert-info']
+    ) ?>
+</p>
+<p class="download-link">
+    <?= $this->Html->link(
+        '<i class="fas fa-download"></i> Download ' . $dateRange . ' time series data as an Excel spreadsheet',
+        [
+            '?' => ['timeSeries' => 1],
+            '_ext' => 'xlsx'
+        ],
         ['escape' => false, 'class' => 'alert alert-info']
     ) ?>
 </p>

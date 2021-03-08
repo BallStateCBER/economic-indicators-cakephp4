@@ -5,8 +5,6 @@ namespace App\Spreadsheet;
 
 use DataCenter\Spreadsheet\Spreadsheet as DataCenterSpreadsheet;
 use Exception;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class Spreadsheet extends DataCenterSpreadsheet
 {
@@ -59,19 +57,6 @@ class Spreadsheet extends DataCenterSpreadsheet
         $this->objPHPExcel->getActiveSheet()->mergeCells($span);
 
         $this
-            ->nextRow()
-            ->nextRow()
-            ->writeRow($columnTitles)
-            ->styleRow([
-                'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER,
-                ],
-                'borders' => [
-                    'outline' => ['style' => Border::BORDER_THIN],
-                ],
-                'font' => ['bold' => true],
-            ])
             ->nextRow();
 
         return $this;
