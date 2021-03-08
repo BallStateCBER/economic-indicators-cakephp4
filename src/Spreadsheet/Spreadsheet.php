@@ -3,45 +3,46 @@ declare(strict_types=1);
 
 namespace App\Spreadsheet;
 
-use App\Formatter\Formatter;
 use DataCenter\Spreadsheet\Spreadsheet as DataCenterSpreadsheet;
 use Exception;
-use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class Spreadsheet extends DataCenterSpreadsheet
 {
     /**
-     * Spreadsheet constructor.
+     * Spreadsheet constructor
      *
-     * @param array $seriesGroup Array from SeriesGroups
      * @param array|bool $data Data, or FALSE if not found
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws \Exception
      */
-    public function __construct(array $seriesGroup, $data)
+    public function __construct(array|bool $data)
     {
         parent::__construct();
 
         if ($data === false) {
             throw new Exception('No data found');
         }
+    }
 
-        $title = $seriesGroup['title'];
+    /**
+     * Set attribution cell to span all columns
+     *
+     * Must be called after $this->columnTitles is set
+     *
+     * @param string $title Spreadsheet title
+     * @param string[] $columnTitles Titles for each column
+     * @return $this
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     */
+    protected function setUpMetaAndHeaders(string $title, array $columnTitles)
+    {
         $author = 'Center for Business and Economic Research, Ball State University';
-        $unit = Formatter::getUnit($data);
-        $columnTitles = [
-            'Metric',
-            "$unit",
-            'Change from One Year Prior',
-            'Percent Change from One Year Prior',
-            'Date',
-        ];
         $this
+            ->setColumnTitles($columnTitles)
             ->setMetadataTitle($title)
             ->setAuthor($author)
-            ->setColumnTitles($columnTitles)
             ->setActiveSheetTitle($title)
             ->writeSheetTitle($title)
             ->nextRow()
@@ -49,7 +50,6 @@ class Spreadsheet extends DataCenterSpreadsheet
             ->nextRow()
             ->writeRow(['Data provided by the Economic Research Division of the Federal Reserve Bank of St. Louis']);
 
-        // Set attribution cell to span all columns
         $span = sprintf(
             'A%s:%s%s',
             $this->currentRow,
@@ -74,30 +74,6 @@ class Spreadsheet extends DataCenterSpreadsheet
             ])
             ->nextRow();
 
-        $prepend = Formatter::getPrepend($unit);
-        $frequency = Formatter::getFrequency($data);
-        foreach ($data['observations'] as $name => $series) {
-            $this
-                ->writeRow([
-                    $name,
-                    Formatter::formatValue($series['value']['value'], $prepend),
-                    Formatter::formatValue($series['change']['value'], $prepend),
-                    Formatter::formatValue($series['percentChange']['value']) . '%',
-                ])
-                ->alignHorizontal('right', 2);
-
-                // Write date explicitly as a string so it doesn't get reformatted into a different date format by Excel
-                $date = Formatter::getFormattedDate($series['value']['date'], $frequency);
-                $dateCol = 5;
-                $cell = $this->getColumnKey($dateCol) . $this->currentRow;
-                $this->objPHPExcel
-                    ->getActiveSheet()
-                    ->getCell($cell)
-                    ->setValueExplicit($date, DataType::TYPE_STRING);
-
-            $this->nextRow();
-        }
-
-        $this->setCellWidth();
+        return $this;
     }
 }

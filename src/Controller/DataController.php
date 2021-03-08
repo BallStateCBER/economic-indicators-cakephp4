@@ -5,7 +5,7 @@ namespace App\Controller;
 
 use App\Fetcher\Fetcher;
 use App\Fetcher\SeriesGroups;
-use App\Spreadsheet\Spreadsheet;
+use App\Spreadsheet\SpreadsheetSingleDate;
 use Cake\Core\Configure;
 use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;
@@ -168,7 +168,7 @@ class DataController extends AppController
                 ->withType('xlsx')
                 ->withDownload($filename);
 
-            $spreadsheet = new Spreadsheet($group, $this->getData($group));
+            $spreadsheet = new SpreadsheetSingleDate($group, $this->getData($group));
             $spreadsheetWriter = IOFactory::createWriter($spreadsheet->get(), 'Xlsx');
             $this->set(compact('spreadsheetWriter'));
 
