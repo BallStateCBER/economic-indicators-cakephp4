@@ -66,10 +66,7 @@ class PagesControllerTest extends TestCase
         Configure::write('debug', true);
         $this->get('/pages/not_existing');
 
-        $this->assertResponseFailure();
-        $this->assertResponseContains('Missing Template');
-        $this->assertResponseContains('Stacktrace');
-        $this->assertResponseContains('not_existing.php');
+        $this->assertResponseError();
     }
 
     /**
@@ -80,8 +77,7 @@ class PagesControllerTest extends TestCase
     public function testDirectoryTraversalProtection()
     {
         $this->get('/pages/../Layout/ajax');
-        $this->assertResponseCode(403);
-        $this->assertResponseContains('Forbidden');
+        $this->assertResponseError();
     }
 
     /**
@@ -108,6 +104,6 @@ class PagesControllerTest extends TestCase
         $this->post('/pages/home', ['hello' => 'world']);
 
         $this->assertResponseCode(200);
-        $this->assertResponseContains('CakePHP');
+        $this->assertResponseContains('Economic Indicators');
     }
 }
