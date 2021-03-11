@@ -107,12 +107,15 @@ class StatisticsTable extends Table
     }
 
     /**
-     * Returns all of the values, changes since last year, and percent changes for all metrics in the provided group
+     * Returns values, changes since last year, and percent changes for all metrics in the provided group
+     *
+     * If $all is TRUE, returns statistics for all dates. Otherwise, only returns the most recent statistic.
      *
      * @param array $seriesGroup A group defined in \App\Fetcher\SeriesGroups
+     * @param bool $all TRUE to return statistics for all dates
      * @return array
      */
-    public function getGroup(array $seriesGroup)
+    public function getGroup(array $seriesGroup, bool $all = false)
     {
         $updated = null;
         $series = [];
@@ -132,9 +135,9 @@ class StatisticsTable extends Table
             $series[$seriesName] = [
                 'units' => $metric->units,
                 'frequency' => $metric->frequency,
-                'value' => $this->getValues($metric->id),
-                'change' => $this->getChanges($metric->id),
-                'percentChange' => $this->getPercentChanges($metric->id),
+                'value' => $this->getValues($metric->id, $all),
+                'change' => $this->getChanges($metric->id, $all),
+                'percentChange' => $this->getPercentChanges($metric->id, $all),
             ];
         }
 

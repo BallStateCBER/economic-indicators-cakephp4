@@ -49,13 +49,12 @@ class DataController extends AppController
      */
     private function renderObservations(array $seriesGroup): Response
     {
+        $isTimeSeries = (bool)$this->getRequest()->getQuery('timeSeries');
         if ($this->request->is('xlsx')) {
-            $isTimeSeries = (bool)$this->getRequest()->getQuery('timeSeries');
-
             return $this->renderSpreadsheet($seriesGroup, $isTimeSeries);
         }
 
-        $data = $this->Statistics->getGroup($seriesGroup);
+        $data = $this->Statistics->getGroup($seriesGroup, $isTimeSeries);
         $frequency = Formatter::getFrequency($data);
         $dateRange = $this->Statistics->getDateRange($seriesGroup, $frequency);
 
@@ -153,10 +152,10 @@ class DataController extends AppController
      * Renders a spreadsheet, or redirects back to the appropriate page with an error message
      *
      * @param array $seriesGroup Series group metadata
-     * @param bool $timeSeries TRUE if outputting spreadsheet with a series of values on all available dates
+     * @param bool $isTimeSeries TRUE if outputting spreadsheet with a series of values on all available dates
      * @return \Cake\Http\Response
      */
-    private function renderSpreadsheet(array $seriesGroup, $timeSeries = false): Response
+    private function renderSpreadsheet(array $seriesGroup, $isTimeSeries = false): Response
     {
         try {
             $title = str_replace([' ', '_'], '-', strtolower($seriesGroup['title']));
@@ -167,8 +166,8 @@ class DataController extends AppController
                 ->withType('xlsx')
                 ->withDownload($filename);
 
-            $data = $this->Statistics->getGroup($seriesGroup);
-            $spreadsheet = $timeSeries
+            $data = $this->Statistics->getGroup($seriesGroup, $isTimeSeries);
+            $spreadsheet = $isTimeSeries
                 ? new SpreadsheetTimeSeries($seriesGroup, $data)
                 : new SpreadsheetSingleDate($seriesGroup, $data);
             $spreadsheetWriter = IOFactory::createWriter($spreadsheet->get(), 'Xlsx');
