@@ -56,18 +56,17 @@ class Formatter
     /**
      * Returns a formatted date string for the provided series
      *
-     * @param string $date Date string
+     * @param \Cake\I18n\FrozenDate $date Date string
      * @param string $frequency e.g. 'monthly'
      * @return string
      */
-    public static function getFormattedDate(string $date, string $frequency): string
+    public static function getFormattedDate(FrozenDate $date, string $frequency): string
     {
         if (str_contains($frequency, 'quarterly')) {
-            $dateObj = new FrozenDate($date);
-            $month = $dateObj->format('n');
+            $month = $date->format('n');
             $quarter = ceil($month / 3);
 
-            return sprintf('Q%s %s', $quarter, $dateObj->format('Y'));
+            return sprintf('Q%s %s', $quarter, $date->format('Y'));
         }
 
         if (str_contains($frequency, 'monthly')) {

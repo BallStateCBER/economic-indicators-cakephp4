@@ -3,21 +3,23 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Fetcher\Fetcher;
 use App\Fetcher\SeriesGroups;
 use App\Formatter\Formatter;
 use App\Spreadsheet\SpreadsheetSingleDate;
 use App\Spreadsheet\SpreadsheetTimeSeries;
 use Cake\Core\Configure;
-use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;
 use DateTime;
 use DateTimeZone;
 use Exception;
-use fred_api_exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as PhpOfficeException;
 
+/**
+ * Class DataController
+ * @package App\Controller
+ * @property \App\Model\Table\StatisticsTable $Statistics
+ */
 class DataController extends AppController
 {
     /**
@@ -36,51 +38,39 @@ class DataController extends AppController
                 'value' => 'xlsx',
             ]
         );
-    }
-
-    /**
-     * Returns data from the cache or API, or FALSE in the event of an error fetching data
-     *
-     * @param array $series Series data
-     * @return array|bool
-     */
-    private function getData(array $series)
-    {
-        try {
-            return (new Fetcher())->getCachedValuesAndChanges($series);
-        } catch (NotFoundException | fred_api_exception $e) {
-            return false;
-        }
+        $this->loadModel('Statistics');
     }
 
     /**
      * Sets up and renders an observations page
      *
-     * @param array $group Series group metadata
+     * @param array $seriesGroup Series group metadata
      * @return \Cake\Http\Response
      */
-    private function renderObservations(array $group): Response
+    private function renderObservations(array $seriesGroup): Response
     {
         if ($this->request->is('xlsx')) {
             $isTimeSeries = (bool)$this->getRequest()->getQuery('timeSeries');
 
-            return $this->renderSpreadsheet($group, $isTimeSeries);
+            return $this->renderSpreadsheet($seriesGroup, $isTimeSeries);
         }
 
-        $data = $this->getData($group);
-        $firstMetric = reset($data['series']);
+        $data = $this->Statistics->getGroup($seriesGroup);
         $frequency = Formatter::getFrequency($data);
+        $firstMetric = reset($data['series']);
+        $firstStatistic = $firstMetric['value']->first();
+        $lastStatistic = $firstMetric['value']->last();
         $dateRange = sprintf(
             '%s - %s',
-            Formatter::getFormattedDate(reset($firstMetric['value'])['date'], $frequency),
-            Formatter::getFormattedDate(end($firstMetric['value'])['date'], $frequency),
+            Formatter::getFormattedDate($firstStatistic->date, $frequency),
+            Formatter::getFormattedDate($lastStatistic->date, $frequency),
         );
 
         $this->set([
             'data' => $data,
             'dateRange' => $dateRange,
             'frequency' => $frequency,
-            'pageTitle' => $group['title'],
+            'pageTitle' => $seriesGroup['title'],
         ]);
 
         return $this->render('observations');
@@ -169,14 +159,14 @@ class DataController extends AppController
     /**
      * Renders a spreadsheet, or redirects back to the appropriate page with an error message
      *
-     * @param array $group Series group metadata
+     * @param array $seriesGroup Series group metadata
      * @param bool $timeSeries TRUE if outputting spreadsheet with a series of values on all available dates
      * @return \Cake\Http\Response
      */
-    private function renderSpreadsheet(array $group, $timeSeries = false): Response
+    private function renderSpreadsheet(array $seriesGroup, $timeSeries = false): Response
     {
         try {
-            $title = str_replace([' ', '_'], '-', strtolower($group['title']));
+            $title = str_replace([' ', '_'], '-', strtolower($seriesGroup['title']));
             $timezone = new DateTimeZone(Configure::read('local_timezone'));
             $date = (new DateTime('now', $timezone))->format('-Y-m-d');
             $filename = $title . $date . '.xlsx';
@@ -184,9 +174,10 @@ class DataController extends AppController
                 ->withType('xlsx')
                 ->withDownload($filename);
 
+            $data = $this->Statistics->getGroup($seriesGroup);
             $spreadsheet = $timeSeries
-                ? new SpreadsheetTimeSeries($group, $this->getData($group))
-                : new SpreadsheetSingleDate($group, $this->getData($group));
+                ? new SpreadsheetTimeSeries($seriesGroup, $data)
+                : new SpreadsheetSingleDate($seriesGroup, $data);
             $spreadsheetWriter = IOFactory::createWriter($spreadsheet->get(), 'Xlsx');
             $this->set(compact('spreadsheetWriter'));
 

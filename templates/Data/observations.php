@@ -56,7 +56,7 @@ $prepend = Formatter::getPrepend($unit);
                 <?php
                     $lastObservations = [];
                     foreach (['value', 'change', 'percentChange'] as $type) {
-                        $lastObservations[$type] = end($series[$type]);
+                        $lastObservations[$type] = $series[$type]->last();
                     }
                 ?>
                 <tr>
