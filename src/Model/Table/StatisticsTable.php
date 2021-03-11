@@ -131,8 +131,7 @@ class StatisticsTable extends Table
                 $updated = $metric->last_updated;
             }
 
-            $endpointName = $endpoint['subvar'];
-            $endpoints[$endpointName] = [
+            $endpoints[$endpoint['name']] = [
                 'units' => $metric->units,
                 'frequency' => $metric->frequency,
                 'value' => $this->getValues($metric->id, $all),

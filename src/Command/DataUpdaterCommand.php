@@ -112,7 +112,7 @@ class DataUpdaterCommand extends Command
 
         $groups = (new EndpointGroups())->getAll();
         foreach ($groups as $group) {
-            $io->info($group['endpoints'][0]['var']);
+            $io->info($group['endpoints'][0]['group']);
             $this->loadMetrics($group);
 
             $io->out(' - Checking for updates');
@@ -344,7 +344,7 @@ class DataUpdaterCommand extends Command
         foreach ($endpointGroup['endpoints'] as $endpoint) {
             $this->setEndpoint($endpoint);
             $endpointName = $endpoint['id'];
-            $this->io->out(sprintf(' - %s > %s metadata', $endpoint['var'], $endpoint['subvar']));
+            $this->io->out(sprintf(' - %s > %s metadata', $endpoint['group'], $endpoint['name']));
             $endpointMeta = $this->getEndpointMetadata();
             $metric = $this->metrics[$endpointName];
             $this->apiParameters['sort_order'] = 'asc';

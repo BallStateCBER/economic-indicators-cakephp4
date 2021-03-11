@@ -111,8 +111,8 @@ class EndpointGroups
         $endpoints = [];
         foreach (FredEndpoints::COUNTY_UNEMPLOYMENT_IDS as $countyName => $seriesId) {
             $endpoints[] = [
-                'var' => FredEndpoints::VAR_COUNTY_UNEMPLOYMENT,
-                'subvar' => $countyName,
+                'group' => FredEndpoints::VAR_COUNTY_UNEMPLOYMENT,
+                'name' => $countyName,
                 'id' => $seriesId,
             ];
         }
