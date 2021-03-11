@@ -13,12 +13,12 @@ class SpreadsheetTimeSeries extends Spreadsheet
     /**
      * Spreadsheet constructor.
      *
-     * @param array $seriesGroup Array from SeriesGroups
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @param array|bool $data Data, or FALSE if not found
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws \Exception
      */
-    public function __construct(array $seriesGroup, $data)
+    public function __construct(array $endpointGroup, $data)
     {
         parent::__construct($data);
 
@@ -27,7 +27,7 @@ class SpreadsheetTimeSeries extends Spreadsheet
         $unit = Formatter::getUnit($data);
         $this
             ->setUpMetaAndHeaders(
-                title: $seriesGroup['title'],
+                title: $endpointGroup['title'],
                 columnTitles: array_merge(['Metric'], $dates),
             )
             ->writeRow(['Values are in ' . strtolower($unit)])

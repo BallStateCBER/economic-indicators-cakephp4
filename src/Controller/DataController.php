@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Fetcher\SeriesGroups;
+use App\Fetcher\EndpointGroups;
 use App\Formatter\Formatter;
 use App\Spreadsheet\SpreadsheetSingleDate;
 use App\Spreadsheet\SpreadsheetTimeSeries;
@@ -44,25 +44,25 @@ class DataController extends AppController
     /**
      * Sets up and renders an observations page
      *
-     * @param array $seriesGroup Series group metadata
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return \Cake\Http\Response
      */
-    private function renderObservations(array $seriesGroup): Response
+    private function renderObservations(array $endpointGroup): Response
     {
         $isTimeSeries = (bool)$this->getRequest()->getQuery('timeSeries');
         if ($this->request->is('xlsx')) {
-            return $this->renderSpreadsheet($seriesGroup, $isTimeSeries);
+            return $this->renderSpreadsheet($endpointGroup, $isTimeSeries);
         }
 
-        $data = $this->Statistics->getGroup($seriesGroup, $isTimeSeries);
+        $data = $this->Statistics->getGroup($endpointGroup, $isTimeSeries);
         $frequency = Formatter::getFrequency($data);
-        $dateRange = $this->Statistics->getDateRange($seriesGroup, $frequency);
+        $dateRange = $this->Statistics->getDateRange($endpointGroup, $frequency);
 
         $this->set([
             'data' => $data,
             'dateRange' => $dateRange,
             'frequency' => $frequency,
-            'pageTitle' => $seriesGroup['title'],
+            'pageTitle' => $endpointGroup['title'],
         ]);
 
         return $this->render('observations');
@@ -75,7 +75,7 @@ class DataController extends AppController
      */
     public function housing(): Response
     {
-        return $this->renderObservations(SeriesGroups::HOUSING);
+        return $this->renderObservations(EndpointGroups::HOUSING);
     }
 
     /**
@@ -85,7 +85,7 @@ class DataController extends AppController
      */
     public function vehicleSales(): Response
     {
-        return $this->renderObservations(SeriesGroups::VEHICLE_SALES);
+        return $this->renderObservations(EndpointGroups::VEHICLE_SALES);
     }
 
     /**
@@ -95,7 +95,7 @@ class DataController extends AppController
      */
     public function retailFoodServices(): Response
     {
-        return $this->renderObservations(SeriesGroups::RETAIL_FOOD_SERVICES);
+        return $this->renderObservations(EndpointGroups::RETAIL_FOOD_SERVICES);
     }
 
     /**
@@ -105,7 +105,7 @@ class DataController extends AppController
      */
     public function gdp(): Response
     {
-        return $this->renderObservations(SeriesGroups::GDP);
+        return $this->renderObservations(EndpointGroups::GDP);
     }
 
     /**
@@ -115,7 +115,7 @@ class DataController extends AppController
      */
     public function unemployment(): Response
     {
-        return $this->renderObservations(SeriesGroups::UNEMPLOYMENT);
+        return $this->renderObservations(EndpointGroups::UNEMPLOYMENT);
     }
 
     /**
@@ -125,7 +125,7 @@ class DataController extends AppController
      */
     public function employmentBySector(): Response
     {
-        return $this->renderObservations(SeriesGroups::EMP_BY_SECTOR);
+        return $this->renderObservations(EndpointGroups::EMP_BY_SECTOR);
     }
 
     /**
@@ -135,7 +135,7 @@ class DataController extends AppController
      */
     public function earnings(): Response
     {
-        return $this->renderObservations(SeriesGroups::EARNINGS);
+        return $this->renderObservations(EndpointGroups::EARNINGS);
     }
 
     /**
@@ -145,20 +145,20 @@ class DataController extends AppController
      */
     public function countyUnemployment(): Response
     {
-        return $this->renderObservations(SeriesGroups::getCountyUnemployment());
+        return $this->renderObservations(EndpointGroups::getCountyUnemployment());
     }
 
     /**
      * Renders a spreadsheet, or redirects back to the appropriate page with an error message
      *
-     * @param array $seriesGroup Series group metadata
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @param bool $isTimeSeries TRUE if outputting spreadsheet with a series of values on all available dates
      * @return \Cake\Http\Response
      */
-    private function renderSpreadsheet(array $seriesGroup, $isTimeSeries = false): Response
+    private function renderSpreadsheet(array $endpointGroup, $isTimeSeries = false): Response
     {
         try {
-            $title = str_replace([' ', '_'], '-', strtolower($seriesGroup['title']));
+            $title = str_replace([' ', '_'], '-', strtolower($endpointGroup['title']));
             $timezone = new DateTimeZone(Configure::read('local_timezone'));
             $date = (new DateTime('now', $timezone))->format('-Y-m-d');
             $filename = $title . $date . '.xlsx';
@@ -166,10 +166,10 @@ class DataController extends AppController
                 ->withType('xlsx')
                 ->withDownload($filename);
 
-            $data = $this->Statistics->getGroup($seriesGroup, $isTimeSeries);
+            $data = $this->Statistics->getGroup($endpointGroup, $isTimeSeries);
             $spreadsheet = $isTimeSeries
-                ? new SpreadsheetTimeSeries($seriesGroup, $data)
-                : new SpreadsheetSingleDate($seriesGroup, $data);
+                ? new SpreadsheetTimeSeries($endpointGroup, $data)
+                : new SpreadsheetSingleDate($endpointGroup, $data);
             $spreadsheetWriter = IOFactory::createWriter($spreadsheet->get(), 'Xlsx');
             $this->set(compact('spreadsheetWriter'));
 

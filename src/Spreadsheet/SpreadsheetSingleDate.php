@@ -13,12 +13,12 @@ class SpreadsheetSingleDate extends Spreadsheet
     /**
      * Spreadsheet constructor.
      *
-     * @param array $seriesGroup Array from SeriesGroups
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @param array|bool $data Data, or FALSE if not found
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws \Exception
      */
-    public function __construct(array $seriesGroup, array|bool $data)
+    public function __construct(array $endpointGroup, array|bool $data)
     {
         parent::__construct($data);
 
@@ -31,7 +31,7 @@ class SpreadsheetSingleDate extends Spreadsheet
             'Date',
         ];
         $this
-            ->setUpMetaAndHeaders($seriesGroup['title'], $columnTitles)
+            ->setUpMetaAndHeaders($endpointGroup['title'], $columnTitles)
             ->nextRow()
             ->writeRow($columnTitles)
             ->styleRow([

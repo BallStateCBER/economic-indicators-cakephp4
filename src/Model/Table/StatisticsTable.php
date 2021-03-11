@@ -111,15 +111,15 @@ class StatisticsTable extends Table
      *
      * If $all is TRUE, returns statistics for all dates. Otherwise, only returns the most recent statistic.
      *
-     * @param array $seriesGroup A group defined in \App\Fetcher\SeriesGroups
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @param bool $all TRUE to return statistics for all dates
      * @return array
      */
-    public function getGroup(array $seriesGroup, bool $all = false)
+    public function getGroup(array $endpointGroup, bool $all = false)
     {
         $updated = null;
         $series = [];
-        foreach ($seriesGroup['endpoints'] as $endpoint) {
+        foreach ($endpointGroup['endpoints'] as $endpoint) {
             $seriesId = $endpoint['seriesId'];
             /** @var \App\Model\Entity\Metric $metric */
             $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
@@ -147,13 +147,13 @@ class StatisticsTable extends Table
     /**
      * Returns a string describing the date range of known statistics
      *
-     * @param array $seriesGroup Group of endpoints
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @param string $frequency Frequency string
      * @return string
      */
-    public function getDateRange(array $seriesGroup, string $frequency): string
+    public function getDateRange(array $endpointGroup, string $frequency): string
     {
-        $firstEndpoint = reset($seriesGroup['endpoints']);
+        $firstEndpoint = reset($endpointGroup['endpoints']);
         $seriesId = $firstEndpoint['seriesId'];
         $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
         $query = $this

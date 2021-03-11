@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Fetcher\SeriesGroups;
+use App\Fetcher\EndpointGroups;
 use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\StatisticsTable;
@@ -110,7 +110,7 @@ class DataUpdaterCommand extends Command
         $this->io = $io;
         $this->progress = $io->helper('Progress');
 
-        $groups = (new SeriesGroups())->getAll();
+        $groups = (new EndpointGroups())->getAll();
         foreach ($groups as $group) {
             $io->info($group['endpoints'][0]['var']);
             $this->loadMetrics($group);
@@ -135,21 +135,21 @@ class DataUpdaterCommand extends Command
     /**
      * Returns TRUE if the API has more recently-updated data than the database
      *
-     * @param array $seriesGroup Array of data about a group of data series
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return bool
      * @throws \fred_api_exception
      */
-    private function updateIsAvailable(array $seriesGroup): bool
+    private function updateIsAvailable(array $endpointGroup): bool
     {
-        $firstSeries = $seriesGroup['endpoints'][0];
+        $firstEndpoint = $endpointGroup['endpoints'][0];
 
         /** @var \App\Model\Entity\Metric $metric */
         $metric = $this->metricsTable
             ->find()
-            ->where(['name' => $firstSeries['seriesId']])
+            ->where(['name' => $firstEndpoint['seriesId']])
             ->first();
         if (!$metric) {
-            $this->io->error('No metric record was found for ' . $firstSeries['seriesId']);
+            $this->io->error('No metric record was found for ' . $firstEndpoint['seriesId']);
             exit;
         }
 
@@ -157,7 +157,7 @@ class DataUpdaterCommand extends Command
             return true;
         }
 
-        $this->setSeries($firstSeries);
+        $this->setSeries($firstEndpoint);
         $seriesMeta = $this->getSeriesMetadata();
         $responseUpdated = $seriesMeta['@attributes']['last_updated'];
 
@@ -334,15 +334,15 @@ class DataUpdaterCommand extends Command
     /**
      * Fetches data from the API and updates/adds corresponding records in the database
      *
-     * @param array $seriesGroup A group of data series
-     * @throws \fred_api_exception
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return void
+     * @throws \fred_api_exception
      */
-    public function updateGroup(array $seriesGroup): void
+    public function updateGroup(array $endpointGroup): void
     {
         // Fetch from API
         $this->io->out(' - Retrieving from API...');
-        foreach ($seriesGroup['endpoints'] as $series) {
+        foreach ($endpointGroup['endpoints'] as $series) {
             $this->setSeries($series);
             $this->io->out(sprintf(' - %s > %s metadata', $series['var'], $series['subvar']));
             $seriesMeta = $this->getSeriesMetadata();

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Fetcher;
 
-class SeriesGroups
+class EndpointGroups
 {
     public const HOUSING = [
         'title' => FredEndpoints::VAR_HOUSING,
@@ -125,7 +125,7 @@ class SeriesGroups
     }
 
     /**
-     * Returns an array of endpoint groups
+     * Returns an array of all endpoint groups
      *
      * @return array
      */
