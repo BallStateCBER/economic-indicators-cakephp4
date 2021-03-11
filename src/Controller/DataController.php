@@ -57,14 +57,7 @@ class DataController extends AppController
 
         $data = $this->Statistics->getGroup($seriesGroup);
         $frequency = Formatter::getFrequency($data);
-        $firstMetric = reset($data['series']);
-        $firstStatistic = $firstMetric['value']->first();
-        $lastStatistic = $firstMetric['value']->last();
-        $dateRange = sprintf(
-            '%s - %s',
-            Formatter::getFormattedDate($firstStatistic->date, $frequency),
-            Formatter::getFormattedDate($lastStatistic->date, $frequency),
-        );
+        $dateRange = $this->Statistics->getDateRange($seriesGroup, $frequency);
 
         $this->set([
             'data' => $data,

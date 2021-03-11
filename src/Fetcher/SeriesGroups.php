@@ -119,6 +119,7 @@ class SeriesGroups
 
         return [
             'cacheKey' => 'county_unemployment',
+            'title' => 'Indiana County Unemployment',
             'endpoints' => $endpoints,
         ];
     }

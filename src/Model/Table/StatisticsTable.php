@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
+use App\Formatter\Formatter;
 use Cake\Datasource\ResultSetInterface;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Query;
@@ -141,6 +142,32 @@ class StatisticsTable extends Table
     }
 
     /**
+     * Returns a string describing the date range of known statistics
+     *
+     * @param array $seriesGroup Group of endpoints
+     * @param string $frequency Frequency string
+     * @return string
+     */
+    public function getDateRange(array $seriesGroup, string $frequency): string
+    {
+        $firstEndpoint = reset($seriesGroup['endpoints']);
+        $seriesId = $firstEndpoint['seriesId'];
+        $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
+        $query = $this
+            ->find()
+            ->select(['id', 'date'])
+            ->where(['metric_id' => $metric->id]);
+        $firstStat = $query->order(['date' => 'ASC'])->first();
+        $lastStat = $query->order(['date' => 'DESC'])->first();
+
+        return sprintf(
+            '%s - %s',
+            Formatter::getFormattedDate($firstStat->date, $frequency),
+            Formatter::getFormattedDate($lastStat->date, $frequency),
+        );
+    }
+
+    /**
      * Custom finder for getting statistics by metric ID and data type ID
      *
      * @param \Cake\ORM\Query $query Query object
@@ -162,41 +189,59 @@ class StatisticsTable extends Table
      * Returns all 'value' (normal units) statistics for the given metric
      *
      * @param int $metricId Metric ID
-     * @return \Cake\Datasource\ResultSetInterface
+     * @param bool $all TRUE to return all results rather than only the most recent
+     * @return \Cake\Datasource\ResultSetInterface|\App\Model\Entity\Statistic
      */
-    private function getValues(int $metricId): ResultSetInterface
+    private function getValues(int $metricId, bool $all = false)
     {
-        return $this
-            ->find('byMetricAndType', ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_VALUE])
-            ->all();
+        $query = $this->find(
+            'byMetricAndType',
+            ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_VALUE]
+        );
+        if ($all) {
+            return $query->all();
+        }
+
+        return $query->last();
     }
 
     /**
      * Returns all 'change from previous year' statistics for the given metric
      *
      * @param int $metricId Metric ID
-     * @return \Cake\Datasource\ResultSetInterface
+     * @param bool $all TRUE to return all results rather than only the most recent
+     * @return \Cake\Datasource\ResultSetInterface|\App\Model\Entity\Statistic
      */
-    private function getChanges(int $metricId): ResultSetInterface
+    private function getChanges(int $metricId, bool $all = false)
     {
-        return $this
-            ->find('byMetricAndType', ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_CHANGE])
-            ->all();
+        $query = $this->find(
+            'byMetricAndType',
+            ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_CHANGE]
+        );
+        if ($all) {
+            return $query->all();
+        }
+
+        return $query->last();
     }
 
     /**
      * Returns all 'percent change from previous year' statistics for the given metric
      *
      * @param int $metricId Metric ID
-     * @return \Cake\Datasource\ResultSetInterface
+     * @param bool $all TRUE to return all results rather than only the most recent
+     * @return \Cake\Datasource\ResultSetInterface|\App\Model\Entity\Statistic
      */
-    private function getPercentChanges(int $metricId): ResultSetInterface
+    private function getPercentChanges(int $metricId, bool $all = false)
     {
-        return $this
-            ->find(
-                'byMetricAndType',
-                ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_PERCENT_CHANGE]
-            )
-            ->all();
+        $query = $this->find(
+            'byMetricAndType',
+            ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_PERCENT_CHANGE]
+        );
+        if ($all) {
+            return $query->all();
+        }
+
+        return $query->last();
     }
 }
