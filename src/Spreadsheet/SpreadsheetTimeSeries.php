@@ -18,7 +18,7 @@ class SpreadsheetTimeSeries extends Spreadsheet
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws \Exception
      */
-    public function __construct(array $seriesGroup, array|bool $data)
+    public function __construct(array $seriesGroup, $data)
     {
         parent::__construct($data);
 
@@ -30,7 +30,7 @@ class SpreadsheetTimeSeries extends Spreadsheet
                 title: $seriesGroup['title'],
                 columnTitles: array_merge(['Metric'], $dates),
             )
-            ->writeRow(["Values are in $unit"])
+            ->writeRow(['Values are in ' . strtolower($unit)])
             ->nextRow()
             ->nextRow()
             ->writeRow(['Metric']);
