@@ -8,6 +8,13 @@ use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
+/**
+ * Class SpreadsheetTimeSeries
+ *
+ * Generates a spreadsheet with data pertaining to all available dates
+ *
+ * @package App\Spreadsheet
+ */
 class SpreadsheetTimeSeries extends Spreadsheet
 {
     /**

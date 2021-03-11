@@ -8,6 +8,13 @@ use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
+/**
+ * Class SpreadsheetSingleDate
+ *
+ * Generates a spreadsheet with data pertaining to only the most recent available date
+ *
+ * @package App\Spreadsheet
+ */
 class SpreadsheetSingleDate extends Spreadsheet
 {
     /**
