@@ -113,7 +113,7 @@ class EndpointGroups
             $endpoints[] = [
                 'var' => FredEndpoints::VAR_COUNTY_UNEMPLOYMENT,
                 'subvar' => $countyName,
-                'seriesId' => $seriesId,
+                'id' => $seriesId,
             ];
         }
 

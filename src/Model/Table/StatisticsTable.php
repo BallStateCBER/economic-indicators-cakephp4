@@ -118,9 +118,9 @@ class StatisticsTable extends Table
     public function getGroup(array $endpointGroup, bool $all = false)
     {
         $updated = null;
-        $series = [];
+        $endpoints = [];
         foreach ($endpointGroup['endpoints'] as $endpoint) {
-            $seriesId = $endpoint['seriesId'];
+            $seriesId = $endpoint['id'];
             /** @var \App\Model\Entity\Metric $metric */
             $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
             if (!$metric) {
@@ -131,8 +131,8 @@ class StatisticsTable extends Table
                 $updated = $metric->last_updated;
             }
 
-            $seriesName = $endpoint['subvar'];
-            $series[$seriesName] = [
+            $endpointName = $endpoint['subvar'];
+            $endpoints[$endpointName] = [
                 'units' => $metric->units,
                 'frequency' => $metric->frequency,
                 'value' => $this->getValues($metric->id, $all),
@@ -141,7 +141,7 @@ class StatisticsTable extends Table
             ];
         }
 
-        return compact('updated', 'series');
+        return compact('updated', 'endpoints');
     }
 
     /**
@@ -154,7 +154,7 @@ class StatisticsTable extends Table
     public function getDateRange(array $endpointGroup, string $frequency): string
     {
         $firstEndpoint = reset($endpointGroup['endpoints']);
-        $seriesId = $firstEndpoint['seriesId'];
+        $seriesId = $firstEndpoint['id'];
         $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
         $query = $this
             ->find()

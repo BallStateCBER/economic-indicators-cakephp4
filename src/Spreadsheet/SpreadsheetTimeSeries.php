@@ -61,9 +61,9 @@ class SpreadsheetTimeSeries extends Spreadsheet
             ->nextRow();
 
         $prepend = Formatter::getPrepend($unit);
-        foreach ($data['series'] as $name => $series) {
-            $row = [$name];
-            foreach ($series[$type] as $observation) {
+        foreach ($data['endpoints'] as $endpointName => $endpoint) {
+            $row = [$endpointName];
+            foreach ($endpoint[$type] as $observation) {
                 $row[] = $type == 'percentChange'
                     ? $observation->value . '%'
                     : Formatter::formatValue($observation->value, $prepend);
@@ -88,9 +88,9 @@ class SpreadsheetTimeSeries extends Spreadsheet
     private function getDates(array $data): array
     {
         $years = [];
-        $firstMetric = reset($data['series']);
-        foreach ($firstMetric['value'] as $observation) {
-            $years[] = $observation->date;
+        $firstEndpoint = reset($data['endpoints']);
+        foreach ($firstEndpoint['value'] as $statistic) {
+            $years[] = $statistic->date;
         }
 
         return $years;

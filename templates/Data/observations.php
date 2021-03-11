@@ -52,25 +52,25 @@ $prepend = Formatter::getPrepend($unit);
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($data['series'] as $name => $series): ?>
+            <?php foreach ($data['endpoints'] as $name => $endpoint): ?>
                 <tr>
                     <td>
                         <?= $name ?>
                         <br />
                         <small>
-                            <?= Formatter::getFormattedDate($series['value']['date'], $frequency) ?>
+                            <?= Formatter::getFormattedDate($endpoint['value']['date'], $frequency) ?>
                         </small>
                     </td>
                     <td>
-                        <?= Formatter::formatValue($series['value']['value'], $prepend) ?>
+                        <?= Formatter::formatValue($endpoint['value']['value'], $prepend) ?>
                     </td>
                     <td>
-                        <?= Formatter::formatValue($series['change']['value'], $prepend) ?>
-                        <?= Formatter::getArrow($series['change']['value']) ?>
+                        <?= Formatter::formatValue($endpoint['change']['value'], $prepend) ?>
+                        <?= Formatter::getArrow($endpoint['change']['value']) ?>
                     </td>
                     <td>
-                        <?= Formatter::formatValue($series['percentChange']['value']) ?>%
-                        <?= Formatter::getArrow($series['percentChange']['value']) ?>
+                        <?= Formatter::formatValue($endpoint['percentChange']['value']) ?>%
+                        <?= Formatter::getArrow($endpoint['percentChange']['value']) ?>
                     </td>
                 </tr>
             <?php endforeach; ?>

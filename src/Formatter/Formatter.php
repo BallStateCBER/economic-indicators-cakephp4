@@ -54,7 +54,7 @@ class Formatter
     }
 
     /**
-     * Returns a formatted date string for the provided series
+     * Returns a formatted date string
      *
      * @param \Cake\I18n\FrozenDate $date Date string
      * @param string $frequency e.g. 'monthly'
@@ -81,27 +81,27 @@ class Formatter
     /**
      * Returns a frequency string for use with getFormattedDate()
      *
-     * @param array $data Series observation data
+     * @param array $data Output of StatisticsTable::getGroup()
      * @return string
      */
     public static function getFrequency(array $data): string
     {
-        $firstSeries = reset($data['series']);
+        $firstEndpoint = reset($data['endpoints']);
 
-        return strtolower($firstSeries['frequency']);
+        return strtolower($firstEndpoint['frequency']);
     }
 
     /**
-     * Returns a string expressing the units used in this group of series
+     * Returns a string expressing the units used by this endpoint
      *
-     * @param array $data Series observation data
+     * @param array $data Output of StatisticsTable::getGroup()
      * @return string
      */
     public static function getUnit(array $data): string
     {
-        $firstSeries = reset($data['series']);
+        $firstEndpoint = reset($data['endpoints']);
 
-        return $firstSeries['units'];
+        return $firstEndpoint['units'];
     }
 
     /**
@@ -118,7 +118,7 @@ class Formatter
     /**
      * Returns a formatted date representing when this data was last updated
      *
-     * @param array $data Series observation data
+     * @param array $data Output of StatisticsTable::getGroup()
      * @return string
      */
     public static function getLastUpdated(array $data): string

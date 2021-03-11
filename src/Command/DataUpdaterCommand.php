@@ -142,14 +142,15 @@ class DataUpdaterCommand extends Command
     private function updateIsAvailable(array $endpointGroup): bool
     {
         $firstEndpoint = $endpointGroup['endpoints'][0];
+        $endpointName = $firstEndpoint['id'];
 
         /** @var \App\Model\Entity\Metric $metric */
         $metric = $this->metricsTable
             ->find()
-            ->where(['name' => $firstEndpoint['seriesId']])
+            ->where(['name' => $endpointName])
             ->first();
         if (!$metric) {
-            $this->io->error('No metric record was found for ' . $firstEndpoint['seriesId']);
+            $this->io->error('No metric record was found for ' . $endpointName);
             exit;
         }
 
@@ -157,9 +158,9 @@ class DataUpdaterCommand extends Command
             return true;
         }
 
-        $this->setSeries($firstEndpoint);
-        $seriesMeta = $this->getSeriesMetadata();
-        $responseUpdated = $seriesMeta['@attributes']['last_updated'];
+        $this->setEndpoint($firstEndpoint);
+        $endpointMeta = $this->getEndpointMetadata();
+        $responseUpdated = $endpointMeta['@attributes']['last_updated'];
 
         return (new FrozenTime($responseUpdated))->gt($metric->last_updated);
     }
@@ -167,33 +168,33 @@ class DataUpdaterCommand extends Command
     /**
      * Loads metrics into $this->metrics, creating them if necessary
      *
-     * @param array $group Group of data series
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return void
      * @throws \fred_api_exception
      */
-    private function loadMetrics(array $group)
+    private function loadMetrics(array $endpointGroup)
     {
-        foreach ($group['endpoints'] as $endpoint) {
-            $seriesId = $endpoint['seriesId'];
+        foreach ($endpointGroup['endpoints'] as $endpoint) {
+            $endpointName = $endpoint['id'];
 
             // Find existing metric
             $metric = $this->metricsTable
                 ->find()
-                ->where(['name' => $seriesId])
+                ->where(['name' => $endpointName])
                 ->first();
             if ($metric) {
-                $this->metrics[$seriesId] = $metric;
+                $this->metrics[$endpointName] = $metric;
                 continue;
             }
 
             // Create missing metric
-            $this->io->out(' - Adding series ' . $seriesId . ' to metrics table');
-            $this->setSeries($seriesId);
-            $seriesMeta = $this->getSeriesMetadata();
+            $this->io->out(' - Adding ' . $endpointName . ' to metrics table');
+            $this->setEndpoint($endpointName);
+            $endpointMeta = $this->getEndpointMetadata();
             $data = [
-                'name' => $seriesId,
-                'units' => $seriesMeta['@attributes']['units'],
-                'frequency' => $seriesMeta['@attributes']['frequency'],
+                'name' => $endpointName,
+                'units' => $endpointMeta['@attributes']['units'],
+                'frequency' => $endpointMeta['@attributes']['frequency'],
             ];
             $metric = $this->metricsTable->newEntity($data);
             if (!$this->metricsTable->save($metric)) {
@@ -201,7 +202,7 @@ class DataUpdaterCommand extends Command
                 $this->io->out(print_r($metric->getErrors(), true));
                 exit;
             }
-            $this->metrics[$seriesId] = $metric;
+            $this->metrics[$endpointName] = $metric;
         }
     }
 
@@ -217,50 +218,48 @@ class DataUpdaterCommand extends Command
     }
 
     /**
-     * Sets the series ID for the next API request
+     * Sets the series_id parameter for the next API request
      *
-     * @param string|array $series Series ID or array that contains 'seriesId' key
+     * @param string|array $endpointName Endpoint name (aka series ID) or array that contains 'id' key
      * @return void
      */
-    public function setSeries(mixed $series): void
+    public function setEndpoint(mixed $endpointName): void
     {
-        if (is_array($series)) {
-            if (!isset($series['seriesId'])) {
+        if (is_array($endpointName)) {
+            if (!isset($endpointName['id'])) {
                 throw new InternalErrorException('Series ID not provided');
             }
-            $seriesId = $series['seriesId'];
-        } else {
-            $seriesId = $series;
+            $endpointName = $endpointName['id'];
         }
 
-        $this->apiParameters['series_id'] = $seriesId;
+        $this->apiParameters['series_id'] = $endpointName;
     }
 
     /**
-     * Returns information about a data series
+     * Returns information about a data series provided by a given endpoint
      *
      * @param array $parameters Additional optional parameters
      * @return array|null
      * @throws \fred_api_exception
      * @link https://fred.stlouisfed.org/docs/api/fred/
      */
-    public function getSeriesMetadata(array $parameters = []): ?array
+    public function getEndpointMetadata(array $parameters = []): ?array
     {
-        /** @var \fred_api_series $seriesApi */
-        $seriesApi = $this->api->factory('series');
+        /** @var \fred_api_series $api */
+        $api = $this->api->factory('series');
         $parameters += $this->apiParameters;
         $this->throttle();
 
         for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts--) {
             $finalAttempt = $attempts == 1;
             try {
-                $response = $seriesApi->get($parameters);
+                $response = $api->get($parameters);
                 if (property_exists($response, 'series')) {
                     return (array)($response->series);
                 }
 
                 if ($finalAttempt) {
-                    throw new NotFoundException('Series data not found');
+                    throw new NotFoundException('Metadata not found');
                 }
 
                 $this->io->error('Failed, retrying');
@@ -291,13 +290,13 @@ class DataUpdaterCommand extends Command
     {
         for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts++) {
             $finalAttempt = $attempts == 1;
-            /** @var \fred_api_series $seriesApi */
-            $seriesApi = $this->api->factory('series');
+            /** @var \fred_api_series $api */
+            $api = $this->api->factory('series');
             $parameters += $this->apiParameters;
             $parameters['file_type'] = 'json';
 
             $this->throttle();
-            $response = $seriesApi->observations($parameters);
+            $response = $api->observations($parameters);
             $response = json_decode($response);
             $responseIsValid = json_last_error() != JSON_ERROR_NONE;
             $responseIsValid = $responseIsValid && !is_object($response) || !property_exists($response, 'observations');
@@ -342,11 +341,12 @@ class DataUpdaterCommand extends Command
     {
         // Fetch from API
         $this->io->out(' - Retrieving from API...');
-        foreach ($endpointGroup['endpoints'] as $series) {
-            $this->setSeries($series);
-            $this->io->out(sprintf(' - %s > %s metadata', $series['var'], $series['subvar']));
-            $seriesMeta = $this->getSeriesMetadata();
-            $metric = $this->metrics[$series['seriesId']];
+        foreach ($endpointGroup['endpoints'] as $endpoint) {
+            $this->setEndpoint($endpoint);
+            $endpointName = $endpoint['id'];
+            $this->io->out(sprintf(' - %s > %s metadata', $endpoint['var'], $endpoint['subvar']));
+            $endpointMeta = $this->getEndpointMetadata();
+            $metric = $this->metrics[$endpointName];
             $this->apiParameters['sort_order'] = 'asc';
 
             $this->io->out('   - Values');
@@ -370,7 +370,7 @@ class DataUpdaterCommand extends Command
                 dataTypeId: StatisticsTable::DATA_TYPE_PERCENT_CHANGE,
             );
 
-            $this->updateMetricUpdatedDate($metric, $seriesMeta['@attributes']['last_updated']);
+            $this->updateMetricUpdatedDate($metric, $endpointMeta['@attributes']['last_updated']);
         }
     }
 
