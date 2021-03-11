@@ -92,7 +92,7 @@ class DataUpdaterCommand extends Command
     public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser = parent::buildOptionParser($parser);
-        $parser->setDescription('Updates API-fetched data for any pages with expired caches');
+        $parser->setDescription('Updates API-fetched data stored in the database');
 
         return $parser;
     }
