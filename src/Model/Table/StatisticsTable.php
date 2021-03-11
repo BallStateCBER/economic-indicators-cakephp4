@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Model\Table;
 
 use App\Formatter\Formatter;
+use Cake\Cache\Cache;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
@@ -115,30 +116,34 @@ class StatisticsTable extends Table
      */
     public function getGroup(array $endpointGroup, bool $all = false)
     {
-        $updated = null;
-        $endpoints = [];
-        foreach ($endpointGroup['endpoints'] as $endpoint) {
-            $seriesId = $endpoint['id'];
-            /** @var \App\Model\Entity\Metric $metric */
-            $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
-            if (!$metric) {
-                throw new InternalErrorException(sprintf('Metric named %s not found', $seriesId));
+        $cacheKey = $endpointGroup['title'] . ($all ? '-all' : '-last');
+
+        return Cache::remember($cacheKey, function () use ($endpointGroup, $all) {
+            $updated = null;
+            $endpoints = [];
+            foreach ($endpointGroup['endpoints'] as $endpoint) {
+                $seriesId = $endpoint['id'];
+                /** @var \App\Model\Entity\Metric $metric */
+                $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
+                if (!$metric) {
+                    throw new InternalErrorException(sprintf('Metric named %s not found', $seriesId));
+                }
+
+                if (!$updated) {
+                    $updated = $metric->last_updated;
+                }
+
+                $endpoints[$endpoint['name']] = [
+                    'units' => $metric->units,
+                    'frequency' => $metric->frequency,
+                    'value' => $this->getValues($metric->id, $all),
+                    'change' => $this->getChanges($metric->id, $all),
+                    'percentChange' => $this->getPercentChanges($metric->id, $all),
+                ];
             }
 
-            if (!$updated) {
-                $updated = $metric->last_updated;
-            }
-
-            $endpoints[$endpoint['name']] = [
-                'units' => $metric->units,
-                'frequency' => $metric->frequency,
-                'value' => $this->getValues($metric->id, $all),
-                'change' => $this->getChanges($metric->id, $all),
-                'percentChange' => $this->getPercentChanges($metric->id, $all),
-            ];
-        }
-
-        return compact('updated', 'endpoints');
+            return compact('updated', 'endpoints');
+        }, 'observations');
     }
 
     /**
@@ -150,21 +155,25 @@ class StatisticsTable extends Table
      */
     public function getDateRange(array $endpointGroup, string $frequency): string
     {
-        $firstEndpoint = reset($endpointGroup['endpoints']);
-        $seriesId = $firstEndpoint['id'];
-        $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
-        $query = $this
-            ->find()
-            ->select(['id', 'date'])
-            ->where(['metric_id' => $metric->id]);
-        $firstStat = $query->order(['date' => 'ASC'])->first();
-        $lastStat = $query->order(['date' => 'DESC'])->first();
+        $cacheKey = $endpointGroup['title'] . '-range';
 
-        return sprintf(
-            '%s - %s',
-            Formatter::getFormattedDate($firstStat->date, $frequency),
-            Formatter::getFormattedDate($lastStat->date, $frequency),
-        );
+        return Cache::remember($cacheKey, function () use ($endpointGroup, $frequency) {
+            $firstEndpoint = reset($endpointGroup['endpoints']);
+            $seriesId = $firstEndpoint['id'];
+            $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
+            $query = $this
+                ->find()
+                ->select(['id', 'date'])
+                ->where(['metric_id' => $metric->id]);
+            $firstStat = $query->order(['date' => 'ASC'])->first();
+            $lastStat = $query->order(['date' => 'DESC'])->first();
+
+            return sprintf(
+                '%s - %s',
+                Formatter::getFormattedDate($firstStat->date, $frequency),
+                Formatter::getFormattedDate($lastStat->date, $frequency),
+            );
+        }, 'observations');
     }
 
     /**
