@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Spreadsheet;
 
 use App\Formatter\Formatter;
+use Cake\ORM\TableRegistry;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -54,7 +55,9 @@ class SpreadsheetSingleDate extends Spreadsheet
             ->nextRow();
 
         $prepend = Formatter::getPrepend($unit);
-        $frequency = Formatter::getFrequency($data);
+        /** @var \App\Model\Table\MetricsTable $metricsTable */
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $frequency = $metricsTable->getFrequency($endpointGroup);
         foreach ($data['endpoints'] as $endpointName => $endpoint) {
             $this
                 ->writeRow([

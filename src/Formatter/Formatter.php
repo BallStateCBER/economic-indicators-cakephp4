@@ -62,6 +62,7 @@ class Formatter
      */
     public static function getFormattedDate(FrozenDate $date, string $frequency): string
     {
+        $frequency = strtolower($frequency);
         if (str_contains($frequency, 'quarterly')) {
             $month = $date->format('n');
             $quarter = ceil($month / 3);
@@ -76,19 +77,6 @@ class Formatter
         }
 
         return (new FrozenDate($date))->format($format);
-    }
-
-    /**
-     * Returns a frequency string for use with getFormattedDate()
-     *
-     * @param array $data Output of StatisticsTable::getGroup()
-     * @return string
-     */
-    public static function getFrequency(array $data): string
-    {
-        $firstEndpoint = reset($data['endpoints']);
-
-        return strtolower($firstEndpoint['frequency']);
     }
 
     /**

@@ -19,6 +19,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Exception as PhpOfficeException;
  * Class DataController
  *
  * @package App\Controller
+ * @property \App\Model\Table\MetricsTable $Metrics
  * @property \App\Model\Table\StatisticsTable $Statistics
  */
 class DataController extends AppController
@@ -39,6 +40,7 @@ class DataController extends AppController
                 'value' => 'xlsx',
             ]
         );
+        $this->loadModel('Metrics');
         $this->loadModel('Statistics');
     }
 
@@ -56,13 +58,13 @@ class DataController extends AppController
         }
 
         $data = $this->Statistics->getGroup($endpointGroup, $isTimeSeries);
-        $frequency = Formatter::getFrequency($data);
-        $dateRange = $this->Statistics->getDateRange($endpointGroup, $frequency);
+        $dateRange = $this->Statistics->getDateRange($endpointGroup);
+        $frequency = $this->Metrics->getFrequency($endpointGroup);
 
         $this->set([
             'data' => $data,
             'dateRange' => $dateRange,
-            'frequency' => $frequency,
+            'frequency' => strtolower($frequency),
             'pageTitle' => $endpointGroup['title'],
         ]);
 

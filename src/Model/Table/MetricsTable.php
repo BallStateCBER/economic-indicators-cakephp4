@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
+use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
@@ -83,5 +84,28 @@ class MetricsTable extends Table
             ->notEmptyString('frequency');
 
         return $validator;
+    }
+
+    /**
+     * Looks up the frequency (Monthly, Quarterly, etc.) of the first metric associated with this group of endpoints
+     *
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @return string
+     */
+    public function getFrequency(array $endpointGroup): string
+    {
+        $metricName = $endpointGroup['endpoints'][0]['id'];
+        /** @var \App\Model\Entity\Metric $metric */
+        $metric = $this
+            ->find()
+            ->select(['frequency'])
+            ->where(['name' => $metricName])
+            ->first();
+
+        if (!$metric) {
+            throw new InternalErrorException("Metric $metricName not found");
+        }
+
+        return $metric->frequency;
     }
 }

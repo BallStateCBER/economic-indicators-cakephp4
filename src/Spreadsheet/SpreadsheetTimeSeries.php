@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Spreadsheet;
 
 use App\Formatter\Formatter;
+use Cake\ORM\TableRegistry;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -43,7 +44,9 @@ class SpreadsheetTimeSeries extends Spreadsheet
             ->writeRow(['Metric']);
 
         // Write dates explicitly as strings so they don't get reformatted into a different date format by Excel
-        $frequency = Formatter::getFrequency($data);
+        /** @var \App\Model\Table\MetricsTable $metricsTable */
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $frequency = $metricsTable->getFrequency($endpointGroup);
         foreach ($dates as $i => $date) {
             $date = Formatter::getFormattedDate($date, $frequency);
             $colNum = $i + 2;

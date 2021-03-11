@@ -150,14 +150,13 @@ class StatisticsTable extends Table
      * Returns a string describing the date range of known statistics
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
-     * @param string $frequency Frequency string
      * @return string
      */
-    public function getDateRange(array $endpointGroup, string $frequency): string
+    public function getDateRange(array $endpointGroup): string
     {
         $cacheKey = $endpointGroup['title'] . '-range';
 
-        return Cache::remember($cacheKey, function () use ($endpointGroup, $frequency) {
+        return Cache::remember($cacheKey, function () use ($endpointGroup) {
             $firstEndpoint = reset($endpointGroup['endpoints']);
             $seriesId = $firstEndpoint['id'];
             $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
@@ -167,6 +166,7 @@ class StatisticsTable extends Table
                 ->where(['metric_id' => $metric->id]);
             $firstStat = $query->order(['date' => 'ASC'])->first();
             $lastStat = $query->order(['date' => 'DESC'])->first();
+            $frequency = $this->Metrics->getFrequency($endpointGroup);
 
             return sprintf(
                 '%s - %s',
