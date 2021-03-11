@@ -48,18 +48,18 @@ class SpreadsheetSingleDate extends Spreadsheet
 
         $prepend = Formatter::getPrepend($unit);
         $frequency = Formatter::getFrequency($data);
-        foreach ($data['series'] as $name => $series) {
+        foreach ($data['endpoints'] as $endpointName => $endpoint) {
             $this
                 ->writeRow([
-                    $name,
-                    Formatter::formatValue($series['value']->value, $prepend),
-                    Formatter::formatValue($series['change']->value, $prepend),
-                    Formatter::formatValue($series['percentChange']->value) . '%',
+                    $endpointName,
+                    Formatter::formatValue($endpoint['value']->value, $prepend),
+                    Formatter::formatValue($endpoint['change']->value, $prepend),
+                    Formatter::formatValue($endpoint['percentChange']->value) . '%',
                 ])
                 ->alignHorizontal('right', 2);
 
             // Write date explicitly as a string so it doesn't get reformatted into a different date format by Excel
-            $date = Formatter::getFormattedDate($series['value']->date, $frequency);
+            $date = Formatter::getFormattedDate($endpoint['value']->date, $frequency);
             $dateCol = 5;
             $cell = $this->getColumnKey($dateCol) . $this->currentRow;
             $this->objPHPExcel
