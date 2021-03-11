@@ -10,7 +10,6 @@ use Cake\Validation\Validator;
  * Metrics Model
  *
  * @property \App\Model\Table\StatisticsTable&\Cake\ORM\Association\HasMany $Statistics
- *
  * @method \App\Model\Entity\Metric newEmptyEntity()
  * @method \App\Model\Entity\Metric newEntity(array $data, array $options = [])
  * @method \App\Model\Entity\Metric[] newEntities(array $data, array $options = [])

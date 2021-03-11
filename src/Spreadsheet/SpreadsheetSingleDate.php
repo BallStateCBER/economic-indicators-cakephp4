@@ -18,7 +18,7 @@ class SpreadsheetSingleDate extends Spreadsheet
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws \Exception
      */
-    public function __construct(array $endpointGroup, array|bool $data)
+    public function __construct(array $endpointGroup, array | bool $data)
     {
         parent::__construct($data);
 

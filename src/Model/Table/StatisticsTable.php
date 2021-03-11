@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Model\Table;
 
 use App\Formatter\Formatter;
-use Cake\Datasource\ResultSetInterface;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
@@ -15,7 +14,6 @@ use Cake\Validation\Validator;
  * Statistics Model
  *
  * @property \App\Model\Table\MetricsTable&\Cake\ORM\Association\BelongsTo $Metrics
- *
  * @method \App\Model\Entity\Statistic newEmptyEntity()
  * @method \App\Model\Entity\Statistic newEntity(array $data, array $options = [])
  * @method \App\Model\Entity\Statistic[] newEntities(array $data, array $options = [])
@@ -25,10 +23,10 @@ use Cake\Validation\Validator;
  * @method \App\Model\Entity\Statistic[] patchEntities(iterable $entities, array $data, array $options = [])
  * @method \App\Model\Entity\Statistic|false save(\Cake\Datasource\EntityInterface $entity, $options = [])
  * @method \App\Model\Entity\Statistic saveOrFail(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\Statistic[]|ResultSetInterface|false saveMany(iterable $entities, $options = [])
- * @method \App\Model\Entity\Statistic[]|ResultSetInterface saveManyOrFail(iterable $entities, $options = [])
- * @method \App\Model\Entity\Statistic[]|ResultSetInterface|false deleteMany(iterable $entities, $options = [])
- * @method \App\Model\Entity\Statistic[]|ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Statistic[]|\Cake\Datasource\ResultSetInterface|false saveMany(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Statistic[]|\Cake\Datasource\ResultSetInterface saveManyOrFail(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Statistic[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Statistic[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class StatisticsTable extends Table

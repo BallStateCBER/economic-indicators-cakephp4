@@ -17,6 +17,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Exception as PhpOfficeException;
 
 /**
  * Class DataController
+ *
  * @package App\Controller
  * @property \App\Model\Table\StatisticsTable $Statistics
  */

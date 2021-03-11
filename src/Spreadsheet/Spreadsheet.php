@@ -15,7 +15,7 @@ class Spreadsheet extends DataCenterSpreadsheet
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws \Exception
      */
-    public function __construct(array|bool $data)
+    public function __construct(array | bool $data)
     {
         parent::__construct();
 
