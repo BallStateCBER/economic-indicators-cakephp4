@@ -65,8 +65,8 @@ class SpreadsheetTimeSeries extends Spreadsheet
             $row = [$name];
             foreach ($series[$type] as $observation) {
                 $row[] = $type == 'percentChange'
-                    ? $observation['value'] . '%'
-                    : Formatter::formatValue($observation['value'], $prepend);
+                    ? $observation->value . '%'
+                    : Formatter::formatValue($observation->value, $prepend);
             }
             $this
                 ->writeRow($row)
@@ -90,7 +90,7 @@ class SpreadsheetTimeSeries extends Spreadsheet
         $years = [];
         $firstMetric = reset($data['series']);
         foreach ($firstMetric['value'] as $observation) {
-            $years[] = $observation['date'];
+            $years[] = $observation->date;
         }
 
         return $years;
