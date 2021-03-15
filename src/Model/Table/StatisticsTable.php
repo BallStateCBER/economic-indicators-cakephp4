@@ -199,14 +199,16 @@ class StatisticsTable extends Table
      *
      * @param int $metricId Metric ID
      * @param bool $all TRUE to return all results rather than only the most recent
-     * @return \Cake\Datasource\ResultSetInterface|\App\Model\Entity\Statistic
+     * @return \Cake\Datasource\ResultSetInterface|array
      */
     private function getValues(int $metricId, bool $all = false)
     {
-        $query = $this->find(
-            'byMetricAndType',
-            ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_VALUE]
-        );
+        $query = $this
+            ->find(
+                'byMetricAndType',
+                ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_VALUE]
+            )
+            ->enableHydration(false);
         if ($all) {
             return $query->all();
         }
@@ -219,14 +221,16 @@ class StatisticsTable extends Table
      *
      * @param int $metricId Metric ID
      * @param bool $all TRUE to return all results rather than only the most recent
-     * @return \Cake\Datasource\ResultSetInterface|\App\Model\Entity\Statistic
+     * @return \Cake\Datasource\ResultSetInterface|array
      */
     private function getChanges(int $metricId, bool $all = false)
     {
-        $query = $this->find(
-            'byMetricAndType',
-            ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_CHANGE]
-        );
+        $query = $this
+            ->find(
+                'byMetricAndType',
+                ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_CHANGE]
+            )
+            ->enableHydration(false);
         if ($all) {
             return $query->all();
         }
@@ -243,10 +247,12 @@ class StatisticsTable extends Table
      */
     private function getPercentChanges(int $metricId, bool $all = false)
     {
-        $query = $this->find(
-            'byMetricAndType',
-            ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_PERCENT_CHANGE]
-        );
+        $query = $this
+            ->find(
+                'byMetricAndType',
+                ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_PERCENT_CHANGE]
+            )
+            ->enableHydration(false);
         if ($all) {
             return $query->all();
         }
