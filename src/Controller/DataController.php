@@ -9,8 +9,7 @@ use App\Spreadsheet\SpreadsheetSingleDate;
 use App\Spreadsheet\SpreadsheetTimeSeries;
 use Cake\Core\Configure;
 use Cake\Http\Response;
-use DateTime;
-use DateTimeZone;
+use Cake\Utility\Text;
 use Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as PhpOfficeException;
@@ -161,10 +160,11 @@ class DataController extends AppController
     private function renderSpreadsheet(array $endpointGroup, $isTimeSeries = false): Response
     {
         try {
-            $title = str_replace([' ', '_'], '-', strtolower($endpointGroup['title']));
-            $timezone = new DateTimeZone(Configure::read('local_timezone'));
-            $date = (new DateTime('now', $timezone))->format('-Y-m-d');
-            $filename = $title . $date . '.xlsx';
+            $filename = sprintf(
+                '%s-%s.xlsx',
+                str_replace([' ', '_'], '-', strtolower($endpointGroup['title'])),
+                $this->getDateForFilename($endpointGroup, $isTimeSeries)
+            );
             $this->response = $this->response
                 ->withType('xlsx')
                 ->withDownload($filename);
@@ -195,5 +195,35 @@ class DataController extends AppController
         }
 
         return $this->redirect(['_ext' => null]);
+    }
+
+    /**
+     * Returns a date string for use in a spreadsheet filename
+     *
+     * @param array $endpointGroup  A group defined in \App\Fetcher\EndpointGroups
+     * @param bool $isTimeSeries TRUE if a date range should be generated
+     * @return string
+     */
+    private function getDateForFilename(array $endpointGroup, bool $isTimeSeries): string
+    {
+        if ($isTimeSeries) {
+            $dateRange = $this->Statistics->getDateRange($endpointGroup);
+
+            return Text::slug(strtolower($dateRange));
+        }
+
+        $firstEndpoint = reset($endpointGroup['endpoints']);
+        $metricName = $firstEndpoint['id'];
+        /** @var \App\Model\Entity\Metric $metric */
+        $metric = $this->Metrics->find()->where(['name' => $metricName])->first();
+        /** @var \App\Model\Entity\Statistic $statistic */
+        $statistic = $this->Statistics->find()
+            ->select(['id', 'date'])
+            ->where(['metric_id' => $metric->id])
+            ->orderDesc('date')
+            ->first();
+        $date = Formatter::getFormattedDate($statistic->date, $metric->frequency);
+
+        return Text::slug(strtolower($date));
     }
 }
