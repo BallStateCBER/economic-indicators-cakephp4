@@ -62,14 +62,14 @@ class SpreadsheetSingleDate extends Spreadsheet
             $this
                 ->writeRow([
                     $endpointName,
-                    Formatter::formatValue($endpoint['value']['value'], $prepend),
+                    Formatter::formatValue($endpoint['observation']['value'], $prepend),
                     Formatter::formatValue($endpoint['change']['value'], $prepend),
                     Formatter::formatValue($endpoint['percentChange']['value']) . '%',
                 ])
                 ->alignHorizontal('right', 2);
 
             // Write date explicitly as a string so it doesn't get reformatted into a different date format by Excel
-            $date = Formatter::getFormattedDate($endpoint['value']['date'], $frequency);
+            $date = Formatter::getFormattedDate($endpoint['observation']['date'], $frequency);
             $dateCol = 5;
             $cell = $this->getColumnKey($dateCol) . $this->currentRow;
             $this->objPHPExcel

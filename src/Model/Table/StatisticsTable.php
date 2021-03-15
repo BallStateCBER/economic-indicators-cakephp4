@@ -136,7 +136,7 @@ class StatisticsTable extends Table
                 $endpoints[$endpoint['name']] = [
                     'units' => $metric->units,
                     'frequency' => $metric->frequency,
-                    'value' => $this->getValues($metric->id, $all),
+                    'observation' => $this->getObservations($metric->id, $all),
                     'change' => $this->getChanges($metric->id, $all),
                     'percentChange' => $this->getPercentChanges($metric->id, $all),
                 ];
@@ -195,13 +195,13 @@ class StatisticsTable extends Table
     }
 
     /**
-     * Returns all 'value' (normal units) statistics for the given metric
+     * Returns all non-comparative 'observation' statistics for the given metric
      *
      * @param int $metricId Metric ID
      * @param bool $all TRUE to return all results rather than only the most recent
      * @return \Cake\Datasource\ResultSetInterface|array
      */
-    private function getValues(int $metricId, bool $all = false)
+    private function getObservations(int $metricId, bool $all = false)
     {
         $query = $this
             ->find(

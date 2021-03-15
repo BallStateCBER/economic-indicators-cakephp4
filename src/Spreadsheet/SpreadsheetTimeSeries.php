@@ -30,7 +30,6 @@ class SpreadsheetTimeSeries extends Spreadsheet
     {
         parent::__construct($data);
 
-        $type = 'value';
         $dates = $this->getDates($data);
         $unit = Formatter::getUnit($data);
         $this
@@ -73,10 +72,8 @@ class SpreadsheetTimeSeries extends Spreadsheet
         $prepend = Formatter::getPrepend($unit);
         foreach ($data['endpoints'] as $endpointName => $endpoint) {
             $row = [$endpointName];
-            foreach ($endpoint[$type] as $observation) {
-                $row[] = $type == 'percentChange'
-                    ? $observation['value'] . '%'
-                    : Formatter::formatValue($observation['value'], $prepend);
+            foreach ($endpoint['observation'] as $statistic) {
+                $row[] = Formatter::formatValue($statistic['value'], $prepend);
             }
             $this
                 ->writeRow($row)
@@ -99,7 +96,7 @@ class SpreadsheetTimeSeries extends Spreadsheet
     {
         $years = [];
         $firstEndpoint = reset($data['endpoints']);
-        foreach ($firstEndpoint['value'] as $statistic) {
+        foreach ($firstEndpoint['observation'] as $statistic) {
             $years[] = $statistic['date'];
         }
 

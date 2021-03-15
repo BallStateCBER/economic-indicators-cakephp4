@@ -58,11 +58,11 @@ $prepend = Formatter::getPrepend($unit);
                         <?= $name ?>
                         <br />
                         <small>
-                            <?= Formatter::getFormattedDate($endpoint['value']['date'], $frequency) ?>
+                            <?= Formatter::getFormattedDate($endpoint['observation']['date'], $frequency) ?>
                         </small>
                     </td>
                     <td>
-                        <?= Formatter::formatValue($endpoint['value']['value'], $prepend) ?>
+                        <?= Formatter::formatValue($endpoint['observation']['value'], $prepend) ?>
                     </td>
                     <td>
                         <?= Formatter::formatValue($endpoint['change']['value'], $prepend) ?>
