@@ -114,7 +114,7 @@ class StatisticsTable extends Table
      * @param bool $all TRUE to return statistics for all dates
      * @return array
      */
-    public function getGroup(array $endpointGroup, bool $all = false)
+    public function getGroup(array $endpointGroup, bool $all = false): array
     {
         $cacheKey = $endpointGroup['title'] . ($all ? '-all' : '-last');
 
