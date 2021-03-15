@@ -12,7 +12,7 @@ use Cake\ORM\Entity;
  * @property int $metric_id
  * @property int $data_type_id
  * @property string|null $value
- * @property string $date
+ * @property \Cake\I18n\FrozenDate $date
  * @property \Cake\I18n\FrozenTime $created
  * @property \Cake\I18n\FrozenTime $modified
  *
