@@ -110,21 +110,23 @@ class DataUpdaterCommand extends Command
         $this->io = $io;
         $this->progress = $io->helper('Progress');
 
-        $groups = (new EndpointGroups())->getAll();
-        foreach ($groups as $group) {
-            $io->info($group['endpoints'][0]['group']);
-            $this->loadMetrics($group);
+        $endpointGroups = (new EndpointGroups())->getAll();
+        foreach ($endpointGroups as $endpointGroup) {
+            $io->info($endpointGroup['endpoints'][0]['group']);
+            $this->loadMetrics($endpointGroup);
 
-            $io->out(' - Checking for updates');
-            if (!$this->updateIsAvailable($group)) {
-                $io->out(' - API does not yet have an update');
-                continue;
-            }
-
-            try {
-                $this->updateGroup($group);
-            } catch (NotFoundException | fred_api_exception $e) {
-                $io->error($e->getMessage());
+            foreach ($endpointGroup['endpoints'] as $endpoint) {
+                if ($this->updateIsAvailable($endpoint['id'])) {
+                    $io->out(sprintf(' - %s: Update available', $endpoint['id']));
+                    try {
+                        $this->updateEndpoint($endpoint);
+                    } catch (NotFoundException | fred_api_exception $e) {
+                        $io->error($e->getMessage());
+                    }
+                } else {
+                    $io->out(sprintf(' - %s: No update available', $endpoint['id']));
+                    continue;
+                }
             }
             $io->out(' - Done');
         }
@@ -135,15 +137,12 @@ class DataUpdaterCommand extends Command
     /**
      * Returns TRUE if the API has more recently-updated data than the database
      *
-     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @param string $endpointName Matching metric->name and a seriesID in the FRED API
      * @return bool
      * @throws \fred_api_exception
      */
-    private function updateIsAvailable(array $endpointGroup): bool
+    private function updateIsAvailable(string $endpointName): bool
     {
-        $firstEndpoint = $endpointGroup['endpoints'][0];
-        $endpointName = $firstEndpoint['id'];
-
         /** @var \App\Model\Entity\Metric $metric */
         $metric = $this->metricsTable
             ->find()
@@ -158,7 +157,7 @@ class DataUpdaterCommand extends Command
             return true;
         }
 
-        $this->setEndpoint($firstEndpoint);
+        $this->setEndpoint($endpointName);
         $endpointMeta = $this->getEndpointMetadata();
         $responseUpdated = $endpointMeta['@attributes']['last_updated'];
 
@@ -333,45 +332,43 @@ class DataUpdaterCommand extends Command
     /**
      * Fetches data from the API and updates/adds corresponding records in the database
      *
-     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @param array $endpoint An endpoint defined in \App\Fetcher\FredEndpoints
      * @return void
      * @throws \fred_api_exception
      */
-    public function updateGroup(array $endpointGroup): void
+    public function updateEndpoint(array $endpoint): void
     {
         // Fetch from API
         $this->io->out(' - Retrieving from API...');
-        foreach ($endpointGroup['endpoints'] as $endpoint) {
-            $this->setEndpoint($endpoint);
-            $endpointName = $endpoint['id'];
-            $this->io->out(sprintf(' - %s > %s metadata', $endpoint['group'], $endpoint['name']));
-            $endpointMeta = $this->getEndpointMetadata();
-            $metric = $this->metrics[$endpointName];
-            $this->apiParameters['sort_order'] = 'asc';
+        $this->setEndpoint($endpoint);
+        $endpointName = $endpoint['id'];
+        $this->io->out(sprintf(' - %s > %s metadata', $endpoint['group'], $endpoint['name']));
+        $endpointMeta = $this->getEndpointMetadata();
+        $metric = $this->metrics[$endpointName];
+        $this->apiParameters['sort_order'] = 'asc';
 
-            $this->io->out('   - Values');
-            $this->saveAllStatistics(
-                observations: $this->getObservations(['units' => self::UNITS_VALUE]),
-                metricId: $metric->id,
-                dataTypeId: StatisticsTable::DATA_TYPE_VALUE,
-            );
+        $this->io->out('   - Values');
+        $this->saveAllStatistics(
+            observations: $this->getObservations(['units' => self::UNITS_VALUE]),
+            metricId: $metric->id,
+            dataTypeId: StatisticsTable::DATA_TYPE_VALUE,
+        );
 
-            $this->io->out('   - Changes');
-            $this->saveAllStatistics(
-                observations: $this->getObservations(['units' => self::UNITS_CHANGE_FROM_1_YEAR_AGO]),
-                metricId: $metric->id,
-                dataTypeId: StatisticsTable::DATA_TYPE_CHANGE,
-            );
+        $this->io->out('   - Changes');
+        $this->saveAllStatistics(
+            observations: $this->getObservations(['units' => self::UNITS_CHANGE_FROM_1_YEAR_AGO]),
+            metricId: $metric->id,
+            dataTypeId: StatisticsTable::DATA_TYPE_CHANGE,
+        );
 
-            $this->io->out('   - Percent changes');
-            $this->saveAllStatistics(
-                observations: $this->getObservations(['units' => self::UNITS_PERCENT_CHANGE_FROM_1_YEAR_AGO]),
-                metricId: $metric->id,
-                dataTypeId: StatisticsTable::DATA_TYPE_PERCENT_CHANGE,
-            );
+        $this->io->out('   - Percent changes');
+        $this->saveAllStatistics(
+            observations: $this->getObservations(['units' => self::UNITS_PERCENT_CHANGE_FROM_1_YEAR_AGO]),
+            metricId: $metric->id,
+            dataTypeId: StatisticsTable::DATA_TYPE_PERCENT_CHANGE,
+        );
 
-            $this->updateMetricUpdatedDate($metric, $endpointMeta['@attributes']['last_updated']);
-        }
+        $this->updateMetricUpdatedDate($metric, $endpointMeta['@attributes']['last_updated']);
     }
 
     /**
