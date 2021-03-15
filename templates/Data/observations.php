@@ -90,7 +90,7 @@ $prepend = Formatter::getPrepend($unit);
         '<i class="fas fa-download"></i> Download ' . $dateRange . ' time series data as an Excel spreadsheet',
         [
             '?' => ['timeSeries' => 1],
-            '_ext' => 'xlsx'
+            '_ext' => 'xlsx',
         ],
         ['escape' => false, 'class' => 'alert alert-info']
     ) ?>
