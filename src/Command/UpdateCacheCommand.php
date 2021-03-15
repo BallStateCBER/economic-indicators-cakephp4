@@ -109,7 +109,7 @@ class UpdateCacheCommand extends Command
     {
         $this->io->out(' - Refreshing data for all dates');
         $cacheKey = $endpointGroup['title'] . '-all';
-        Cache::delete($cacheKey);
+        Cache::delete($cacheKey, 'observations');
         $this->statisticsTable->getGroup($endpointGroup, true);
     }
 }
