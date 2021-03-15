@@ -81,7 +81,7 @@ class UpdateCacheCommand extends Command
     {
         $this->io->out(' - Refreshing date range');
         $cacheKey = $endpointGroup['title'] . '-range';
-        Cache::delete($cacheKey);
+        Cache::delete($cacheKey, 'observations');
         $this->statisticsTable->getDateRange($endpointGroup);
     }
 
@@ -95,7 +95,7 @@ class UpdateCacheCommand extends Command
     {
         $this->io->out(' - Refreshing data for most recent date');
         $cacheKey = $endpointGroup['title'] . '-last';
-        Cache::delete($cacheKey);
+        Cache::delete($cacheKey, 'observations');
         $this->statisticsTable->getGroup($endpointGroup);
     }
 
