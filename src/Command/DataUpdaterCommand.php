@@ -7,18 +7,14 @@ use App\Fetcher\EndpointGroups;
 use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\StatisticsTable;
-use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Cake\Console\Helper;
-use Cake\Core\Configure;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\Http\Exception\NotFoundException;
 use Cake\I18n\FrozenDate;
 use Cake\I18n\FrozenTime;
 use Cake\ORM\TableRegistry;
-use fred_api;
 use fred_api_exception;
 
 /**
@@ -35,28 +31,25 @@ use fred_api_exception;
  * @property \Cake\Console\ConsoleIo $io
  * @property \Cake\Shell\Helper\ProgressHelper $progress
  */
-class DataUpdaterCommand extends Command
+class DataUpdaterCommand extends AppCommand
 {
     private array $apiParameters;
     private array $metrics;
-    private ConsoleIo $io;
     private const UNITS_CHANGE_FROM_1_YEAR_AGO = 'ch1';
     private const UNITS_PERCENT_CHANGE_FROM_1_YEAR_AGO = 'pc1';
     private const UNITS_VALUE = 'lin';
-    private fred_api $api;
     private MetricsTable $metricsTable;
-    private Helper $progress;
     private StatisticsTable $statisticsTable;
 
     /**
      * @var int The number of times to retry a failing API call after the first attempt
      */
-    private int $apiRetryCount = 2;
+    protected int $apiRetryCount = 2;
 
     /**
      * @var float Seconds to wait between each API call
      */
-    private float $rateThrottle = 1;
+    protected float $rateThrottle = 1;
 
     /**
      * DataUpdaterCommand constructor.
@@ -64,19 +57,6 @@ class DataUpdaterCommand extends Command
     public function __construct()
     {
         parent::__construct();
-
-        // Used in calls to file_exists() in the FredApi library
-        if (!defined('FRED_API_ROOT')) {
-            define('FRED_API_ROOT', ROOT . DS . 'lib' . DS . 'FredApi' . DS);
-        }
-
-        require_once ROOT . DS . 'lib' . DS . 'FredApi' . DS . 'fred_api.php';
-        $apiKey = Configure::read('fred_api_key');
-        try {
-            $this->api = new fred_api($apiKey);
-        } catch (fred_api_exception $e) {
-            throw new InternalErrorException('Error creating FRED API object: ' . $e->getMessage());
-        }
 
         $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
@@ -107,8 +87,7 @@ class DataUpdaterCommand extends Command
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
-        $this->io = $io;
-        $this->progress = $io->helper('Progress');
+        parent::execute($args, $io);
         $cacheUpdater = new UpdateCacheCommand($io);
 
         $endpointGroups = (new EndpointGroups())->getAll();
@@ -214,17 +193,6 @@ class DataUpdaterCommand extends Command
             }
             $this->metrics[$endpointName] = $metric;
         }
-    }
-
-    /**
-     * Pauses execution for $this->rateThrottle seconds
-     *
-     * @return void
-     */
-    private function throttle()
-    {
-        $microseconds = (int)($this->rateThrottle * 1000000);
-        usleep($microseconds);
     }
 
     /**
