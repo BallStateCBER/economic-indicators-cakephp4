@@ -109,25 +109,36 @@ class DataUpdaterCommand extends Command
     {
         $this->io = $io;
         $this->progress = $io->helper('Progress');
+        $cacheUpdater = new UpdateCacheCommand($io);
 
         $endpointGroups = (new EndpointGroups())->getAll();
         foreach ($endpointGroups as $endpointGroup) {
             $io->info($endpointGroup['endpoints'][0]['group']);
             $this->loadMetrics($endpointGroup);
+            $groupUpdated = false;
 
             foreach ($endpointGroup['endpoints'] as $endpoint) {
                 if ($this->updateIsAvailable($endpoint['id'])) {
                     $io->out(sprintf(' - %s: Update available', $endpoint['id']));
                     try {
                         $this->updateEndpoint($endpoint);
+                        $groupUpdated = true;
                     } catch (NotFoundException | fred_api_exception $e) {
                         $io->error($e->getMessage());
+                        exit;
                     }
                 } else {
                     $io->out(sprintf(' - %s: No update available', $endpoint['id']));
                     continue;
                 }
             }
+
+            if ($groupUpdated) {
+                $cacheUpdater->refreshDateRange($endpointGroup);
+                $cacheUpdater->refreshLastDateData($endpointGroup);
+                $cacheUpdater->refreshDateRangeData($endpointGroup);
+            }
+
             $io->out(' - Done');
         }
 

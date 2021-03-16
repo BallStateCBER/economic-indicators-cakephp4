@@ -27,6 +27,19 @@ class UpdateCacheCommand extends Command
     private StatisticsTable $statisticsTable;
 
     /**
+     * UpdateCacheCommand constructor
+     *
+     * @param \Cake\Console\ConsoleIo|null $io ConsoleIo object
+     */
+    public function __construct(?ConsoleIo $io = null)
+    {
+        parent::__construct();
+        $this->io = $io;
+        $this->progress = $io->helper('Progress');
+        $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
+    }
+
+    /**
      * Hook method for defining this command's option parser.
      *
      * @see https://book.cakephp.org/4/en/console-commands/commands.html#defining-arguments-and-options
@@ -51,9 +64,6 @@ class UpdateCacheCommand extends Command
     public function execute(Arguments $args, ConsoleIo $io)
     {
         $this->io = $io;
-        $this->progress = $io->helper('Progress');
-        $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
-
         $endpointGroups = (new EndpointGroups())->getAll();
         $count = count($endpointGroups);
         foreach ($endpointGroups as $i => $endpointGroup) {
@@ -77,9 +87,9 @@ class UpdateCacheCommand extends Command
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return void
      */
-    private function refreshDateRange(array $endpointGroup): void
+    public function refreshDateRange(array $endpointGroup): void
     {
-        $this->io->out(' - Refreshing date range');
+        $this->io->out(' - Refreshing cached date range');
         $cacheKey = $endpointGroup['title'] . '-range';
         Cache::delete($cacheKey, 'observations');
         $this->statisticsTable->getDateRange($endpointGroup);
@@ -91,9 +101,9 @@ class UpdateCacheCommand extends Command
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return void
      */
-    private function refreshLastDateData(array $endpointGroup)
+    public function refreshLastDateData(array $endpointGroup)
     {
-        $this->io->out(' - Refreshing data for most recent date');
+        $this->io->out(' - Refreshing cached data for most recent date');
         $cacheKey = $endpointGroup['title'] . '-last';
         Cache::delete($cacheKey, 'observations');
         $this->statisticsTable->getGroup($endpointGroup);
@@ -105,9 +115,9 @@ class UpdateCacheCommand extends Command
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return void
      */
-    private function refreshDateRangeData(mixed $endpointGroup)
+    public function refreshDateRangeData(mixed $endpointGroup)
     {
-        $this->io->out(' - Refreshing data for all dates');
+        $this->io->out(' - Refreshing cached data for all dates');
         $cacheKey = $endpointGroup['title'] . '-all';
         Cache::delete($cacheKey, 'observations');
         $this->statisticsTable->getGroup($endpointGroup, true);
