@@ -425,7 +425,8 @@ class DataUpdaterCommand extends Command
      */
     private function updateMetricUpdatedDate(Metric $metric, string $lastUpdated): void
     {
-        $this->metricsTable->patchEntity($metric, ['last_updated' => new FrozenTime($lastUpdated)]);
+        $dateObj = new FrozenTime($lastUpdated, $this->getApiTimezone($lastUpdated));
+        $this->metricsTable->patchEntity($metric, ['last_updated' => $dateObj]);
         if (!$this->metricsTable->save($metric)) {
             $this->io->error('There was an error updating that metric. Details:');
             $this->io->out(print_r($metric->getErrors(), true));
@@ -458,5 +459,22 @@ class DataUpdaterCommand extends Command
             $this->progress->increment()->draw();
         }
         $this->io->overwrite('   - Done');
+    }
+
+    /**
+     * Returns a valid timezone string gleaned from the API-returned date string
+     *
+     * According to the API docs, the date should end with a three-character GMT offset string, such as '-06'
+     *
+     * @param string $lastUpdated Returned by the API in this format: "2013-07-31 09:26:16-05"
+     * @return string
+     */
+    private function getApiTimezone($lastUpdated): string
+    {
+        $timeOffset = substr($lastUpdated, -3);
+        $operator = substr($timeOffset, 0, 1);
+        $hours = substr($timeOffset, 1, 2);
+
+        return $operator . $hours . '00';
     }
 }
