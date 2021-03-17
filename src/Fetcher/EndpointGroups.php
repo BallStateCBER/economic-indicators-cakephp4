@@ -124,6 +124,29 @@ class EndpointGroups
     }
 
     /**
+     * Returns the state manufacturing group of endpoints
+     *
+     * @return array
+     */
+    public static function getStateManufacturing()
+    {
+        $endpoints = [];
+        $states = array_flip(FredEndpoints::STATES);
+        foreach (FredEndpoints::STATE_MANUFACTURING_EMPLOYMENT_IDS as $stateAbbreviation => $seriesId) {
+            $endpoints[] = [
+                'group' => FredEndpoints::VAR_STATE_MANUFACTURING_EMPLOYMENT,
+                'name' => $states[$stateAbbreviation],
+                'id' => $seriesId,
+            ];
+        }
+
+        return [
+            'title' => 'State Manufacturing Employment',
+            'endpoints' => $endpoints,
+        ];
+    }
+
+    /**
      * Returns an array of all endpoint groups
      *
      * @return array
@@ -139,6 +162,7 @@ class EndpointGroups
             self::EMP_BY_SECTOR,
             self::EARNINGS,
             self::getCountyUnemployment(),
+            self::getStateManufacturing(),
         ];
     }
 }
