@@ -34,8 +34,10 @@ class UpdateCacheCommand extends Command
     public function __construct(?ConsoleIo $io = null)
     {
         parent::__construct();
-        $this->io = $io;
-        $this->progress = $io->helper('Progress');
+        if ($io) {
+            $this->io = $io;
+            $this->progress = $io->helper('Progress');
+        }
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
     }
 
@@ -64,6 +66,7 @@ class UpdateCacheCommand extends Command
     public function execute(Arguments $args, ConsoleIo $io)
     {
         $this->io = $io;
+        $this->progress = $io->helper('Progress');
         $endpointGroups = (new EndpointGroups())->getAll();
         $count = count($endpointGroups);
         foreach ($endpointGroups as $i => $endpointGroup) {
