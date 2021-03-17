@@ -275,6 +275,12 @@ class DataUpdaterCommand extends AppCommand
 
             $this->throttle();
             $response = $api->observations($parameters);
+            if (!is_string($response)) {
+                $this->io->err('JSON response is not a string. API returned:');
+                var_dump($response);
+
+                exit;
+            }
             $response = json_decode($response);
             $responseIsValid = json_last_error() != JSON_ERROR_NONE;
             $responseIsValid = $responseIsValid && !is_object($response) || !property_exists($response, 'observations');
