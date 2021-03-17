@@ -92,11 +92,6 @@ class FredEndpoints
         'name' => 'Advance retail sales: Retail (excluding food services)',
         'id' => 'RSXFS',
     ];
-    public const RETAIL_FOOD_REAL_SALES = [
-        'group' => self::VAR_RETAIL_FOOD,
-        'name' => 'Advance real retail and food services sales',
-        'id' => 'TOTALSA',
-    ];
 
     public const VAR_GDP = 'Gross Domestic Product';
     public const GDP = [

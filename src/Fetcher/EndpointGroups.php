@@ -38,7 +38,6 @@ class EndpointGroups
             FredEndpoints::RETAIL_FOOD_TOTAL,
             FredEndpoints::RETAIL_FOOD_EX_DEALERS,
             FredEndpoints::RETAIL_FOOD_EX_FOOD,
-            FredEndpoints::RETAIL_FOOD_REAL_SALES,
         ],
     ];
 
