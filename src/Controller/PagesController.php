@@ -16,6 +16,8 @@ declare(strict_types=1);
  */
 namespace App\Controller;
 
+use Cake\ORM\TableRegistry;
+
 /**
  * Static content controller
  *
@@ -32,5 +34,9 @@ class PagesController extends AppController
      */
     public function home(): void
     {
+        $releasesTable = TableRegistry::getTableLocator()->get('Releases');
+        $releaseDates = $releasesTable->getNextReleaseDates();
+
+        $this->set(compact('releaseDates'));
     }
 }

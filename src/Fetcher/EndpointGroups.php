@@ -151,7 +151,7 @@ class EndpointGroups
      *
      * @return array
      */
-    public function getAll()
+    public static function getAll()
     {
         return [
             self::HOUSING,

@@ -90,7 +90,7 @@ class DataUpdaterCommand extends AppCommand
         parent::execute($args, $io);
         $cacheUpdater = new UpdateCacheCommand($io);
 
-        $endpointGroups = (new EndpointGroups())->getAll();
+        $endpointGroups = EndpointGroups::getAll();
         foreach ($endpointGroups as $endpointGroup) {
             $io->info($endpointGroup['endpoints'][0]['group']);
             $this->loadMetrics($endpointGroup);

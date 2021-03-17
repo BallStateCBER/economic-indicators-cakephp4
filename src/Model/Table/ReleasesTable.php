@@ -3,6 +3,11 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
+use App\Fetcher\EndpointGroups;
+use Cake\Cache\Cache;
+use Cake\Database\Expression\QueryExpression;
+use Cake\Http\Exception\NotFoundException;
+use Cake\I18n\FrozenDate;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -88,5 +93,66 @@ class ReleasesTable extends Table
         $rules->add($rules->existsIn(['metric_id'], 'Metrics'), ['errorField' => 'metric_id']);
 
         return $rules;
+    }
+
+    /**
+     * Returns a YYYY-MM-DD keyed array of arrays of endpoints, with dates representing each endpoint's next release
+     *
+     * @return array
+     */
+    public function getNextReleaseDates(): array
+    {
+        $cacheKey = 'next_release_dates';
+
+        return Cache::remember($cacheKey, function () {
+            $endpointGroups = EndpointGroups::getAll();
+            $dates = [];
+            foreach ($endpointGroups as $endpointGroup) {
+                foreach ($endpointGroup['endpoints'] as $endpoint) {
+                    $date = $this->getNextReleaseDate($endpoint['id']);
+                    if ($date) {
+                        $group = $endpoint['group'];
+                        $dates[$date->format('Y-m-d')][$group][] = $endpoint['name'];
+                    }
+                }
+            }
+            ksort($dates);
+
+            return $dates;
+        }, 'observations');
+    }
+
+    /**
+     * Returns the next date on or after the current date in which this metric has a release recorded
+     *
+     * @param string $metricName String to match with metrics.name
+     * @return \Cake\I18n\FrozenDate|null
+     * @throws \Cake\Http\Exception\NotFoundException
+     */
+    public function getNextReleaseDate(string $metricName): ?FrozenDate
+    {
+        $metric = $this->Metrics
+            ->find()
+            ->select(['id'])
+            ->where(['name' => $metricName])
+            ->first();
+        if (!$metric) {
+            throw new NotFoundException('Metric named ' . $metricName . ' not found');
+        }
+
+        /** @var \App\Model\Entity\Release $release */
+        $release = $this
+            ->find()
+            ->select(['date'])
+            ->where([
+                'metric_id' => $metric->id,
+                function (QueryExpression $exp) {
+                    return $exp->gte('date', (new FrozenDate())->format('Y-m-d'));
+                },
+            ])
+            ->orderAsc('date')
+            ->first();
+
+        return $release ? $release->date : null;
     }
 }

@@ -67,7 +67,7 @@ class UpdateCacheCommand extends Command
     {
         $this->io = $io;
         $this->progress = $io->helper('Progress');
-        $endpointGroups = (new EndpointGroups())->getAll();
+        $endpointGroups = EndpointGroups::getAll();
         $count = count($endpointGroups);
         foreach ($endpointGroups as $i => $endpointGroup) {
             $io->out(sprintf(

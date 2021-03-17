@@ -62,7 +62,7 @@ class UpdateReleaseDatesCommand extends AppCommand
         $this->releasesTable = TableRegistry::getTableLocator()->get('Releases');
         $this->seriesApi = $this->api->factory('series');
         $this->releaseApi = $this->api->factory('release');
-        $endpointGroups = (new EndpointGroups())->getAll();
+        $endpointGroups = EndpointGroups::getAll();
         foreach ($endpointGroups as $endpointGroup) {
             $this->io->info($endpointGroup['title']);
             foreach ($endpointGroup['endpoints'] as $endpoint) {

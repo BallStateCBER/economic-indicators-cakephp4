@@ -56,3 +56,46 @@ table.observations {
         margin-left: 20px;
     }
 }
+
+#upcoming-releases {
+    > div {
+        border-bottom: 1px solid #aaa;
+        padding-top: 0.5em;
+        padding-bottom: 0.5em;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        > ul {
+            margin-bottom: 0;
+
+            ul {
+                margin-top: 0;
+            }
+        }
+    }
+
+    button {
+        padding-bottom: 0;
+        padding-top: 0;
+
+        span {
+            color: #000;
+            margin-left: 0.5em;
+        }
+
+        &:hover {
+            text-decoration: none;
+
+            span {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    h2 {
+        margin-bottom: 0;
+    }
+}
+
