@@ -418,7 +418,7 @@ class FredEndpoints
         'Wyoming' => 'WY',
     ];
 
-    public const VAR_STATE_MANUFACTURING_EMPLOYMENT = 'County unemployment rate';
+    public const VAR_STATE_MANUFACTURING_EMPLOYMENT = 'State manufacturing employment';
     public const STATE_MANUFACTURING_EMPLOYMENT_IDS = [
         'AL' => 'SMU01000003000000001SA',
         'AK' => 'AKMFG',
