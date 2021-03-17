@@ -6,6 +6,7 @@ namespace App\Model\Table;
 use App\Formatter\Formatter;
 use Cake\Cache\Cache;
 use Cake\Http\Exception\InternalErrorException;
+use Cake\Http\Exception\NotFoundException;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
@@ -151,6 +152,7 @@ class StatisticsTable extends Table
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return string
+     * @throws \Cake\Http\Exception\NotFoundException
      */
     public function getDateRange(array $endpointGroup): string
     {
@@ -164,6 +166,14 @@ class StatisticsTable extends Table
                 ->find()
                 ->select(['id', 'date'])
                 ->where(['metric_id' => $metric->id]);
+            if (!$query->count()) {
+                throw new NotFoundException(sprintf(
+                    'No statistics were found for metric #%s (%s)',
+                    $metric->id,
+                    $seriesId,
+                ));
+            }
+
             $firstStat = $query->order(['date' => 'ASC'])->first();
             $lastStat = $query->order(['date' => 'DESC'])->first();
             $frequency = $this->Metrics->getFrequency($endpointGroup);
