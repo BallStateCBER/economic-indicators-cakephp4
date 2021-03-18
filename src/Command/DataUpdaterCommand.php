@@ -98,7 +98,7 @@ class DataUpdaterCommand extends AppCommand
 
             foreach ($endpointGroup['endpoints'] as $endpoint) {
                 if ($this->updateIsAvailable($endpoint['id'])) {
-                    $io->out(sprintf(' - %s: Update available', $endpoint['id']));
+                    $io->out(sprintf('%s: Update available', $endpoint['id']));
                     try {
                         $this->updateEndpoint($endpoint);
                         $groupUpdated = true;
@@ -107,7 +107,7 @@ class DataUpdaterCommand extends AppCommand
                         exit;
                     }
                 } else {
-                    $io->out(sprintf(' - %s: No update available', $endpoint['id']));
+                    $io->out(sprintf('%s: No update available', $endpoint['id']));
                     continue;
                 }
             }
@@ -116,7 +116,7 @@ class DataUpdaterCommand extends AppCommand
                 $cacheUpdater->refreshGroup($endpointGroup);
             }
 
-            $io->out(' - Done');
+            $io->out();
         }
 
         $io->success('Finished');
@@ -175,7 +175,7 @@ class DataUpdaterCommand extends AppCommand
             }
 
             // Create missing metric
-            $this->io->out(' - Adding ' . $endpointName . ' to metrics table');
+            $this->io->out('Adding ' . $endpointName . ' to metrics table');
             $this->setEndpoint($endpointName);
             $endpointMeta = $this->getEndpointMetadata();
             $data = [
@@ -325,26 +325,26 @@ class DataUpdaterCommand extends AppCommand
         $this->io->out(' - Retrieving from API...');
         $this->setEndpoint($endpoint);
         $endpointName = $endpoint['id'];
-        $this->io->out(sprintf(' - %s > %s metadata', $endpoint['group'], $endpoint['name']));
+        $this->io->out(sprintf('%s: %s metadata', $endpoint['group'], $endpoint['name']));
         $endpointMeta = $this->getEndpointMetadata();
         $metric = $this->metrics[$endpointName];
         $this->apiParameters['sort_order'] = 'asc';
 
-        $this->io->out('   - Values');
+        $this->io->out('- Values');
         $this->saveAllStatistics(
             observations: $this->getObservations(['units' => self::UNITS_VALUE]),
             metricId: $metric->id,
             dataTypeId: StatisticsTable::DATA_TYPE_VALUE,
         );
 
-        $this->io->out('   - Changes');
+        $this->io->out('- Changes');
         $this->saveAllStatistics(
             observations: $this->getObservations(['units' => self::UNITS_CHANGE_FROM_1_YEAR_AGO]),
             metricId: $metric->id,
             dataTypeId: StatisticsTable::DATA_TYPE_CHANGE,
         );
 
-        $this->io->out('   - Percent changes');
+        $this->io->out('- Percent changes');
         $this->saveAllStatistics(
             observations: $this->getObservations(['units' => self::UNITS_PERCENT_CHANGE_FROM_1_YEAR_AGO]),
             metricId: $metric->id,
@@ -441,7 +441,6 @@ class DataUpdaterCommand extends AppCommand
             );
             $this->progress->increment()->draw();
         }
-        $this->io->overwrite('   - Done');
     }
 
     /**
