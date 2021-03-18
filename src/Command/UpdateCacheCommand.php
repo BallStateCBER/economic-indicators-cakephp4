@@ -89,15 +89,11 @@ class UpdateCacheCommand extends Command
      */
     public function refreshGroup(array $endpointGroup): void
     {
-        $this->io->out(' - ' . number_format(memory_get_usage()));
         $this->io->out(' - Refreshing cached date range');
         $this->statisticsTable->cacheDateRange($endpointGroup);
-        $this->io->out(' - ' . number_format(memory_get_usage()));
         $this->io->out(' - Refreshing cached data for most recent date');
         $this->statisticsTable->cacheGroup($endpointGroup);
-        $this->io->out(' - ' . number_format(memory_get_usage()));
         $this->io->out(' - Refreshing cached data for all dates');
         $this->statisticsTable->cacheGroup($endpointGroup, true);
-        $this->io->out(' - ' . number_format(memory_get_usage()));
     }
 }
