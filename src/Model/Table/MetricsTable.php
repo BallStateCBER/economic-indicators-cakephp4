@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
+use App\Model\Entity\Metric;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -107,5 +108,27 @@ class MetricsTable extends Table
         }
 
         return $metric->frequency;
+    }
+
+    /**
+     * Returns the first metric associated with this group of endpoints
+     *
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @return \App\Model\Entity\Metric
+     */
+    public function getForEndpointGroup(array $endpointGroup): Metric
+    {
+        $metricName = $endpointGroup['endpoints'][0]['id'];
+        /** @var \App\Model\Entity\Metric $metric */
+        $metric = $this
+            ->find()
+            ->where(['name' => $metricName])
+            ->first();
+
+        if (!$metric) {
+            throw new InternalErrorException("Metric $metricName not found");
+        }
+
+        return $metric;
     }
 }

@@ -56,15 +56,15 @@ class DataController extends AppController
             return $this->renderSpreadsheet($endpointGroup, $isTimeSeries);
         }
 
-        $data = $this->Statistics->getGroup($endpointGroup, $isTimeSeries);
-        $dateRange = $this->Statistics->getDateRange($endpointGroup);
-        $frequency = $this->Metrics->getFrequency($endpointGroup);
-
+        $metric = $this->Metrics->getForEndpointGroup($endpointGroup);
         $this->set([
-            'data' => $data,
-            'dateRange' => $dateRange,
-            'frequency' => strtolower($frequency),
+            'dateRange' => $this->Statistics->getDateRange($endpointGroup),
+            'frequency' => $metric->frequency,
+            'lastUpdated' => $metric->last_updated->format('F j, Y'),
             'pageTitle' => $endpointGroup['title'],
+            'prepend' => Formatter::getPrepend($metric->units),
+            'statistics' => $this->Statistics->getGroup($endpointGroup, $isTimeSeries),
+            'unit' => $metric->units,
         ]);
 
         return $this->render('observations');

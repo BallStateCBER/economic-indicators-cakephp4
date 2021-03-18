@@ -119,7 +119,7 @@ class ReleasesTable extends Table
             ksort($dates);
 
             return $dates;
-        }, 'observations');
+        }, StatisticsTable::CACHE_CONFIG);
     }
 
     /**

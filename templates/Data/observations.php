@@ -1,25 +1,26 @@
 <?php
 /**
  * @var \App\View\AppView $this
- * @var array|bool $data
+ * @var array|bool $statistics
  * @var string $dateRange
  * @var string $frequency
+ * @var string $lastUpdated
+ * @var string $prepend
+ * @var string $unit
  */
 
 use App\Formatter\Formatter;
+use App\Model\Table\StatisticsTable;
 
 $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
-
-$unit = Formatter::getUnit($data);
-$prepend = Formatter::getPrepend($unit);
 ?>
 
 <p>
     <?= ucfirst($frequency) ?> data -
-    Last updated <?= Formatter::getLastUpdated($data) ?>
+    Last updated <?= $lastUpdated ?>
 </p>
 
-<?php if ($data === false): ?>
+<?php if ($statistics === false): ?>
     <p class="alert alert-info">
         Sorry, this data set is currently unavailable. Please check back for an update soon.
     </p>
@@ -52,25 +53,40 @@ $prepend = Formatter::getPrepend($unit);
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($data['endpoints'] as $name => $endpoint): ?>
+            <?php foreach ($statistics as $seriesId => $statsByDataType): ?>
                 <tr>
                     <td>
-                        <?= $name ?>
+                        <?= $seriesId ?>
                         <br />
                         <small>
-                            <?= Formatter::getFormattedDate($endpoint['observation']['date'], $frequency) ?>
+                            <?= Formatter::getFormattedDate(
+                                $statsByDataType[StatisticsTable::DATA_TYPE_VALUE]['date'],
+                                $frequency
+                            ) ?>
                         </small>
                     </td>
                     <td>
-                        <?= Formatter::formatValue($endpoint['observation']['value'], $prepend) ?>
+                        <?= Formatter::formatValue(
+                            $statsByDataType[StatisticsTable::DATA_TYPE_VALUE]['value'],
+                            $prepend
+                        ) ?>
                     </td>
                     <td>
-                        <?= Formatter::formatValue($endpoint['change']['value'], $prepend) ?>
-                        <?= Formatter::getArrow($endpoint['change']['value']) ?>
+                        <?= Formatter::formatValue(
+                            $statsByDataType[StatisticsTable::DATA_TYPE_CHANGE]['value'],
+                            $prepend
+                        ) ?>
+                        <?= Formatter::getArrow(
+                            $statsByDataType[StatisticsTable::DATA_TYPE_CHANGE]['value']
+                        ) ?>
                     </td>
                     <td>
-                        <?= Formatter::formatValue($endpoint['percentChange']['value']) ?>%
-                        <?= Formatter::getArrow($endpoint['percentChange']['value']) ?>
+                        <?= Formatter::formatValue(
+                            $statsByDataType[StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
+                        ) ?>%
+                        <?= Formatter::getArrow(
+                            $statsByDataType[StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
+                        ) ?>
                     </td>
                 </tr>
             <?php endforeach; ?>

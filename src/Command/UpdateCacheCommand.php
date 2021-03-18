@@ -5,7 +5,6 @@ namespace App\Command;
 
 use App\Fetcher\EndpointGroups;
 use App\Model\Table\StatisticsTable;
-use Cake\Cache\Cache;
 use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
@@ -76,53 +75,29 @@ class UpdateCacheCommand extends Command
                 $i + 1,
                 $count,
             ));
-            $this->refreshDateRange($endpointGroup);
-            $this->refreshLastDateData($endpointGroup);
-            $this->refreshDateRangeData($endpointGroup);
+            $this->refreshGroup($endpointGroup);
         }
 
         $io->success('Finished');
     }
 
     /**
-     * Deletes and re-generates cached date range for an endpoint group
+     * Re-generates cached statistic and date ranges for this endpoint group
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return void
      */
-    public function refreshDateRange(array $endpointGroup): void
+    public function refreshGroup(array $endpointGroup): void
     {
+        $this->io->out(' - ' . number_format(memory_get_usage()));
         $this->io->out(' - Refreshing cached date range');
-        $cacheKey = $endpointGroup['title'] . '-range';
-        Cache::delete($cacheKey, 'observations');
-        $this->statisticsTable->getDateRange($endpointGroup);
-    }
-
-    /**
-     * Deletes and re-generates cached single-date data for an endpoint group
-     *
-     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
-     * @return void
-     */
-    public function refreshLastDateData(array $endpointGroup)
-    {
+        $this->statisticsTable->cacheDateRange($endpointGroup);
+        $this->io->out(' - ' . number_format(memory_get_usage()));
         $this->io->out(' - Refreshing cached data for most recent date');
-        $cacheKey = $endpointGroup['title'] . '-last';
-        Cache::delete($cacheKey, 'observations');
-        $this->statisticsTable->getGroup($endpointGroup);
-    }
-
-    /**
-     * Deletes and re-generates cached date-range data for an endpoint group
-     *
-     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
-     * @return void
-     */
-    public function refreshDateRangeData(mixed $endpointGroup)
-    {
+        $this->statisticsTable->cacheGroup($endpointGroup);
+        $this->io->out(' - ' . number_format(memory_get_usage()));
         $this->io->out(' - Refreshing cached data for all dates');
-        $cacheKey = $endpointGroup['title'] . '-all';
-        Cache::delete($cacheKey, 'observations');
-        $this->statisticsTable->getGroup($endpointGroup, true);
+        $this->statisticsTable->cacheGroup($endpointGroup, true);
+        $this->io->out(' - ' . number_format(memory_get_usage()));
     }
 }

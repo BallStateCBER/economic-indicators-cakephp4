@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Formatter;
 
 use Cake\I18n\FrozenDate;
-use Cake\I18n\FrozenTime;
 
 class Formatter
 {
@@ -101,16 +100,5 @@ class Formatter
     public static function getPrepend(string $unit): ?string
     {
         return str_contains(strtolower($unit), 'dollar') ? '$' : null;
-    }
-
-    /**
-     * Returns a formatted date representing when this data was last updated
-     *
-     * @param array $data Output of StatisticsTable::getGroup()
-     * @return string
-     */
-    public static function getLastUpdated(array $data): string
-    {
-        return (new FrozenTime($data['updated']))->format('F j, Y');
     }
 }

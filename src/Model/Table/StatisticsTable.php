@@ -5,6 +5,7 @@ namespace App\Model\Table;
 
 use App\Formatter\Formatter;
 use Cake\Cache\Cache;
+use Cake\Datasource\ResultSetInterface;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\Http\Exception\NotFoundException;
 use Cake\ORM\Query;
@@ -25,10 +26,10 @@ use Cake\Validation\Validator;
  * @method \App\Model\Entity\Statistic[] patchEntities(iterable $entities, array $data, array $options = [])
  * @method \App\Model\Entity\Statistic|false save(\Cake\Datasource\EntityInterface $entity, $options = [])
  * @method \App\Model\Entity\Statistic saveOrFail(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\Statistic[]|\Cake\Datasource\ResultSetInterface|false saveMany(iterable $entities, $options = [])
- * @method \App\Model\Entity\Statistic[]|\Cake\Datasource\ResultSetInterface saveManyOrFail(iterable $entities, $options = [])
- * @method \App\Model\Entity\Statistic[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable $entities, $options = [])
- * @method \App\Model\Entity\Statistic[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Statistic[]|ResultSetInterface|false saveMany(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Statistic[]|ResultSetInterface saveManyOrFail(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Statistic[]|ResultSetInterface|false deleteMany(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Statistic[]|ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class StatisticsTable extends Table
@@ -36,6 +37,39 @@ class StatisticsTable extends Table
     public const DATA_TYPE_VALUE = 1;
     public const DATA_TYPE_CHANGE = 2;
     public const DATA_TYPE_PERCENT_CHANGE = 3;
+    public const CACHE_CONFIG = 'observations';
+
+    /**
+     * Returns a cache key to be used for caching sets of statistics
+     *
+     * @param string $seriesId A FRED API seriesID string
+     * @param int $dataTypeId An integer representing observations, changes, or percent changes
+     * @param bool $all TRUE if data for all dates rather than all
+     * @return string
+     */
+    public static function getStatsCacheKey(mixed $seriesId, int $dataTypeId, bool $all): string
+    {
+        return sprintf(
+            '%s-%s-%s',
+            $seriesId,
+            $dataTypeId,
+            $all ? 'all' : 'last'
+        );
+    }
+
+    /**
+     * Returns a cache key to be used for caching a date range for a set of statistics
+     *
+     * @param string $seriesId A FRED API seriesID string
+     * @return string
+     */
+    public static function getDateRangeCacheKey(mixed $seriesId): string
+    {
+        return sprintf(
+            '%s-range',
+            $seriesId,
+        );
+    }
 
     /**
      * Initialize method
@@ -117,34 +151,28 @@ class StatisticsTable extends Table
      */
     public function getGroup(array $endpointGroup, bool $all = false): array
     {
-        $cacheKey = $endpointGroup['title'] . ($all ? '-all' : '-last');
-
-        return Cache::remember($cacheKey, function () use ($endpointGroup, $all) {
-            $updated = null;
-            $endpoints = [];
-            foreach ($endpointGroup['endpoints'] as $endpoint) {
-                $seriesId = $endpoint['id'];
-                /** @var \App\Model\Entity\Metric $metric */
-                $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
-                if (!$metric) {
-                    throw new InternalErrorException(sprintf('Metric named %s not found', $seriesId));
+        $statistics = [];
+        $dataTypeIds = [
+            self::DATA_TYPE_VALUE,
+            self::DATA_TYPE_CHANGE,
+            self::DATA_TYPE_PERCENT_CHANGE,
+        ];
+        foreach ($endpointGroup['endpoints'] as $endpoint) {
+            $seriesId = $endpoint['id'];
+            $seriesName = $endpoint['name'];
+            foreach ($dataTypeIds as $dataTypeId) {
+                $cacheKey = self::getStatsCacheKey($seriesId, $dataTypeId, $all);
+                $result = Cache::read($cacheKey, self::CACHE_CONFIG);
+                if (!$result) {
+                    $this->cacheGroup($endpointGroup, $all);
+                    $result = Cache::read($cacheKey, self::CACHE_CONFIG);
                 }
-
-                if (!$updated) {
-                    $updated = $metric->last_updated;
-                }
-
-                $endpoints[$endpoint['name']] = [
-                    'units' => $metric->units,
-                    'frequency' => $metric->frequency,
-                    'observation' => $this->getObservations($metric->id, $all),
-                    'change' => $this->getChanges($metric->id, $all),
-                    'percentChange' => $this->getPercentChanges($metric->id, $all),
-                ];
+                $statistics[$seriesName][$dataTypeId] = $result;
+                unset($result);
             }
+        }
 
-            return compact('updated', 'endpoints');
-        }, 'observations');
+        return $statistics;
     }
 
     /**
@@ -156,34 +184,101 @@ class StatisticsTable extends Table
      */
     public function getDateRange(array $endpointGroup): string
     {
-        $cacheKey = $endpointGroup['title'] . '-range';
+        $firstEndpoint = reset($endpointGroup['endpoints']);
+        $seriesId = $firstEndpoint['id'];
+        $cacheKey = self::getDateRangeCacheKey($seriesId);
+        $result = Cache::read($cacheKey, self::CACHE_CONFIG);
 
-        return Cache::remember($cacheKey, function () use ($endpointGroup) {
-            $firstEndpoint = reset($endpointGroup['endpoints']);
-            $seriesId = $firstEndpoint['id'];
+        if (!$result) {
+            $this->cacheDateRange($endpointGroup);
+            $result = Cache::read($cacheKey, self::CACHE_CONFIG);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Creates cache files for all metrics in the provided group, deleting any existing cache files
+     *
+     * If $all is TRUE, caches statistics for all dates. Otherwise, only caches the most recent statistic.
+     *
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @param bool $all TRUE to return statistics for all dates
+     * @return void
+     */
+    public function cacheGroup(array $endpointGroup, bool $all = false)
+    {
+        $dataTypeIds = [
+            self::DATA_TYPE_VALUE,
+            self::DATA_TYPE_CHANGE,
+            self::DATA_TYPE_PERCENT_CHANGE,
+        ];
+        foreach ($endpointGroup['endpoints'] as $endpoint) {
+            $seriesId = $endpoint['id'];
+            /** @var \App\Model\Entity\Metric $metric */
             $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
-            $query = $this
-                ->find()
-                ->select(['id', 'date'])
-                ->where(['metric_id' => $metric->id]);
-            if (!$query->count()) {
-                throw new NotFoundException(sprintf(
-                    'No statistics were found for metric #%s (%s)',
-                    $metric->id,
-                    $seriesId,
-                ));
+            if (!$metric) {
+                throw new InternalErrorException(sprintf('Metric named %s not found', $seriesId));
             }
 
-            $firstStat = $query->order(['date' => 'ASC'])->first();
-            $lastStat = $query->order(['date' => 'DESC'])->first();
-            $frequency = $this->Metrics->getFrequency($endpointGroup);
+            foreach ($dataTypeIds as $dataTypeId) {
+                $cacheKey = self::getStatsCacheKey($seriesId, $dataTypeId, $all);
+                $statistics = $this->getByMetricAndType($metric->id, StatisticsTable::DATA_TYPE_VALUE, $all);
+                Cache::write($cacheKey, $statistics, self::CACHE_CONFIG);
+                unset($statistics);
+                unset($cacheKey);
+            }
+            unset($metric);
+        }
+        unset($dataTypeIds);
+    }
 
-            return sprintf(
-                '%s - %s',
-                Formatter::getFormattedDate($firstStat->date, $frequency),
-                Formatter::getFormattedDate($lastStat->date, $frequency),
-            );
-        }, 'observations');
+    /**
+     * Caches a string describing the date range of known statistics in this group
+     *
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @return void
+     * @throws \Cake\Http\Exception\NotFoundException
+     */
+    public function cacheDateRange(array $endpointGroup)
+    {
+        $firstEndpoint = reset($endpointGroup['endpoints']);
+        $seriesId = $firstEndpoint['id'];
+        $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
+        $query = $this
+            ->find()
+            ->select(['id', 'date'])
+            ->where(['metric_id' => $metric->id]);
+        $firstStat = $query->order(['date' => 'ASC'])->first();
+        if (!$firstStat) {
+            throw new NotFoundException(sprintf(
+                'No statistics were found for metric #%s (%s)',
+                $metric->id,
+                $seriesId,
+            ));
+        }
+        $lastStat = $query->order(['date' => 'DESC'])->first();
+        $frequency = $this->Metrics->getFrequency($endpointGroup);
+        $dateRange = sprintf(
+            '%s - %s',
+            Formatter::getFormattedDate($firstStat->date, $frequency),
+            Formatter::getFormattedDate($lastStat->date, $frequency),
+        );
+
+        $cacheKey = self::getDateRangeCacheKey($seriesId);
+        Cache::write($cacheKey, $dateRange, self::CACHE_CONFIG);
+
+        unset(
+            $cacheKey,
+            $dateRange,
+            $firstEndpoint,
+            $firstStat,
+            $frequency,
+            $lastStat,
+            $metric,
+            $query,
+            $seriesId,
+        );
     }
 
     /**
@@ -205,62 +300,19 @@ class StatisticsTable extends Table
     }
 
     /**
-     * Returns all non-comparative 'observation' statistics for the given metric
+     * Returns all statistics for the given metric and the given observations/changes/percent-changes
      *
      * @param int $metricId Metric ID
+     * @param int $dataTypeId Data type ID
      * @param bool $all TRUE to return all results rather than only the most recent
      * @return \Cake\Datasource\ResultSetInterface|array
      */
-    private function getObservations(int $metricId, bool $all = false)
+    public function getByMetricAndType(int $metricId, int $dataTypeId, bool $all = false): ResultSetInterface|array
     {
         $query = $this
             ->find(
                 'byMetricAndType',
-                ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_VALUE]
-            )
-            ->enableHydration(false);
-        if ($all) {
-            return $query->all();
-        }
-
-        return $query->last();
-    }
-
-    /**
-     * Returns all 'change from previous year' statistics for the given metric
-     *
-     * @param int $metricId Metric ID
-     * @param bool $all TRUE to return all results rather than only the most recent
-     * @return \Cake\Datasource\ResultSetInterface|array
-     */
-    private function getChanges(int $metricId, bool $all = false)
-    {
-        $query = $this
-            ->find(
-                'byMetricAndType',
-                ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_CHANGE]
-            )
-            ->enableHydration(false);
-        if ($all) {
-            return $query->all();
-        }
-
-        return $query->last();
-    }
-
-    /**
-     * Returns all 'percent change from previous year' statistics for the given metric
-     *
-     * @param int $metricId Metric ID
-     * @param bool $all TRUE to return all results rather than only the most recent
-     * @return \Cake\Datasource\ResultSetInterface|\App\Model\Entity\Statistic
-     */
-    private function getPercentChanges(int $metricId, bool $all = false)
-    {
-        $query = $this
-            ->find(
-                'byMetricAndType',
-                ['metric_id' => $metricId, 'data_type_id' => StatisticsTable::DATA_TYPE_PERCENT_CHANGE]
+                ['metric_id' => $metricId, 'data_type_id' => $dataTypeId]
             )
             ->enableHydration(false);
         if ($all) {

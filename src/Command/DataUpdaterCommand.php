@@ -113,9 +113,7 @@ class DataUpdaterCommand extends AppCommand
             }
 
             if ($groupUpdated) {
-                $cacheUpdater->refreshDateRange($endpointGroup);
-                $cacheUpdater->refreshLastDateData($endpointGroup);
-                $cacheUpdater->refreshDateRangeData($endpointGroup);
+                $cacheUpdater->refreshGroup($endpointGroup);
             }
 
             $io->out(' - Done');
