@@ -451,7 +451,7 @@ class DataUpdaterCommand extends AppCommand
      * @param string $lastUpdated Returned by the API in this format: "2013-07-31 09:26:16-05"
      * @return string
      */
-    private function getApiTimezone($lastUpdated): string
+    private function getApiTimezone(string $lastUpdated): string
     {
         $timeOffset = substr($lastUpdated, -3);
         $operator = substr($timeOffset, 0, 1);
