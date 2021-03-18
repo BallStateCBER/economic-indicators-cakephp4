@@ -441,6 +441,7 @@ class DataUpdaterCommand extends AppCommand
             );
             $this->progress->increment()->draw();
         }
+        $this->io->overwrite('');
     }
 
     /**
