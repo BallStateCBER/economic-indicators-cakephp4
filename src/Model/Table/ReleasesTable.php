@@ -16,7 +16,6 @@ use Cake\Validation\Validator;
  * Releases Model
  *
  * @property \App\Model\Table\MetricsTable&\Cake\ORM\Association\BelongsTo $Metrics
- *
  * @method \App\Model\Entity\Release newEmptyEntity()
  * @method \App\Model\Entity\Release newEntity(array $data, array $options = [])
  * @method \App\Model\Entity\Release[] newEntities(array $data, array $options = [])
@@ -30,7 +29,6 @@ use Cake\Validation\Validator;
  * @method \App\Model\Entity\Release[]|\Cake\Datasource\ResultSetInterface saveManyOrFail(iterable $entities, $options = [])
  * @method \App\Model\Entity\Release[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable $entities, $options = [])
  * @method \App\Model\Entity\Release[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class ReleasesTable extends Table

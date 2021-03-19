@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Command;
 
-use App\Command\UpdateReleaseDatesCommand;
 use Cake\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
@@ -26,6 +25,7 @@ class UpdateReleaseDatesCommandTest extends TestCase
         parent::setUp();
         $this->useCommandRunner();
     }
+
     /**
      * Test buildOptionParser method
      *

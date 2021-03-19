@@ -26,10 +26,10 @@ use Cake\Validation\Validator;
  * @method \App\Model\Entity\Statistic[] patchEntities(iterable $entities, array $data, array $options = [])
  * @method \App\Model\Entity\Statistic|false save(\Cake\Datasource\EntityInterface $entity, $options = [])
  * @method \App\Model\Entity\Statistic saveOrFail(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\Statistic[]|ResultSetInterface|false saveMany(iterable $entities, $options = [])
- * @method \App\Model\Entity\Statistic[]|ResultSetInterface saveManyOrFail(iterable $entities, $options = [])
- * @method \App\Model\Entity\Statistic[]|ResultSetInterface|false deleteMany(iterable $entities, $options = [])
- * @method \App\Model\Entity\Statistic[]|ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Statistic[]|\Cake\Datasource\ResultSetInterface|false saveMany(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Statistic[]|\Cake\Datasource\ResultSetInterface saveManyOrFail(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Statistic[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Statistic[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class StatisticsTable extends Table
@@ -307,7 +307,7 @@ class StatisticsTable extends Table
      * @param bool $all TRUE to return all results rather than only the most recent
      * @return \Cake\Datasource\ResultSetInterface|array
      */
-    public function getByMetricAndType(int $metricId, int $dataTypeId, bool $all = false): ResultSetInterface|array
+    public function getByMetricAndType(int $metricId, int $dataTypeId, bool $all = false): ResultSetInterface | array
     {
         $query = $this
             ->find(
