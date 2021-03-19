@@ -5,6 +5,10 @@ use Cake\I18n\FrozenDate;
 
 $i = 0;
 ?>
+<div id="twitter-feed">
+    <a class="twitter-timeline" data-lang="en" data-width="275" data-height="500" href="https://twitter.com/BallStateCBER?ref_src=twsrc%5Etfw">Tweets by BallStateCBER</a>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
 
 <?php if ($releaseDates): ?>
     <section id="upcoming-releases">
@@ -78,3 +82,5 @@ $i = 0;
         });
     });
 </script>
+
+<br style="clear: both;" />
