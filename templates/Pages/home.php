@@ -17,7 +17,7 @@ $i = 0;
     </h1>
 
     <p>
-        <strong>Click on a category on the left</strong> to start exploring a wealth of economic data collected from
+        <strong>Click on a category in the menu</strong> to start exploring a wealth of economic data collected from
         reliable, primary sources.
     </p>
 
