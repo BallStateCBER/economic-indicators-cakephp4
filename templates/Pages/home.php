@@ -5,10 +5,38 @@ use Cake\I18n\FrozenDate;
 
 $i = 0;
 ?>
+
 <div id="twitter-feed">
     <a class="twitter-timeline" data-lang="en" data-width="275" data-height="500" href="https://twitter.com/BallStateCBER?ref_src=twsrc%5Etfw">Tweets by BallStateCBER</a>
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </div>
+
+<section>
+    <h1>
+        Data at Your Fingertips
+    </h1>
+
+    <p>
+        <strong>Click on a category on the left</strong> to start exploring a wealth of economic data collected from
+        reliable, primary sources.
+    </p>
+
+    <p>
+        Notifications about new data releases are emailed weekly through the
+        <a href="http://cber.iweb.bsu.edu/IBB" title="Indiana Business Bulletin weekly newsletter">
+            Indiana Business Bulletin
+        </a>
+        and posted daily through our <em>BallStateCBER</em> accounts on
+        <a href="http://www.facebook.com/BallStateCBER" title="BallStateCBER on Facebook">Facebook</a> and
+        <a href="http://twitter.com/BallStateCBER" title="BallStateCBER on Twitter">Twitter</a>.
+        You do not need to be a member of either Facebook or Twitter to view our accounts.
+    </p>
+
+    <p>
+        If you have any questions or comments, please email project manager
+        <a href="mailto:sdevaraj@bsu.edu">Srikant Devaraj</a>.
+    </p>
+</section>
 
 <?php if ($releaseDates): ?>
     <section id="upcoming-releases">
