@@ -11,10 +11,21 @@ $i = 0;
         <h1>
             Upcoming Data Releases
         </h1>
+        <p>
+            Click each category to show details
+        </p>
         <?php foreach ($releaseDates as $date => $endpoints): ?>
             <div>
                 <h2>
-                    <?= (new FrozenDate($date))->format('F jS, Y') ?>
+                    <?php
+                        $dateObj = new FrozenDate($date);
+                        echo sprintf(
+                            '%s<sup>%s</sup>%s',
+                            $dateObj->format('F j'),
+                            $dateObj->format('S'),
+                            $dateObj->format(', Y'),
+                        );
+                    ?>
                 </h2>
                 <ul class="list-unstyled">
                     <?php foreach ($endpoints as $group => $names): ?>
