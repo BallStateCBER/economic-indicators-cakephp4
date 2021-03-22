@@ -81,6 +81,9 @@ $i = 0;
                 </ul>
             </div>
         <?php endforeach; ?>
+        <p class="disclaimer">
+            <?= $this->element('release_date_disclaimer') ?>
+        </p>
     </section>
 <?php endif; ?>
 
