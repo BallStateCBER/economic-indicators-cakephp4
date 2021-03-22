@@ -15,16 +15,16 @@ use App\Model\Table\StatisticsTable;
 $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
 ?>
 
-<p>
-    <?= ucfirst($frequency) ?> data -
-    Last updated <?= $lastUpdated ?>
-</p>
-
 <?php if ($statistics === false): ?>
     <p class="alert alert-info">
         Sorry, this data set is currently unavailable. Please check back for an update soon.
     </p>
 <?php else: ?>
+    <p>
+        <?= ucfirst($frequency) ?> data -
+        Last updated <?= $lastUpdated ?>
+    </p>
+
     <table class="table observations">
         <thead>
             <tr>
