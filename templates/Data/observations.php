@@ -2,6 +2,7 @@
 /**
  * @var \App\View\AppView $this
  * @var \Cake\I18n\FrozenDate $nextRelease
+ * @var array $statsForSparklines
  * @var array|bool $statistics
  * @var string $dateRange
  * @var string $frequency
@@ -61,6 +62,7 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
             </tr>
         </thead>
         <tbody>
+            <?php $i = 0; ?>
             <?php foreach ($statistics as $seriesId => $statsByDataType): ?>
                 <tr>
                     <td>
@@ -78,6 +80,7 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                             $statsByDataType[StatisticsTable::DATA_TYPE_VALUE]['value'],
                             $prepend
                         ) ?>
+                        <div id="sparkline-<?= $i ?>" style="width: 100px; height: 30px"></div>
                     </td>
                     <td>
                         <?= Formatter::formatValue(
@@ -97,6 +100,7 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                         ) ?>
                     </td>
                 </tr>
+                <?php $i++; ?>
             <?php endforeach; ?>
         </tbody>
     </table>
@@ -124,4 +128,43 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
     <p class="disclaimer">
         * <?= $this->element('release_date_disclaimer') ?>
     </p>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawSparklines);
+
+        function drawSparklines() {
+            const options = {
+                axisTitlesPosition: 'none',
+                chartArea: {
+                    height: '100%',
+                    width: '100%'
+                },
+                enableInteractivity: false,
+                hAxis: {
+                    baselineColor: 'transparent',
+                    gridlines: {count: 0},
+                    textPosition: 'none',
+                    viewWindowMode: 'maximized',
+                },
+                legend: {position: 'none'},
+                vAxis: {
+                    baselineColor: 'transparent',
+                    gridlines: {count: 0},
+                    textPosition: 'none',
+                    viewWindowMode: 'maximized',
+                },
+            };
+
+            let data, chart;
+            <?php $i = 0; ?>
+            <?php foreach ($statsForSparklines as $seriesId => $statistics): ?>
+                data = google.visualization.arrayToDataTable(<?= json_encode($statistics) ?>);
+                chart = new google.visualization.LineChart(document.getElementById('sparkline-<?= $i ?>'));
+                chart.draw(data, options);
+                <?php $i++; ?>
+            <?php endforeach; ?>
+        }
+    </script>
 <?php endif; ?>

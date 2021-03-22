@@ -68,6 +68,7 @@ class DataController extends AppController
             'pageTitle' => $endpointGroup['title'],
             'prepend' => Formatter::getPrepend($firstMetric->units),
             'statistics' => $this->Statistics->getGroup($endpointGroup, $isTimeSeries),
+            'statsForSparklines' => $this->Statistics->getStatsForSparklines($metrics),
             'unit' => $firstMetric->units,
         ]);
 

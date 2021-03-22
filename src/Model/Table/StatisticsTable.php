@@ -282,6 +282,45 @@ class StatisticsTable extends Table
     }
 
     /**
+     * Returns an array of data used to create sparklines
+     *
+     * @param \App\Model\Entity\Metric[]|\Cake\Datasource\ResultSetInterface $metrics Array or ResultSet of metrics
+     * @return array
+     */
+    public function getStatsForSparklines(array | ResultSetInterface $metrics): array
+    {
+        $statsForSparklines = [];
+
+        // Applied inexactly
+        $maxDataPointsPerGraph = 50;
+
+        foreach ($metrics as $metric) {
+            $cacheKey = self::getStatsCacheKey(
+                seriesId: $metric->name,
+                dataTypeId: StatisticsTable::DATA_TYPE_VALUE,
+                all: true
+            );
+            $statistics = Cache::read($cacheKey, StatisticsTable::CACHE_CONFIG);
+            $columnData = [['#', 'Value']];
+            $count = count($statistics);
+            $rate = round($count / $maxDataPointsPerGraph);
+            foreach ($statistics as $i => $statistic) {
+                // Limit number of data points collected
+                if ($count > $maxDataPointsPerGraph) {
+                    if ($i % $rate != 0) {
+                        continue;
+                    }
+                }
+
+                $columnData[] = [$i, (float)$statistic['value']];
+            }
+            $statsForSparklines[$metric->name] = $columnData;
+        }
+
+        return $statsForSparklines;
+    }
+
+    /**
      * Custom finder for getting statistics by metric ID and data type ID
      *
      * @param \Cake\ORM\Query $query Query object
