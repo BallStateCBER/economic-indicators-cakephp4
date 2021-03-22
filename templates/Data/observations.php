@@ -102,14 +102,14 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
     </table>
 
     <div class="row">
-        <p class="download-link col">
+        <p class="download-link col-lg">
             <?= $this->Html->link(
                 '<i class="fas fa-download"></i> Download this data as an Excel spreadsheet',
                 ['_ext' => 'xlsx'],
                 ['escape' => false, 'class' => 'alert alert-info']
             ) ?>
         </p>
-        <p class="download-link col">
+        <p class="download-link col-lg">
             <?= $this->Html->link(
                 '<i class="fas fa-download"></i> Download ' . $dateRange . ' time series data as an Excel spreadsheet',
                 [
