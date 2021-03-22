@@ -12,7 +12,7 @@ namespace App\Fetcher;
  */
 class FredEndpoints
 {
-    public const VAR_HOUSING = 'Housing starts';
+    public const VAR_HOUSING = 'Housing Starts';
     public const HOUSING_TOTAL = [
         'group' => self::VAR_HOUSING,
         'name' => 'Total – new private owned',
@@ -34,7 +34,7 @@ class FredEndpoints
         'id' => 'HOUST5F',
     ];
 
-    public const VAR_VEHICLE_SALES = 'Motor vehicle sales';
+    public const VAR_VEHICLE_SALES = 'Motor Vehicle Sales';
     public const VEHICLE_SALES_TOTAL = [
         'group' => self::VAR_VEHICLE_SALES,
         'name' => 'Total vehicle sales',
@@ -76,7 +76,7 @@ class FredEndpoints
         'id' => 'HTRUCKSSAAR',
     ];
 
-    public const VAR_RETAIL_FOOD = 'Retail and food services';
+    public const VAR_RETAIL_FOOD = 'Retail and Food Services';
     public const RETAIL_FOOD_TOTAL = [
         'group' => self::VAR_RETAIL_FOOD,
         'name' => 'Advance retail sales: Retail and food services, Total',
@@ -209,7 +209,7 @@ class FredEndpoints
         'id' => 'INGOVT',
     ];
 
-    public const VAR_EARNINGS = 'Average weekly earnings (seasonally adjusted)';
+    public const VAR_EARNINGS = 'Average Weekly Earnings (seasonally adjusted)';
     public const EARNINGS_PRIVATE = [
         'group' => self::VAR_EARNINGS,
         'name' => 'Total private',
@@ -266,7 +266,7 @@ class FredEndpoints
         'id' => 'SMU18000008000000011SA',
     ];
 
-    public const VAR_COUNTY_UNEMPLOYMENT = 'County unemployment rate';
+    public const VAR_COUNTY_UNEMPLOYMENT = 'County Unemployment Rate';
     public const COUNTY_UNEMPLOYMENT_IDS = [
         'Adams County' => 'INADAM1URN',
         'Allen County' => 'INALLE3URN',
@@ -418,7 +418,7 @@ class FredEndpoints
         'Wyoming' => 'WY',
     ];
 
-    public const VAR_STATE_MANUFACTURING_EMPLOYMENT = 'State manufacturing employment';
+    public const VAR_STATE_MANUFACTURING_EMPLOYMENT = 'State Manufacturing Employment';
     public const STATE_MANUFACTURING_EMPLOYMENT_IDS = [
         'AL' => 'SMU01000003000000001SA',
         'AK' => 'AKMFG',
