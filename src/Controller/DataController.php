@@ -156,6 +156,16 @@ class DataController extends AppController
     }
 
     /**
+     * State manufacturing employment
+     *
+     * @return \Cake\Http\Response
+     */
+    public function manufacturingEmployment(): Response
+    {
+        return $this->renderObservations(EndpointGroups::getStateManufacturing());
+    }
+
+    /**
      * Renders a spreadsheet, or redirects back to the appropriate page with an error message
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups

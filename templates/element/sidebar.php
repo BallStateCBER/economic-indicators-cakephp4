@@ -39,6 +39,15 @@
                 ]
             ) ?>
         </li>
+        <li>
+            <?= $this->Html->link(
+                'Manufacturing Employment by State',
+                [
+                    'controller' => 'Data',
+                    'action' => 'manufacturingEmployment',
+                ]
+            ) ?>
+        </li>
     </ul>
 </section>
 
