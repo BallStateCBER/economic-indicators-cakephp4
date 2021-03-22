@@ -58,16 +58,17 @@ class DataController extends AppController
         }
 
         $this->loadModel('Releases');
-        $metric = $this->Metrics->getForEndpointGroup($endpointGroup);
+        $metrics = $this->Metrics->getAllForEndpointGroup($endpointGroup);
+        $firstMetric = $metrics[0];
         $this->set([
             'dateRange' => $this->Statistics->getDateRange($endpointGroup),
-            'frequency' => $metric->frequency,
-            'lastUpdated' => $metric->last_updated->format('F j, Y'),
-            'nextRelease' => $this->Releases->getNextReleaseDate($metric),
+            'frequency' => $firstMetric->frequency,
+            'lastUpdated' => $firstMetric->last_updated->format('F j, Y'),
+            'nextRelease' => $this->Releases->getNextReleaseDate(...$metrics),
             'pageTitle' => $endpointGroup['title'],
-            'prepend' => Formatter::getPrepend($metric->units),
+            'prepend' => Formatter::getPrepend($firstMetric->units),
             'statistics' => $this->Statistics->getGroup($endpointGroup, $isTimeSeries),
-            'unit' => $metric->units,
+            'unit' => $firstMetric->units,
         ]);
 
         return $this->render('observations');

@@ -124,38 +124,45 @@ class ReleasesTable extends Table
     /**
      * Returns the next date on or after the current date in which this metric has a release recorded
      *
-     * @param string|\App\Model\Entity\Metric $metricName String to match with metrics.name, or a metric entity
+     * @param string|\App\Model\Entity\Metric ...$metricNames Strings to match with metrics.name, or metric entities
      * @return \Cake\I18n\FrozenDate|null
-     * @throws \Cake\Http\Exception\NotFoundException
      */
-    public function getNextReleaseDate(string | Metric $metricName): ?FrozenDate
+    public function getNextReleaseDate(string | Metric ...$metricNames): ?FrozenDate
     {
-        if (is_string($metricName)) {
-            $metric = $this->Metrics
-                ->find()
-                ->select(['id'])
-                ->where(['name' => $metricName])
-                ->first();
-            if (!$metric) {
-                throw new NotFoundException('Metric named ' . $metricName . ' not found');
+        $nextReleaseDate = null;
+
+        foreach ($metricNames as $metricName) {
+            if (is_string($metricNames)) {
+                $metric = $this->Metrics
+                    ->find()
+                    ->select(['id'])
+                    ->where(['name' => $metricName])
+                    ->first();
+                if (!$metric) {
+                    throw new NotFoundException("Metric named $metricName not found");
+                }
+            } else {
+                $metric = $metricName;
             }
-        } else {
-            $metric = $metricName;
+
+            /** @var \App\Model\Entity\Release $release */
+            $release = $this
+                ->find()
+                ->select(['date'])
+                ->where([
+                    'metric_id' => $metric->id,
+                    function (QueryExpression $exp) {
+                        return $exp->gte('date', (new FrozenDate())->format('Y-m-d'));
+                    },
+                ])
+                ->orderAsc('date')
+                ->first();
+
+            if ($release && (!$nextReleaseDate || $release->date->lessThan($nextReleaseDate))) {
+                $nextReleaseDate = $release->date;
+            }
         }
 
-        /** @var \App\Model\Entity\Release $release */
-        $release = $this
-            ->find()
-            ->select(['date'])
-            ->where([
-                'metric_id' => $metric->id,
-                function (QueryExpression $exp) {
-                    return $exp->gte('date', (new FrozenDate())->format('Y-m-d'));
-                },
-            ])
-            ->orderAsc('date')
-            ->first();
-
-        return $release ? $release->date : null;
+        return $nextReleaseDate;
     }
 }

@@ -116,7 +116,7 @@ class MetricsTable extends Table
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return \App\Model\Entity\Metric
      */
-    public function getForEndpointGroup(array $endpointGroup): Metric
+    public function getFirstForEndpointGroup(array $endpointGroup): Metric
     {
         $metricName = $endpointGroup['endpoints'][0]['id'];
         /** @var \App\Model\Entity\Metric $metric */
@@ -130,5 +130,32 @@ class MetricsTable extends Table
         }
 
         return $metric;
+    }
+
+    /**
+     * Returns all metrics associated with this group of endpoints
+     *
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @return \App\Model\Entity\Metric[]
+     */
+    public function getAllForEndpointGroup(array $endpointGroup): array
+    {
+        $metrics = [];
+        foreach ($endpointGroup['endpoints'] as $endpoint) {
+            $metricName = $endpoint['id'];
+            /** @var \App\Model\Entity\Metric $metric */
+            $metric = $this
+                ->find()
+                ->where(['name' => $metricName])
+                ->first();
+
+            if (!$metric) {
+                throw new InternalErrorException("Metric $metricName not found");
+            }
+
+            $metrics[] = $metric;
+        }
+
+        return $metrics;
     }
 }
