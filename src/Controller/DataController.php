@@ -19,6 +19,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Exception as PhpOfficeException;
  *
  * @package App\Controller
  * @property \App\Model\Table\MetricsTable $Metrics
+ * @property \App\Model\Table\ReleasesTable $Releases
  * @property \App\Model\Table\StatisticsTable $Statistics
  */
 class DataController extends AppController
@@ -56,11 +57,13 @@ class DataController extends AppController
             return $this->renderSpreadsheet($endpointGroup, $isTimeSeries);
         }
 
+        $this->loadModel('Releases');
         $metric = $this->Metrics->getForEndpointGroup($endpointGroup);
         $this->set([
             'dateRange' => $this->Statistics->getDateRange($endpointGroup),
             'frequency' => $metric->frequency,
             'lastUpdated' => $metric->last_updated->format('F j, Y'),
+            'nextRelease' => $this->Releases->getNextReleaseDate($metric),
             'pageTitle' => $endpointGroup['title'],
             'prepend' => Formatter::getPrepend($metric->units),
             'statistics' => $this->Statistics->getGroup($endpointGroup, $isTimeSeries),

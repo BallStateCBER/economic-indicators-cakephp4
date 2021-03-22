@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Model\Table;
 
 use App\Fetcher\EndpointGroups;
+use App\Model\Entity\Metric;
 use Cake\Cache\Cache;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Http\Exception\NotFoundException;
@@ -123,19 +124,23 @@ class ReleasesTable extends Table
     /**
      * Returns the next date on or after the current date in which this metric has a release recorded
      *
-     * @param string $metricName String to match with metrics.name
+     * @param string|\App\Model\Entity\Metric $metricName String to match with metrics.name, or a metric entity
      * @return \Cake\I18n\FrozenDate|null
      * @throws \Cake\Http\Exception\NotFoundException
      */
-    public function getNextReleaseDate(string $metricName): ?FrozenDate
+    public function getNextReleaseDate(string | Metric $metricName): ?FrozenDate
     {
-        $metric = $this->Metrics
-            ->find()
-            ->select(['id'])
-            ->where(['name' => $metricName])
-            ->first();
-        if (!$metric) {
-            throw new NotFoundException('Metric named ' . $metricName . ' not found');
+        if (is_string($metricName)) {
+            $metric = $this->Metrics
+                ->find()
+                ->select(['id'])
+                ->where(['name' => $metricName])
+                ->first();
+            if (!$metric) {
+                throw new NotFoundException('Metric named ' . $metricName . ' not found');
+            }
+        } else {
+            $metric = $metricName;
         }
 
         /** @var \App\Model\Entity\Release $release */

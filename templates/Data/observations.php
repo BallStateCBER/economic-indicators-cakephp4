@@ -1,6 +1,7 @@
 <?php
 /**
  * @var \App\View\AppView $this
+ * @var \Cake\I18n\FrozenDate $nextRelease
  * @var array|bool $statistics
  * @var string $dateRange
  * @var string $frequency
@@ -24,6 +25,11 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
         <?= ucfirst($frequency) ?> data -
         Last updated <?= $lastUpdated ?>
     </p>
+    <?php if ($nextRelease): ?>
+        <p>
+            Next update: <?= $nextRelease->format('F j, Y') ?>*
+        </p>
+    <?php endif; ?>
 
     <table class="table observations">
         <thead>
@@ -92,6 +98,10 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
             <?php endforeach; ?>
         </tbody>
     </table>
+
+    <p class="disclaimer">
+        * <?= $this->element('release_date_disclaimer') ?>
+    </p>
 <?php endif; ?>
 
 <p class="download-link">
