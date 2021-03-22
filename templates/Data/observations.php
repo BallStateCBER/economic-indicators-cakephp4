@@ -21,15 +21,17 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
         Sorry, this data set is currently unavailable. Please check back for an update soon.
     </p>
 <?php else: ?>
-    <p>
-        <?= ucfirst($frequency) ?> data -
-        Last updated <?= $lastUpdated ?>
-    </p>
-    <?php if ($nextRelease): ?>
-        <p>
-            Next update: <?= $nextRelease->format('F j, Y') ?>*
+    <div class="row">
+        <p class="col-lg">
+            <?= ucfirst($frequency) ?> data -
+            Last updated <?= $lastUpdated ?>
         </p>
-    <?php endif; ?>
+        <?php if ($nextRelease): ?>
+            <p class="col-lg text-lg-right">
+                Next update: <?= $nextRelease->format('F j, Y') ?>*
+            </p>
+        <?php endif; ?>
+    </div>
 
     <table class="table observations">
         <thead>
