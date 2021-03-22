@@ -141,8 +141,9 @@ class EndpointGroups
         }
 
         return [
-            'title' => 'State Manufacturing Employment',
+            'cacheKey' => 'state_manufacturing_employment',
             'endpoints' => $endpoints,
+            'title' => 'State Manufacturing Employment',
         ];
     }
 

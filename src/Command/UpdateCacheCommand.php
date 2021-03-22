@@ -95,5 +95,7 @@ class UpdateCacheCommand extends Command
         $this->statisticsTable->cacheGroup($endpointGroup);
         $this->io->out(' - Refreshing cached data for all dates');
         $this->statisticsTable->cacheGroup($endpointGroup, true);
+        $this->io->out(' - Refreshing cached sparkline data');
+        $this->statisticsTable->cacheStatsForSparklines($endpointGroup);
     }
 }

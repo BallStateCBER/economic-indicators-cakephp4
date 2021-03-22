@@ -72,6 +72,20 @@ class StatisticsTable extends Table
     }
 
     /**
+     * Returns a cache key to be used for caching statistics for generating sparklines
+     *
+     * @param string $groupCacheKey The name of a group of endpoints
+     * @return string
+     */
+    public static function getSparklinesCacheKey(string $groupCacheKey): string
+    {
+        return sprintf(
+            '%s-sparklines',
+            $groupCacheKey,
+        );
+    }
+
+    /**
      * Initialize method
      *
      * @param array $config The configuration for the Table.
@@ -282,25 +296,32 @@ class StatisticsTable extends Table
     }
 
     /**
-     * Returns an array of data used to create sparklines
+     * Caches an array of data used to create sparklines
      *
-     * @param \App\Model\Entity\Metric[]|\Cake\Datasource\ResultSetInterface $metrics Array or ResultSet of metrics
-     * @return array
+     * Depends on the 'all observations' cache value already being set
+     *
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @return void
+     * @throws \Cake\Http\Exception\NotFoundException
      */
-    public function getStatsForSparklines(array | ResultSetInterface $metrics): array
+    public function cacheStatsForSparklines(array $endpointGroup): void
     {
         $statsForSparklines = [];
 
         // Applied inexactly
         $maxDataPointsPerGraph = 50;
 
+        $metrics = $this->Metrics->getAllForEndpointGroup($endpointGroup);
         foreach ($metrics as $metric) {
-            $cacheKey = self::getStatsCacheKey(
+            $readCacheKey = self::getStatsCacheKey(
                 seriesId: $metric->name,
                 dataTypeId: StatisticsTable::DATA_TYPE_VALUE,
                 all: true
             );
-            $statistics = Cache::read($cacheKey, StatisticsTable::CACHE_CONFIG);
+            $statistics = Cache::read($readCacheKey, StatisticsTable::CACHE_CONFIG);
+            if (!$statistics) {
+                throw new NotFoundException('Cached statistics not found for key ' . $readCacheKey);
+            }
             $columnData = [['#', 'Value']];
             $count = count($statistics);
             $rate = round($count / $maxDataPointsPerGraph);
@@ -317,7 +338,21 @@ class StatisticsTable extends Table
             $statsForSparklines[$metric->name] = $columnData;
         }
 
-        return $statsForSparklines;
+        $writeCacheKey = self::getSparklinesCacheKey($endpointGroup['cacheKey']);
+        Cache::write($writeCacheKey, $statsForSparklines, self::CACHE_CONFIG);
+    }
+
+    /**
+     * Returns an array of data used to create sparklines
+     *
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @return array|null
+     */
+    public function getStatsForSparklines(array $endpointGroup): ?array
+    {
+        $cacheKey = self::getSparklinesCacheKey($endpointGroup['cacheKey']);
+
+        return Cache::read($cacheKey, self::CACHE_CONFIG);
     }
 
     /**
