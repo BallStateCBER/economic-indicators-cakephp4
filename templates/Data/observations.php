@@ -99,25 +99,27 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
         </tbody>
     </table>
 
+    <div class="row">
+        <p class="download-link col">
+            <?= $this->Html->link(
+                '<i class="fas fa-download"></i> Download this data as an Excel spreadsheet',
+                ['_ext' => 'xlsx'],
+                ['escape' => false, 'class' => 'alert alert-info']
+            ) ?>
+        </p>
+        <p class="download-link col">
+            <?= $this->Html->link(
+                '<i class="fas fa-download"></i> Download ' . $dateRange . ' time series data as an Excel spreadsheet',
+                [
+                    '?' => ['timeSeries' => 1],
+                    '_ext' => 'xlsx',
+                ],
+                ['escape' => false, 'class' => 'alert alert-info']
+            ) ?>
+        </p>
+    </div>
+
     <p class="disclaimer">
         * <?= $this->element('release_date_disclaimer') ?>
     </p>
 <?php endif; ?>
-
-<p class="download-link">
-    <?= $this->Html->link(
-        '<i class="fas fa-download"></i> Download this data as an Excel spreadsheet',
-        ['_ext' => 'xlsx'],
-        ['escape' => false, 'class' => 'alert alert-info']
-    ) ?>
-</p>
-<p class="download-link">
-    <?= $this->Html->link(
-        '<i class="fas fa-download"></i> Download ' . $dateRange . ' time series data as an Excel spreadsheet',
-        [
-            '?' => ['timeSeries' => 1],
-            '_ext' => 'xlsx',
-        ],
-        ['escape' => false, 'class' => 'alert alert-info']
-    ) ?>
-</p>

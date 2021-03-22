@@ -40,6 +40,10 @@ table.observations {
 }
 
 .download-link {
+    a {
+        display: inline-block;
+    }
+
     i {
         font-size: 120%;
         margin-right: 0.5em;
