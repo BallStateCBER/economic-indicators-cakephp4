@@ -237,7 +237,7 @@ class StatisticsTable extends Table
 
             foreach ($dataTypeIds as $dataTypeId) {
                 $cacheKey = self::getStatsCacheKey($seriesId, $dataTypeId, $all);
-                $statistics = $this->getByMetricAndType($metric->id, StatisticsTable::DATA_TYPE_VALUE, $all);
+                $statistics = $this->getByMetricAndType($metric->id, $dataTypeId, $all);
                 Cache::write($cacheKey, $statistics, self::CACHE_CONFIG);
                 unset($statistics);
                 unset($cacheKey);
