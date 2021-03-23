@@ -67,20 +67,20 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                 <tr>
                     <td>
                         <?= $seriesId ?>
-                        <br />
-                        <small>
-                            <?= Formatter::getFormattedDate(
-                                $statsByDataType[StatisticsTable::DATA_TYPE_VALUE]['date'],
-                                $frequency
-                            ) ?>
-                        </small>
+                        <div id="sparkline-<?= $i ?>" class="sparkline"></div>
                     </td>
                     <td>
                         <?= Formatter::formatValue(
                             $statsByDataType[StatisticsTable::DATA_TYPE_VALUE]['value'],
                             $prepend
                         ) ?>
-                        <div id="sparkline-<?= $i ?>" style="width: 100px; height: 30px"></div>
+                        <br />
+                        <span class="date-footnote">
+                            <?= Formatter::getFormattedDate(
+                                $statsByDataType[StatisticsTable::DATA_TYPE_VALUE]['date'],
+                                $frequency
+                            ) ?>
+                        </span>
                     </td>
                     <td>
                         <?= Formatter::formatValue(

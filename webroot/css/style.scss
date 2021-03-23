@@ -24,6 +24,17 @@ table.observations {
     .fa-arrow-circle-down {
         color: red;
     }
+    thead {
+        th {
+            text-align: right;
+            white-space: normal;
+        }
+    }
+    tbody {
+        td:not(:first-child) {
+            text-align: right;
+        }
+    }
 }
 
 #menu_column {
@@ -121,5 +132,16 @@ table.observations {
 }
 
 .disclaimer {
+    font-size: 80%;
+}
+
+div.sparkline {
+    height: 30px;
+    margin-top: 5px;
+    width: 100px;
+}
+
+.date-footnote {
+    color: $text-muted;
     font-size: 80%;
 }
