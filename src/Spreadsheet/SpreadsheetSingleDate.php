@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Spreadsheet;
 
 use App\Formatter\Formatter;
+use App\Model\Table\StatisticsTable;
 use Cake\ORM\TableRegistry;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -30,10 +31,12 @@ class SpreadsheetSingleDate extends Spreadsheet
     {
         parent::__construct($data);
 
-        $unit = Formatter::getUnit($data);
+        /** @var \App\Model\Table\MetricsTable $metricsTable */
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $metric = $metricsTable->getFirstForEndpointGroup($endpointGroup);
         $columnTitles = [
             'Metric',
-            $unit,
+            $metric->units,
             'Change from One Year Prior',
             'Percent Change from One Year Prior',
             'Date',
@@ -54,22 +57,20 @@ class SpreadsheetSingleDate extends Spreadsheet
             ])
             ->nextRow();
 
-        $prepend = Formatter::getPrepend($unit);
-        /** @var \App\Model\Table\MetricsTable $metricsTable */
-        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $prepend = Formatter::getPrepend($metric->units);
         $frequency = $metricsTable->getFrequency($endpointGroup);
-        foreach ($data['endpoints'] as $endpointName => $endpoint) {
+        foreach ($data as $endpointName => $endpoint) {
             $this
                 ->writeRow([
                     $endpointName,
-                    Formatter::formatValue($endpoint['observation']['value'], $prepend),
-                    Formatter::formatValue($endpoint['change']['value'], $prepend),
-                    Formatter::formatValue($endpoint['percentChange']['value']) . '%',
+                    Formatter::formatValue($endpoint[StatisticsTable::DATA_TYPE_VALUE]['value'], $prepend),
+                    Formatter::formatValue($endpoint[StatisticsTable::DATA_TYPE_CHANGE]['value'], $prepend),
+                    Formatter::formatValue($endpoint[StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']) . '%',
                 ])
                 ->alignHorizontal('right', 2);
 
             // Write date explicitly as a string so it doesn't get reformatted into a different date format by Excel
-            $date = Formatter::getFormattedDate($endpoint['observation']['date'], $frequency);
+            $date = Formatter::getFormattedDate($endpoint[StatisticsTable::DATA_TYPE_VALUE]['date'], $frequency);
             $dateCol = 5;
             $cell = $this->getColumnKey($dateCol) . $this->currentRow;
             $this->objPHPExcel

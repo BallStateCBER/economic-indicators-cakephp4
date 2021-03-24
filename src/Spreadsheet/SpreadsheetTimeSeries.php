@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Spreadsheet;
 
 use App\Formatter\Formatter;
+use App\Model\Table\StatisticsTable;
 use Cake\ORM\TableRegistry;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -30,21 +31,21 @@ class SpreadsheetTimeSeries extends Spreadsheet
     {
         parent::__construct($data);
 
+        /** @var \App\Model\Table\MetricsTable $metricsTable */
+        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $metric = $metricsTable->getFirstForEndpointGroup($endpointGroup);
         $dates = $this->getDates($data);
-        $unit = Formatter::getUnit($data);
         $this
             ->setUpMetaAndHeaders(
                 title: $endpointGroup['title'],
                 columnTitles: array_merge(['Metric'], $dates),
             )
-            ->writeRow(['Values are in ' . strtolower($unit)])
+            ->writeRow(['Values are in ' . strtolower($metric->units)])
             ->nextRow()
             ->nextRow()
             ->writeRow(['Metric']);
 
         // Write dates explicitly as strings so they don't get reformatted into a different date format by Excel
-        /** @var \App\Model\Table\MetricsTable $metricsTable */
-        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $frequency = $metricsTable->getFrequency($endpointGroup);
         foreach ($dates as $i => $date) {
             $date = Formatter::getFormattedDate($date, $frequency);
@@ -69,10 +70,10 @@ class SpreadsheetTimeSeries extends Spreadsheet
             ])
             ->nextRow();
 
-        $prepend = Formatter::getPrepend($unit);
-        foreach ($data['endpoints'] as $endpointName => $endpoint) {
+        $prepend = Formatter::getPrepend($metric->units);
+        foreach ($data as $endpointName => $endpoint) {
             $row = [$endpointName];
-            foreach ($endpoint['observation'] as $statistic) {
+            foreach ($endpoint[StatisticsTable::DATA_TYPE_VALUE] as $statistic) {
                 $row[] = Formatter::formatValue($statistic['value'], $prepend);
             }
             $this
@@ -95,8 +96,8 @@ class SpreadsheetTimeSeries extends Spreadsheet
     private function getDates(array $data): array
     {
         $years = [];
-        $firstEndpoint = reset($data['endpoints']);
-        foreach ($firstEndpoint['observation'] as $statistic) {
+        $firstEndpoint = reset($data);
+        foreach ($firstEndpoint[StatisticsTable::DATA_TYPE_VALUE] as $statistic) {
             $years[] = $statistic['date'];
         }
 
