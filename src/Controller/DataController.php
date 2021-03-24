@@ -8,6 +8,7 @@ use App\Formatter\Formatter;
 use App\Spreadsheet\SpreadsheetSingleDate;
 use App\Spreadsheet\SpreadsheetTimeSeries;
 use Cake\Core\Configure;
+use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;
 use Cake\Utility\Text;
 use Exception;
@@ -45,18 +46,48 @@ class DataController extends AppController
     }
 
     /**
-     * Sets up and renders an observations page
+     * Returns an endpoint group, identified by the $griyoBane string
      *
-     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
-     * @return \Cake\Http\Response
+     * @param string $groupName String used for accessing an endpoint group
+     * @return array
+     * @throws \Cake\Http\Exception\NotFoundException
      */
-    private function renderObservations(array $endpointGroup): Response
+    private function getEndpointGroup(string $groupName): array
     {
-        $isTimeSeries = (bool)$this->getRequest()->getQuery('timeSeries');
-        if ($this->request->is('xlsx')) {
-            return $this->renderSpreadsheet($endpointGroup, $isTimeSeries);
+        switch ($groupName) {
+            case 'housing':
+                return EndpointGroups::HOUSING;
+            case 'vehicle-sales':
+                return EndpointGroups::VEHICLE_SALES;
+            case 'retail-food-services':
+                return EndpointGroups::RETAIL_FOOD_SERVICES;
+            case 'gdp':
+                return EndpointGroups::GDP;
+            case 'unemployment':
+                return EndpointGroups::UNEMPLOYMENT;
+            case 'employment-by-sector':
+                return EndpointGroups::EMP_BY_SECTOR;
+            case 'earnings':
+                return EndpointGroups::EARNINGS;
+            case 'county-unemployment':
+                return EndpointGroups::getCountyUnemployment();
+            case 'manufacturing-employment':
+                return EndpointGroups::getStateManufacturing();
         }
 
+        throw new NotFoundException('Data group ' . $groupName . ' not found');
+    }
+
+    /**
+     * Displays a page with statistics for a group of endpoints
+     *
+     * @param string $groupName The name of a group of endpoints
+     * @return void
+     * @throws \Cake\Http\Exception\NotFoundException
+     */
+    public function group(string $groupName)
+    {
+        $endpointGroup = $this->getEndpointGroup($groupName);
         $this->loadModel('Releases');
         $metrics = $this->Metrics->getAllForEndpointGroup($endpointGroup);
         $firstMetric = $metrics[0];
@@ -67,113 +98,25 @@ class DataController extends AppController
             'nextRelease' => $this->Releases->getNextReleaseDate(...$metrics),
             'pageTitle' => $endpointGroup['title'],
             'prepend' => Formatter::getPrepend($firstMetric->units),
-            'statistics' => $this->Statistics->getGroup($endpointGroup, $isTimeSeries),
+            'statistics' => $this->Statistics->getGroup($endpointGroup),
             'statsForSparklines' => $this->Statistics->getStatsForSparklines($endpointGroup),
             'unit' => $firstMetric->units,
         ]);
-
-        return $this->render('observations');
     }
 
     /**
-     * Housing
+     * Initiates a spreadsheet download
      *
-     * @return \Cake\Http\Response
+     * The ?timeSeries=1 query string is used to download an alternate version of the spreadsheet
+     *
+     * @param string $groupName The name of a group of endpoints
+     * @return \Cake\Http\Response|null
      */
-    public function housing(): Response
+    public function download(string $groupName): ?Response
     {
-        return $this->renderObservations(EndpointGroups::HOUSING);
-    }
+        $endpointGroup = $this->getEndpointGroup($groupName);
+        $isTimeSeries = (bool)$this->getRequest()->getQuery('timeSeries');
 
-    /**
-     * Vehicle sales
-     *
-     * @return \Cake\Http\Response
-     */
-    public function vehicleSales(): Response
-    {
-        return $this->renderObservations(EndpointGroups::VEHICLE_SALES);
-    }
-
-    /**
-     * Retail and food services
-     *
-     * @return \Cake\Http\Response
-     */
-    public function retailFoodServices(): Response
-    {
-        return $this->renderObservations(EndpointGroups::RETAIL_FOOD_SERVICES);
-    }
-
-    /**
-     * Gross domestic product
-     *
-     * @return \Cake\Http\Response
-     */
-    public function gdp(): Response
-    {
-        return $this->renderObservations(EndpointGroups::GDP);
-    }
-
-    /**
-     * Unemployment rate
-     *
-     * @return \Cake\Http\Response
-     */
-    public function unemployment(): Response
-    {
-        return $this->renderObservations(EndpointGroups::UNEMPLOYMENT);
-    }
-
-    /**
-     * Employment by sector
-     *
-     * @return \Cake\Http\Response
-     */
-    public function employmentBySector(): Response
-    {
-        return $this->renderObservations(EndpointGroups::EMP_BY_SECTOR);
-    }
-
-    /**
-     * Earnings
-     *
-     * @return \Cake\Http\Response
-     */
-    public function earnings(): Response
-    {
-        return $this->renderObservations(EndpointGroups::EARNINGS);
-    }
-
-    /**
-     * County unemployment rates
-     *
-     * @return \Cake\Http\Response
-     */
-    public function countyUnemployment(): Response
-    {
-        return $this->renderObservations(EndpointGroups::getCountyUnemployment());
-    }
-
-    /**
-     * State manufacturing employment
-     *
-     * @return \Cake\Http\Response
-     */
-    public function manufacturingEmployment(): Response
-    {
-        return $this->renderObservations(EndpointGroups::getStateManufacturing());
-    }
-
-    /**
-     * Renders a spreadsheet, or redirects back to the appropriate page with an error message
-     *
-     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
-     * @param bool $isTimeSeries TRUE if outputting spreadsheet with a series of values on all available dates
-     * @return \Cake\Http\Response
-     */
-    private function renderSpreadsheet(array $endpointGroup, $isTimeSeries = false): Response
-    {
         try {
             $filename = sprintf(
                 '%s-%s.xlsx',
@@ -209,7 +152,11 @@ class DataController extends AppController
             );
         }
 
-        return $this->redirect(['_ext' => null]);
+        return $this->redirect([
+            'action' => 'group',
+            'groupName' => $groupName,
+            '_ext' => null,
+        ]);
     }
 
     /**

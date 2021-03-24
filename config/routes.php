@@ -45,8 +45,15 @@ use Cake\Routing\RouteBuilder;
 $routes->setRouteClass(DashedRoute::class);
 
 $routes->scope('/', function (RouteBuilder $builder) {
-    $builder->setExtensions(['xlsx']);
     $builder->connect('/', ['controller' => 'Pages', 'action' => 'home']);
+    foreach (['group', 'download'] as $action) {
+        $builder
+            ->connect(
+                "/$action/{groupName}",
+                ['controller' => 'Data', 'action' => $action]
+            )
+            ->setPass(['groupName']);
+    }
     $builder->fallbacks();
 });
 

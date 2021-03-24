@@ -109,7 +109,10 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
         <p class="download-link col-lg">
             <?= $this->Html->link(
                 '<i class="fas fa-download"></i> Download this data as an Excel spreadsheet',
-                ['_ext' => 'xlsx'],
+                [
+                    'action' => 'download',
+                    'groupName' => $this->request->getParam('groupName'),
+                ],
                 ['escape' => false, 'class' => 'alert alert-info']
             ) ?>
         </p>
@@ -117,8 +120,9 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
             <?= $this->Html->link(
                 '<i class="fas fa-download"></i> Download ' . $dateRange . ' time series data as an Excel spreadsheet',
                 [
+                    'action' => 'download',
+                    'groupName' => $this->request->getParam('groupName'),
                     '?' => ['timeSeries' => 1],
-                    '_ext' => 'xlsx',
                 ],
                 ['escape' => false, 'class' => 'alert alert-info']
             ) ?>

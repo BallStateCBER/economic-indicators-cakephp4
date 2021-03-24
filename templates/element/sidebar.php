@@ -8,7 +8,8 @@
                 'Housing',
                 [
                     'controller' => 'Data',
-                    'action' => 'housing',
+                    'action' => 'group',
+                    'groupName' => 'housing',
                 ]
             ) ?>
         </li>
@@ -17,7 +18,8 @@
                 'Vehicle Sales',
                 [
                     'controller' => 'Data',
-                    'action' => 'vehicleSales',
+                    'action' => 'group',
+                    'groupName' => 'vehicle-sales',
                 ]
             ) ?>
         </li>
@@ -26,7 +28,8 @@
                 'Retail & Food Services',
                 [
                     'controller' => 'Data',
-                    'action' => 'retailFoodServices',
+                    'action' => 'group',
+                    'groupName' => 'retail-food-services',
                 ]
             ) ?>
         </li>
@@ -35,7 +38,8 @@
                 'Gross Domestic Product',
                 [
                     'controller' => 'Data',
-                    'action' => 'gdp',
+                    'action' => 'group',
+                    'groupName' => 'gdp',
                 ]
             ) ?>
         </li>
@@ -44,7 +48,8 @@
                 'Manufacturing Employment by State',
                 [
                     'controller' => 'Data',
-                    'action' => 'manufacturingEmployment',
+                    'action' => 'group',
+                    'groupName' => 'manufacturing-employment',
                 ]
             ) ?>
         </li>
@@ -61,7 +66,8 @@
                 'Unemployment Rate',
                 [
                     'controller' => 'Data',
-                    'action' => 'unemployment',
+                    'action' => 'group',
+                    'groupName' => 'unemployment',
                 ]
             ) ?>
         </li>
@@ -70,7 +76,8 @@
                 'Employment by Sector',
                 [
                     'controller' => 'Data',
-                    'action' => 'employmentBySector',
+                    'action' => 'group',
+                    'groupName' => 'employment-by-sector',
                 ]
             ) ?>
         </li>
@@ -79,7 +86,8 @@
                 'Weekly Earnings',
                 [
                     'controller' => 'Data',
-                    'action' => 'earnings',
+                    'action' => 'group',
+                    'groupName' => 'earnings',
                 ]
             ) ?>
         </li>
@@ -96,7 +104,8 @@
                 'Unemployment ',
                 [
                     'controller' => 'Data',
-                    'action' => 'countyUnemployment',
+                    'action' => 'group',
+                    'groupName' => 'county-unemployment',
                 ]
             ) ?>
         </li>
