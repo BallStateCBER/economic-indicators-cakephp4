@@ -79,19 +79,6 @@ class Formatter
     }
 
     /**
-     * Returns a string expressing the units used by this endpoint
-     *
-     * @param array $data Output of StatisticsTable::getGroup()
-     * @return string
-     */
-    public static function getUnit(array $data): string
-    {
-        $firstEndpoint = reset($data['endpoints']);
-
-        return $firstEndpoint['units'];
-    }
-
-    /**
      * Returns a string that values should be prepended with, or NULL
      *
      * @param string $unit The result of getUnit()
