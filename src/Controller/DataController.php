@@ -136,7 +136,7 @@ class DataController extends AppController
 
             $this->viewBuilder()->setPlugin('DataCenter');
 
-            return $this->render('/Spreadsheet/spreadsheet', 'DataCenter.spreadsheet');
+            return $this->render('/Spreadsheet/spreadsheet', 'xlsx/spreadsheet');
         } catch (Exception | PhpOfficeException $e) {
             $adminEmail = Configure::read('admin_email');
             $this->Flash->error(
