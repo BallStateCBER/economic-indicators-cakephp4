@@ -50,10 +50,8 @@ table.observations {
     }
 }
 
-.download-link {
-    a {
-        display: inline-block;
-    }
+.downloads-container {
+    padding: 0;
 
     i {
         font-size: 120%;
@@ -153,4 +151,22 @@ div.sparkline {
     text-align: center;
     vertical-align: middle;
     width: 100%;
+}
+
+#download-button {
+    display: block;
+    text-align: left;
+    width: 100%;
+
+    &:hover {
+        text-decoration: none;
+
+        span {
+            text-decoration: underline;
+        }
+    }
+}
+
+#download-options {
+    display: none;
 }

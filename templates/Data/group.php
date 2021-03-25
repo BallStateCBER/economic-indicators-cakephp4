@@ -23,10 +23,6 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
         Sorry, this data set is currently unavailable. Please check back for an update soon.
     </p>
 <?php else: ?>
-    <p class="text-info">
-        <i class="fas fa-info-circle"></i> Click on metric graphs to view expanded time series data
-    </p>
-
     <div class="row">
         <p class="col-lg">
             <?= ucfirst($frequency) ?> data -
@@ -42,8 +38,7 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
     <table class="table observations">
         <thead>
             <tr>
-                <th></th>
-                <th>
+                <th colspan="2">
                     Latest Value
                     <br />
                     <small>
@@ -58,7 +53,7 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                     </small>
                 </th>
                 <th>
-                    % Change
+                    %&nbsp;Change
                     <br />
                     <small>
                         from One Year Ago
@@ -101,16 +96,14 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                         <?= Formatter::formatValue(
                             $seriesData['statistics'][StatisticsTable::DATA_TYPE_CHANGE]['value'],
                             $prepend
-                        ) ?>
-                        <?= Formatter::getArrow(
+                        ) ?>&nbsp;<?= Formatter::getArrow(
                             $seriesData['statistics'][StatisticsTable::DATA_TYPE_CHANGE]['value']
                         ) ?>
                     </td>
                     <td>
                         <?= Formatter::formatValue(
                             $seriesData['statistics'][StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
-                        ) ?>%
-                        <?= Formatter::getArrow(
+                        ) ?>%&nbsp;<?= Formatter::getArrow(
                             $seriesData['statistics'][StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
                         ) ?>
                     </td>
@@ -120,28 +113,35 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
         </tbody>
     </table>
 
-    <div class="row">
-        <p class="download-link col-lg">
-            <?= $this->Html->link(
-                '<i class="fas fa-download"></i> Download this data as an Excel spreadsheet',
-                [
-                    'action' => 'download',
-                    'groupName' => $this->getRequest()->getParam('groupName'),
-                ],
-                ['escape' => false, 'class' => 'alert alert-info']
-            ) ?>
-        </p>
-        <p class="download-link col-lg">
-            <?= $this->Html->link(
-                '<i class="fas fa-download"></i> Download ' . $dateRange . ' time series data as an Excel spreadsheet',
-                [
-                    'action' => 'download',
-                    'groupName' => $this->getRequest()->getParam('groupName'),
-                    '?' => ['timeSeries' => 1],
-                ],
-                ['escape' => false, 'class' => 'alert alert-info']
-            ) ?>
-        </p>
+    <p class="text-info">
+        <i class="fas fa-info-circle"></i> Click on metric graphs to view expanded time series data
+    </p>
+
+    <div class="downloads-container alert alert-info">
+        <button class="btn btn-link" id="download-button">
+            <i class="fas fa-download"></i> <span>Download (.xlsx)...</span>
+        </button>
+        <ul id="download-options">
+            <li>
+                <?= $this->Html->link(
+                    'This table',
+                    [
+                        'action' => 'download',
+                        'groupName' => $this->getRequest()->getParam('groupName'),
+                    ],
+                ) ?>
+            </li>
+            <li>
+                <?= $this->Html->link(
+                    $dateRange . ' time series data',
+                    [
+                        'action' => 'download',
+                        'groupName' => $this->getRequest()->getParam('groupName'),
+                        '?' => ['timeSeries' => 1],
+                    ],
+                ) ?>
+            </li>
+        </ul>
     </div>
 
     <p class="disclaimer">
@@ -185,5 +185,10 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                 <?php $i++; ?>
             <?php endforeach; ?>
         }
+
+        document.getElementById('download-button').addEventListener('click', (event) => {
+            event.preventDefault();
+            slideToggle(document.getElementById('download-options'));
+        });
     </script>
 <?php endif; ?>
