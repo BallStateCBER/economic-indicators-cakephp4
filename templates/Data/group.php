@@ -6,6 +6,7 @@
  * @var array|bool $statistics
  * @var string $dateRange
  * @var string $frequency
+ * @var string $groupName
  * @var string $lastUpdated
  * @var string $prepend
  * @var string $unit
@@ -22,6 +23,10 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
         Sorry, this data set is currently unavailable. Please check back for an update soon.
     </p>
 <?php else: ?>
+    <p class="text-info">
+        <i class="fas fa-info-circle"></i> Click on metric graphs to view expanded time series data
+    </p>
+
     <div class="row">
         <p class="col-lg">
             <?= ucfirst($frequency) ?> data -
@@ -63,40 +68,50 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
         </thead>
         <tbody>
             <?php $i = 0; ?>
-            <?php foreach ($statistics as $seriesId => $statsByDataType): ?>
+            <?php foreach ($statistics as $seriesId => $seriesData): ?>
                 <tr>
                     <td>
-                        <?= $seriesId ?>
-                        <div id="sparkline-<?= $i ?>" class="sparkline"></div>
+                        <?= $this->Html->link(
+                            sprintf('%s <div id="sparkline-%d" class="sparkline"></div>', $seriesData['name'], $i),
+                            [
+                                'action' => 'series',
+                                'groupName' => $groupName,
+                                'seriesId' => $seriesId,
+                            ],
+                            [
+                                'escape' => false,
+                                'title' => 'Click to view time series',
+                            ]
+                        ) ?>
                     </td>
                     <td>
                         <?= Formatter::formatValue(
-                            $statsByDataType[StatisticsTable::DATA_TYPE_VALUE]['value'],
+                            $seriesData['statistics'][StatisticsTable::DATA_TYPE_VALUE]['value'],
                             $prepend
                         ) ?>
                         <br />
                         <span class="date-footnote">
                             <?= Formatter::getFormattedDate(
-                                $statsByDataType[StatisticsTable::DATA_TYPE_VALUE]['date'],
+                                $seriesData['statistics'][StatisticsTable::DATA_TYPE_VALUE]['date'],
                                 $frequency
                             ) ?>
                         </span>
                     </td>
                     <td>
                         <?= Formatter::formatValue(
-                            $statsByDataType[StatisticsTable::DATA_TYPE_CHANGE]['value'],
+                            $seriesData['statistics'][StatisticsTable::DATA_TYPE_CHANGE]['value'],
                             $prepend
                         ) ?>
                         <?= Formatter::getArrow(
-                            $statsByDataType[StatisticsTable::DATA_TYPE_CHANGE]['value']
+                            $seriesData['statistics'][StatisticsTable::DATA_TYPE_CHANGE]['value']
                         ) ?>
                     </td>
                     <td>
                         <?= Formatter::formatValue(
-                            $statsByDataType[StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
+                            $seriesData['statistics'][StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
                         ) ?>%
                         <?= Formatter::getArrow(
-                            $statsByDataType[StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
+                            $seriesData['statistics'][StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
                         ) ?>
                     </td>
                 </tr>
@@ -111,7 +126,7 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                 '<i class="fas fa-download"></i> Download this data as an Excel spreadsheet',
                 [
                     'action' => 'download',
-                    'groupName' => $this->request->getParam('groupName'),
+                    'groupName' => $this->getRequest()->getParam('groupName'),
                 ],
                 ['escape' => false, 'class' => 'alert alert-info']
             ) ?>
@@ -121,7 +136,7 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                 '<i class="fas fa-download"></i> Download ' . $dateRange . ' time series data as an Excel spreadsheet',
                 [
                     'action' => 'download',
-                    'groupName' => $this->request->getParam('groupName'),
+                    'groupName' => $this->getRequest()->getParam('groupName'),
                     '?' => ['timeSeries' => 1],
                 ],
                 ['escape' => false, 'class' => 'alert alert-info']

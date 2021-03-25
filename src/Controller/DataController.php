@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Fetcher\EndpointGroups;
 use App\Formatter\Formatter;
+use App\Model\Table\StatisticsTable;
 use App\Spreadsheet\SpreadsheetSingleDate;
 use App\Spreadsheet\SpreadsheetTimeSeries;
 use Cake\Core\Configure;
@@ -94,6 +95,7 @@ class DataController extends AppController
         $this->set([
             'dateRange' => $this->Statistics->getDateRange($endpointGroup),
             'frequency' => $firstMetric->frequency,
+            'groupName' => $groupName,
             'lastUpdated' => $firstMetric->last_updated->format('F j, Y'),
             'nextRelease' => $this->Releases->getNextReleaseDate(...$metrics),
             'pageTitle' => $endpointGroup['title'],
@@ -187,5 +189,78 @@ class DataController extends AppController
         $date = Formatter::getFormattedDate($statistic->date, $metric->frequency);
 
         return Text::slug(strtolower($date));
+    }
+
+    /**
+     * Displays a page with a line graph of this metric's values over time
+     *
+     * @param string $endpointGroupId String used for accessing an endpoint group
+     * @param string $seriesId Metric seriesID, used in API calls
+     * @return void
+     */
+    public function series(string $endpointGroupId, string $seriesId)
+    {
+        /** @var \App\Model\Entity\Metric $metric */
+        $metric = $this->Metrics->findByName($seriesId)->first();
+        if (!$metric) {
+            throw new NotFoundException('Metric with series ID ' . $seriesId . ' not found');
+        }
+        $statistics = $this->Statistics->getByMetricAndType(
+            metricId: $metric->id,
+            dataTypeId: StatisticsTable::DATA_TYPE_VALUE,
+            all: true,
+        );
+
+        $statsForGraph = [
+            [
+                (object)[
+                    'label' => 'Date',
+                    'type' => 'date',
+                ],
+                ucwords($metric->units),
+            ],
+        ];
+        foreach ($statistics as $statistic) {
+            $statsForGraph[] = [
+                sprintf(
+                    'Date(%s, %s, %s)',
+                    $statistic['date']->format('Y'),
+                    (int)$statistic['date']->format('n') - 1,
+                    $statistic['date']->format('j'),
+                ),
+                (float)$statistic['value'],
+            ];
+        }
+
+        $endpointGroup = $this->getEndpointGroup($endpointGroupId);
+
+        $this->set([
+            'endpointGroupId' => $endpointGroupId,
+            'endpointGroupName' => $endpointGroup['title'],
+            'pageTitle' => sprintf('%s: %s', $endpointGroup['title'], $this->getMetricName($metric->name)),
+            'statsForGraph' => $statsForGraph,
+            'units' => ucwords($metric->units),
+        ]);
+    }
+
+    /**
+     * An awful stepping-stone method for fetching the metric's human-readable name until a better solution is developed
+     *
+     * @param string $seriesId Metric seriesID
+     * @return string
+     * @throws \Cake\Http\Exception\NotFoundException
+     */
+    private function getMetricName(string $seriesId): string
+    {
+        $endpointGroups = EndpointGroups::getAll();
+        foreach ($endpointGroups as $endpointGroup) {
+            foreach ($endpointGroup['endpoints'] as $endpoint) {
+                if ($endpoint['id'] == $seriesId) {
+                    return $endpoint['name'];
+                }
+            }
+        }
+
+        throw new NotFoundException('Metric with seriesID ' . $seriesId . ' not found');
     }
 }

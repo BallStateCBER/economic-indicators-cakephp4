@@ -54,6 +54,12 @@ $routes->scope('/', function (RouteBuilder $builder) {
             )
             ->setPass(['groupName']);
     }
+    $builder
+        ->connect(
+            '/series/{groupName}/{seriesId}',
+            ['controller' => 'Data', 'action' => 'series']
+        )
+        ->setPass(['groupName', 'seriesId']);
     $builder->fallbacks();
 });
 

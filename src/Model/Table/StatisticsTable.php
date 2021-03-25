@@ -181,7 +181,8 @@ class StatisticsTable extends Table
                     $this->cacheGroup($endpointGroup, $all);
                     $result = Cache::read($cacheKey, self::CACHE_CONFIG);
                 }
-                $statistics[$seriesName][$dataTypeId] = $result;
+                $statistics[$seriesId]['name'] = $seriesName;
+                $statistics[$seriesId]['statistics'][$dataTypeId] = $result;
                 unset($result);
             }
         }
