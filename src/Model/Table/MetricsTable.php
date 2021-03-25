@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Model\Table;
 
 use App\Model\Entity\Metric;
+use Cake\Datasource\EntityInterface;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -12,19 +13,20 @@ use Cake\Validation\Validator;
  * Metrics Model
  *
  * @property \App\Model\Table\StatisticsTable&\Cake\ORM\Association\HasMany $Statistics
+ * @method \App\Model\Entity\Metric findOrCreate($search, ?callable $callback = null, $options = [])
+ * @method \App\Model\Entity\Metric get($primaryKey, $options = [])
  * @method \App\Model\Entity\Metric newEmptyEntity()
  * @method \App\Model\Entity\Metric newEntity(array $data, array $options = [])
- * @method \App\Model\Entity\Metric[] newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\Metric get($primaryKey, $options = [])
- * @method \App\Model\Entity\Metric findOrCreate($search, ?callable $callback = null, $options = [])
  * @method \App\Model\Entity\Metric patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method \App\Model\Entity\Metric[] patchEntities(iterable $entities, array $data, array $options = [])
- * @method \App\Model\Entity\Metric|false save(\Cake\Datasource\EntityInterface $entity, $options = [])
  * @method \App\Model\Entity\Metric saveOrFail(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\Metric[]|\Cake\Datasource\ResultSetInterface|false saveMany(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Metric[] newEntities(array $data, array $options = [])
+ * @method \App\Model\Entity\Metric[] patchEntities(iterable $entities, array $data, array $options = [])
+ * @method \App\Model\Entity\Metric[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
  * @method \App\Model\Entity\Metric[]|\Cake\Datasource\ResultSetInterface saveManyOrFail(iterable $entities, $options = [])
  * @method \App\Model\Entity\Metric[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable $entities, $options = [])
- * @method \App\Model\Entity\Metric[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Metric[]|\Cake\Datasource\ResultSetInterface|false saveMany(iterable $entities, $options = [])
+ * @method \App\Model\Entity\Metric|false save(\Cake\Datasource\EntityInterface $entity, $options = [])
+ * @method \Cake\ORM\Query findByName(string $name)
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class MetricsTable extends Table
@@ -114,17 +116,12 @@ class MetricsTable extends Table
      * Returns the first metric associated with this group of endpoints
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
-     * @return \App\Model\Entity\Metric
+     * @return \App\Model\Entity\Metric|\Cake\Datasource\EntityInterface
      */
-    public function getFirstForEndpointGroup(array $endpointGroup): Metric
+    public function getFirstForEndpointGroup(array $endpointGroup): Metric | EntityInterface
     {
         $metricName = $endpointGroup['endpoints'][0]['id'];
-        /** @var \App\Model\Entity\Metric $metric */
-        $metric = $this
-            ->find()
-            ->where(['name' => $metricName])
-            ->first();
-
+        $metric = $this->findByName($metricName)->first();
         if (!$metric) {
             throw new InternalErrorException("Metric $metricName not found");
         }
@@ -136,19 +133,14 @@ class MetricsTable extends Table
      * Returns all metrics associated with this group of endpoints
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
-     * @return \App\Model\Entity\Metric[]
+     * @return \App\Model\Entity\Metric[]|\Cake\Datasource\EntityInterface[]
      */
-    public function getAllForEndpointGroup(array $endpointGroup): array
+    public function getAllForEndpointGroup(array $endpointGroup)
     {
         $metrics = [];
         foreach ($endpointGroup['endpoints'] as $endpoint) {
             $metricName = $endpoint['id'];
-            /** @var \App\Model\Entity\Metric $metric */
-            $metric = $this
-                ->find()
-                ->where(['name' => $metricName])
-                ->first();
-
+            $metric = $this->findByName($metricName)->first();
             if (!$metric) {
                 throw new InternalErrorException("Metric $metricName not found");
             }
