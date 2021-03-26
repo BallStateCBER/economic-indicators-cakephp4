@@ -23,6 +23,10 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
         Sorry, this data set is currently unavailable. Please check back for an update soon.
     </p>
 <?php else: ?>
+    <p class="text-info">
+        <i class="fas fa-info-circle"></i> Click on metric graphs to view expanded time series data
+    </p>
+
     <div class="row">
         <p class="col-lg">
             <?= ucfirst($frequency) ?> data -
@@ -112,10 +116,6 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
             <?php endforeach; ?>
         </tbody>
     </table>
-
-    <p class="text-info">
-        <i class="fas fa-info-circle"></i> Click on metric graphs to view expanded time series data
-    </p>
 
     <div class="downloads-container alert alert-info">
         <button class="btn btn-link" id="download-button">
