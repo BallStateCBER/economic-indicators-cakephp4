@@ -363,6 +363,40 @@ class StatisticsTable extends Table
      */
     public function getStartingDates(array $endpointGroup): array
     {
+        $cacheKey = $this->getStartingDateCacheKey($endpointGroup['cacheKey']);
+        $startingDates = Cache::read($cacheKey, self::CACHE_CONFIG);
+
+        if (!$startingDates) {
+            $this->cacheStartingDates($endpointGroup);
+            $startingDates = Cache::read($cacheKey, self::CACHE_CONFIG);
+        }
+
+        return $startingDates;
+    }
+
+    /**
+     * Returns a cache key to be used for caching the starting dates for a group of endpoints
+     *
+     * @param string $groupCacheKey String used for caching data associated with a group of endpoints
+     * @return string
+     */
+    public function getStartingDateCacheKey(string $groupCacheKey): string
+    {
+        return sprintf(
+            '%s-starting',
+            $groupCacheKey,
+        );
+    }
+
+    /**
+     * Caches an array of the first date associated with statistics belonging to each endpoint
+     *
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @return void
+     */
+    public function cacheStartingDates(array $endpointGroup)
+    {
+        $cacheKey = $this->getStartingDateCacheKey($endpointGroup['cacheKey']);
         $startingDates = [];
         foreach ($endpointGroup['endpoints'] as $endpoint) {
             $seriesId = $endpoint['id'];
@@ -392,7 +426,7 @@ class StatisticsTable extends Table
             throw new NotFoundException('No statistics found for metric ' . $seriesId);
         }
 
-        return $startingDates;
+        Cache::write($cacheKey, $startingDates, self::CACHE_CONFIG);
     }
 
     /**
@@ -421,7 +455,7 @@ class StatisticsTable extends Table
      * @param bool $all TRUE to return all results rather than only the most recent
      * @return \Cake\Datasource\ResultSetInterface|array
      */
-    public function getByMetricAndType(int $metricId, int $dataTypeId, bool $all = false): ResultSetInterface | array
+    public function getByMetricAndType(int $metricId, int $dataTypeId, bool $all = false): ResultSetInterface|array
     {
         $query = $this
             ->find(
