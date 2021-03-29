@@ -91,6 +91,7 @@ class DataController extends AppController
         $endpointGroup = $this->getEndpointGroup($groupName);
         $this->loadModel('Releases');
         $metrics = $this->Metrics->getAllForEndpointGroup($endpointGroup);
+        /** @var \App\Model\Entity\Metric $firstMetric */
         $firstMetric = $metrics[0];
         $this->set([
             'dateRange' => $this->Statistics->getDateRange($endpointGroup),
@@ -173,7 +174,7 @@ class DataController extends AppController
         if ($isTimeSeries) {
             $dateRange = $this->Statistics->getDateRange($endpointGroup);
 
-            return Text::slug(strtolower($dateRange));
+            return Text::slug(strtolower($dateRange[0] . '-' . $dateRange[1]));
         }
 
         $firstEndpoint = reset($endpointGroup['endpoints']);

@@ -2,9 +2,9 @@
 /**
  * @var \App\View\AppView $this
  * @var \Cake\I18n\FrozenDate $nextRelease
+ * @var array $dateRange
  * @var array $statsForSparklines
  * @var array|bool $statistics
- * @var string $dateRange
  * @var string $frequency
  * @var string $groupName
  * @var string $lastUpdated
@@ -133,7 +133,7 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
             </li>
             <li>
                 <?= $this->Html->link(
-                    $dateRange . ' time series data',
+                    sprintf('%s - %s time series data', $dateRange[0], $dateRange[1]),
                     [
                         'action' => 'download',
                         'groupName' => $this->getRequest()->getParam('groupName'),

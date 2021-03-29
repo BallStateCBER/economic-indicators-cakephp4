@@ -194,10 +194,10 @@ class StatisticsTable extends Table
      * Returns a string describing the date range of known statistics
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
-     * @return string
+     * @return array
      * @throws \Cake\Http\Exception\NotFoundException
      */
-    public function getDateRange(array $endpointGroup): string
+    public function getDateRange(array $endpointGroup): array
     {
         $firstEndpoint = reset($endpointGroup['endpoints']);
         $seriesId = $firstEndpoint['id'];
@@ -249,7 +249,7 @@ class StatisticsTable extends Table
     }
 
     /**
-     * Caches a string describing the date range of known statistics in this group
+     * Caches an array with the first and last dates of known statistics in this group
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return void
@@ -274,11 +274,10 @@ class StatisticsTable extends Table
         }
         $lastStat = $query->order(['date' => 'DESC'])->first();
         $frequency = $this->Metrics->getFrequency($endpointGroup);
-        $dateRange = sprintf(
-            '%s - %s',
+        $dateRange = [
             Formatter::getFormattedDate($firstStat->date, $frequency),
             Formatter::getFormattedDate($lastStat->date, $frequency),
-        );
+        ];
 
         $cacheKey = self::getDateRangeCacheKey($seriesId);
         Cache::write($cacheKey, $dateRange, self::CACHE_CONFIG);
