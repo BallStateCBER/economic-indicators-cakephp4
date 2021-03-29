@@ -1,58 +1,58 @@
+<?php
+/**
+ * @var \App\View\AppView $this
+ */
+
+use App\View\AppView;
+
+$usLinks = [
+    'housing' => 'Housing',
+    'vehicle-sales' => 'Vehicle Sales',
+    'retail-food-services' => 'Retail & Food Services',
+    'gdp' => 'Gross Domestic Product',
+    'manufacturing-employment' => 'Manufacturing Employment by State',
+];
+
+$inLinks = [
+    'unemployment' => 'Unemployment Rate',
+    'employment-by-sector' => 'Employment by Sector',
+    'earnings' => 'Weekly Earnings',
+];
+
+$countyLinks = [
+    'county-unemployment' => 'Unemployment',
+];
+
+if (!function_exists('showSidebarLinks')) {
+    /**
+     * @param \App\View\AppView $view AppView
+     * @param array $links Links array
+     * @return void
+     */
+    function showSidebarLinks(AppView $view, array $links)
+    {
+        foreach ($links as $groupName => $label) {
+            echo '<li>';
+            echo $view->Html->link(
+                $label,
+                [
+                    'controller' => 'Data',
+                    'action' => 'group',
+                    'groupName' => $groupName,
+                ]
+            );
+            echo '</li>';
+        }
+    }
+}
+?>
+
 <section>
     <h2>
         United States
     </h2>
     <ul>
-        <li>
-            <?= $this->Html->link(
-                'Housing',
-                [
-                    'controller' => 'Data',
-                    'action' => 'group',
-                    'groupName' => 'housing',
-                ]
-            ) ?>
-        </li>
-        <li>
-            <?= $this->Html->link(
-                'Vehicle Sales',
-                [
-                    'controller' => 'Data',
-                    'action' => 'group',
-                    'groupName' => 'vehicle-sales',
-                ]
-            ) ?>
-        </li>
-        <li>
-            <?= $this->Html->link(
-                'Retail & Food Services',
-                [
-                    'controller' => 'Data',
-                    'action' => 'group',
-                    'groupName' => 'retail-food-services',
-                ]
-            ) ?>
-        </li>
-        <li>
-            <?= $this->Html->link(
-                'Gross Domestic Product',
-                [
-                    'controller' => 'Data',
-                    'action' => 'group',
-                    'groupName' => 'gdp',
-                ]
-            ) ?>
-        </li>
-        <li>
-            <?= $this->Html->link(
-                'Manufacturing Employment by State',
-                [
-                    'controller' => 'Data',
-                    'action' => 'group',
-                    'groupName' => 'manufacturing-employment',
-                ]
-            ) ?>
-        </li>
+        <?php showSidebarLinks($this, $usLinks); ?>
     </ul>
 </section>
 
@@ -61,36 +61,7 @@
         Indiana
     </h2>
     <ul>
-        <li>
-            <?= $this->Html->link(
-                'Unemployment Rate',
-                [
-                    'controller' => 'Data',
-                    'action' => 'group',
-                    'groupName' => 'unemployment',
-                ]
-            ) ?>
-        </li>
-        <li>
-            <?= $this->Html->link(
-                'Employment by Sector',
-                [
-                    'controller' => 'Data',
-                    'action' => 'group',
-                    'groupName' => 'employment-by-sector',
-                ]
-            ) ?>
-        </li>
-        <li>
-            <?= $this->Html->link(
-                'Weekly Earnings',
-                [
-                    'controller' => 'Data',
-                    'action' => 'group',
-                    'groupName' => 'earnings',
-                ]
-            ) ?>
-        </li>
+        <?php showSidebarLinks($this, $inLinks); ?>
     </ul>
 </section>
 
@@ -99,15 +70,6 @@
         Indiana Counties
     </h2>
     <ul>
-        <li>
-            <?= $this->Html->link(
-                'Unemployment ',
-                [
-                    'controller' => 'Data',
-                    'action' => 'group',
-                    'groupName' => 'county-unemployment',
-                ]
-            ) ?>
-        </li>
+        <?php showSidebarLinks($this, $countyLinks); ?>
     </ul>
 </section>
