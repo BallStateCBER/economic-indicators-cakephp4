@@ -356,6 +356,46 @@ class StatisticsTable extends Table
     }
 
     /**
+     * Returns an array of the first date associated with statistics belonging to each endpoint
+     *
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @return array
+     */
+    public function getStartingDates(array $endpointGroup): array
+    {
+        $startingDates = [];
+        foreach ($endpointGroup['endpoints'] as $endpoint) {
+            $seriesId = $endpoint['id'];
+            $metric = $this->Metrics->findByName($seriesId)->first();
+            if (!$metric) {
+                throw new NotFoundException('Metric ' . $seriesId . ' not found');
+            }
+
+            /** @var \App\Model\Entity\Statistic|null $statistic */
+            $statistic = $this
+                ->find(
+                    'byMetricAndType',
+                    [
+                        'metric_id' => $metric->id,
+                        'data_type_id' => StatisticsTable::DATA_TYPE_VALUE,
+                    ]
+                )
+                ->select(['date'])
+                ->orderAsc('date')
+                ->first();
+
+            if ($statistic) {
+                $startingDates[$seriesId] = $statistic->date;
+                continue;
+            }
+
+            throw new NotFoundException('No statistics found for metric ' . $seriesId);
+        }
+
+        return $startingDates;
+    }
+
+    /**
      * Custom finder for getting statistics by metric ID and data type ID
      *
      * @param \Cake\ORM\Query $query Query object

@@ -3,6 +3,7 @@
  * @var \App\View\AppView $this
  * @var \Cake\I18n\FrozenDate $nextRelease
  * @var array $dateRange
+ * @var array $startingDates
  * @var array $statsForSparklines
  * @var array|bool $statistics
  * @var string $frequency
@@ -71,7 +72,13 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                 <tr>
                     <td>
                         <?= $this->Html->link(
-                            sprintf('%s <div id="sparkline-%d" class="sparkline"></div>', $seriesData['name'], $i),
+                            sprintf(
+                                '%s <div id="sparkline-%d" class="sparkline"></div>' .
+                                '<span class="sparkline-footnote">Since %s</span>',
+                                $seriesData['name'],
+                                $i,
+                                $startingDates[$seriesId]->format('F Y'),
+                            ),
                             [
                                 'action' => 'series',
                                 'groupName' => $groupName,

@@ -101,6 +101,7 @@ class DataController extends AppController
             'nextRelease' => $this->Releases->getNextReleaseDate(...$metrics),
             'pageTitle' => $endpointGroup['title'],
             'prepend' => Formatter::getPrepend($firstMetric->units),
+            'startingDates' => $this->Statistics->getStartingDates($endpointGroup),
             'statistics' => $this->Statistics->getGroup($endpointGroup),
             'statsForSparklines' => $this->Statistics->getStatsForSparklines($endpointGroup),
             'unit' => $firstMetric->units,
