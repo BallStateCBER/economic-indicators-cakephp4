@@ -73,7 +73,8 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                     <td>
                         <?= $this->Html->link(
                             sprintf(
-                                '%s <div id="sparkline-%d" class="sparkline"></div>' .
+                                '<span class="metric-name">%s</span>' .
+                                '<div id="sparkline-%d" class="sparkline"></div>' .
                                 '<span class="sparkline-footnote">Since %s</span>',
                                 $seriesData['name'],
                                 $i,
@@ -85,6 +86,7 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                                 'seriesId' => $seriesId,
                             ],
                             [
+                                'class' => 'series-link',
                                 'escape' => false,
                                 'title' => 'Click to view time series',
                             ]
