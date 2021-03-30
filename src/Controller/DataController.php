@@ -47,39 +47,6 @@ class DataController extends AppController
     }
 
     /**
-     * Returns an endpoint group, identified by the $griyoBane string
-     *
-     * @param string $groupName String used for accessing an endpoint group
-     * @return array
-     * @throws \Cake\Http\Exception\NotFoundException
-     */
-    private function getEndpointGroup(string $groupName): array
-    {
-        switch ($groupName) {
-            case 'housing':
-                return EndpointGroups::HOUSING;
-            case 'vehicle-sales':
-                return EndpointGroups::VEHICLE_SALES;
-            case 'retail-food-services':
-                return EndpointGroups::RETAIL_FOOD_SERVICES;
-            case 'gdp':
-                return EndpointGroups::GDP;
-            case 'unemployment':
-                return EndpointGroups::UNEMPLOYMENT;
-            case 'employment-by-sector':
-                return EndpointGroups::EMP_BY_SECTOR;
-            case 'earnings':
-                return EndpointGroups::EARNINGS;
-            case 'county-unemployment':
-                return EndpointGroups::getCountyUnemployment();
-            case 'manufacturing-employment':
-                return EndpointGroups::getStateManufacturing();
-        }
-
-        throw new NotFoundException('Data group ' . $groupName . ' not found');
-    }
-
-    /**
      * Displays a page with statistics for a group of endpoints
      *
      * @param string $groupName The name of a group of endpoints
@@ -88,7 +55,7 @@ class DataController extends AppController
      */
     public function group(string $groupName)
     {
-        $endpointGroup = $this->getEndpointGroup($groupName);
+        $endpointGroup = EndpointGroups::get($groupName);
         $this->loadModel('Releases');
         $metrics = $this->Metrics->getAllForEndpointGroup($endpointGroup);
         /** @var \App\Model\Entity\Metric $firstMetric */
@@ -118,7 +85,7 @@ class DataController extends AppController
      */
     public function download(string $groupName): ?Response
     {
-        $endpointGroup = $this->getEndpointGroup($groupName);
+        $endpointGroup = EndpointGroups::get($groupName);
         $isTimeSeries = (bool)$this->getRequest()->getQuery('timeSeries');
 
         try {
@@ -202,7 +169,7 @@ class DataController extends AppController
      */
     public function series(string $endpointGroupId, string $seriesId)
     {
-        /** @var \App\Model\Entity\Metric $metric */
+        /** @var \App\Model\Entity\Metric|null $metric */
         $metric = $this->Metrics->findByName($seriesId)->first();
         if (!$metric) {
             throw new NotFoundException('Metric with series ID ' . $seriesId . ' not found');
@@ -234,7 +201,7 @@ class DataController extends AppController
             ];
         }
 
-        $endpointGroup = $this->getEndpointGroup($endpointGroupId);
+        $endpointGroup = EndpointGroups::get($endpointGroupId);
 
         $this->set([
             'endpointGroupId' => $endpointGroupId,

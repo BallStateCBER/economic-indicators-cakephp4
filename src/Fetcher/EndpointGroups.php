@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Fetcher;
 
+use Cake\Http\Exception\NotFoundException;
+
 class EndpointGroups
 {
     public const HOUSING = [
@@ -165,5 +167,38 @@ class EndpointGroups
             self::getCountyUnemployment(),
             self::getStateManufacturing(),
         ];
+    }
+
+    /**
+     * Returns an endpoint group, identified by the $groupName string
+     *
+     * @param string $groupName String used for accessing an endpoint group
+     * @return array
+     * @throws \Cake\Http\Exception\NotFoundException
+     */
+    public static function get(string $groupName): array
+    {
+        switch ($groupName) {
+            case 'housing':
+                return self::HOUSING;
+            case 'vehicle-sales':
+                return self::VEHICLE_SALES;
+            case 'retail-food-services':
+                return self::RETAIL_FOOD_SERVICES;
+            case 'gdp':
+                return self::GDP;
+            case 'unemployment':
+                return self::UNEMPLOYMENT;
+            case 'employment-by-sector':
+                return self::EMP_BY_SECTOR;
+            case 'earnings':
+                return self::EARNINGS;
+            case 'county-unemployment':
+                return self::getCountyUnemployment();
+            case 'manufacturing-employment':
+                return self::getStateManufacturing();
+        }
+
+        throw new NotFoundException('Data group ' . $groupName . ' not found');
     }
 }
