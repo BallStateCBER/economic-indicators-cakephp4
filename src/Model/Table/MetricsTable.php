@@ -98,7 +98,7 @@ class MetricsTable extends Table
     public function getFrequency(array $endpointGroup): string
     {
         $metricName = $endpointGroup['endpoints'][0]['id'];
-        /** @var \App\Model\Entity\Metric $metric */
+        /** @var \App\Model\Entity\Metric|null $metric */
         $metric = $this
             ->find()
             ->select(['frequency'])
@@ -149,5 +149,23 @@ class MetricsTable extends Table
         }
 
         return $metrics;
+    }
+
+    /**
+     * Returns a metric associated with the specified seriesId or throws an exception
+     *
+     * @param string $seriesId A FRED API seriesID string
+     * @return \App\Model\Entity\Metric
+     * @throws \Cake\Http\Exception\InternalErrorException
+     */
+    public function getFromSeriesId(string $seriesId): Metric
+    {
+        /** @var \App\Model\Entity\Metric|null $metric */
+        $metric = $this->find()->where(['name' => $seriesId])->first();
+        if (!$metric) {
+            throw new InternalErrorException(sprintf('Metric with seriesID %s not found', $seriesId));
+        }
+
+        return $metric;
     }
 }

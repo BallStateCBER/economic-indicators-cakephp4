@@ -37,6 +37,7 @@ class UpdateCacheCommand extends Command
             $this->io = $io;
             $this->progress = $io->helper('Progress');
         }
+        define('OVERWRITE_CACHE', true);
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
     }
 
@@ -89,15 +90,15 @@ class UpdateCacheCommand extends Command
      */
     public function refreshGroup(array $endpointGroup): void
     {
-        $this->io->out(' - Refreshing cached date range');
-        $this->statisticsTable->cacheDateRange($endpointGroup);
-        $this->io->out(' - Refreshing cached data for most recent date');
-        $this->statisticsTable->cacheGroup($endpointGroup);
-        $this->io->out(' - Refreshing cached data for all dates');
-        $this->statisticsTable->cacheGroup($endpointGroup, true);
-        $this->io->out(' - Refreshing cached sparkline data');
-        $this->statisticsTable->cacheStatsForSparklines($endpointGroup);
-        $this->io->out(' - Refreshing cached starting dates');
-        $this->statisticsTable->cacheStartingDates($endpointGroup);
+        $this->io->out(' - Rebuilding cached date range');
+        $this->statisticsTable->getDateRange($endpointGroup);
+        $this->io->out(' - Rebuilding cached data for most recent date');
+        $this->statisticsTable->getGroup($endpointGroup);
+        $this->io->out(' - Rebuilding cached data for all dates');
+        $this->statisticsTable->getGroup($endpointGroup, true);
+        $this->io->out(' - Rebuilding cached sparkline data');
+        $this->statisticsTable->getStatsForSparklines($endpointGroup);
+        $this->io->out(' - Rebuilding cached starting dates');
+        $this->statisticsTable->getStartingDates($endpointGroup);
     }
 }

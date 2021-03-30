@@ -4,10 +4,12 @@ declare(strict_types=1);
 namespace App\Model\Table;
 
 use App\Formatter\Formatter;
+use App\Model\Entity\Metric;
 use Cake\Cache\Cache;
 use Cake\Datasource\ResultSetInterface;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\Http\Exception\NotFoundException;
+use Cake\I18n\FrozenDate;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
@@ -37,7 +39,43 @@ class StatisticsTable extends Table
     public const DATA_TYPE_VALUE = 1;
     public const DATA_TYPE_CHANGE = 2;
     public const DATA_TYPE_PERCENT_CHANGE = 3;
+    public const DATA_TYPES = [
+        self::DATA_TYPE_VALUE,
+        self::DATA_TYPE_CHANGE,
+        self::DATA_TYPE_PERCENT_CHANGE,
+    ];
     public const CACHE_CONFIG = 'observations';
+    private bool $overwriteCache;
+    private bool $useCache;
+
+    /**
+     * Initialize method
+     *
+     * @param array $config The configuration for the Table.
+     * @return void
+     */
+    public function initialize(array $config): void
+    {
+        parent::initialize($config);
+
+        $this->setTable('statistics');
+        $this->setDisplayField('id');
+        $this->setPrimaryKey('id');
+
+        $this->addBehavior('Timestamp');
+
+        $this->belongsTo('Metrics', [
+            'foreignKey' => 'metric_id',
+            'joinType' => 'INNER',
+        ]);
+        $this->belongsTo('DataTypes', [
+            'foreignKey' => 'data_type_id',
+            'joinType' => 'INNER',
+        ]);
+
+        $this->useCache = !(defined('RUNNING_TEST') && RUNNING_TEST);
+        $this->overwriteCache = (defined('OVERWRITE_CACHE') && OVERWRITE_CACHE);
+    }
 
     /**
      * Returns a cache key to be used for caching sets of statistics
@@ -83,32 +121,6 @@ class StatisticsTable extends Table
             '%s-sparklines',
             $groupCacheKey,
         );
-    }
-
-    /**
-     * Initialize method
-     *
-     * @param array $config The configuration for the Table.
-     * @return void
-     */
-    public function initialize(array $config): void
-    {
-        parent::initialize($config);
-
-        $this->setTable('statistics');
-        $this->setDisplayField('id');
-        $this->setPrimaryKey('id');
-
-        $this->addBehavior('Timestamp');
-
-        $this->belongsTo('Metrics', [
-            'foreignKey' => 'metric_id',
-            'joinType' => 'INNER',
-        ]);
-        $this->belongsTo('DataTypes', [
-            'foreignKey' => 'data_type_id',
-            'joinType' => 'INNER',
-        ]);
     }
 
     /**
@@ -158,6 +170,7 @@ class StatisticsTable extends Table
      * Returns values, changes since last year, and percent changes for all metrics in the provided group
      *
      * If $all is TRUE, returns statistics for all dates. Otherwise, only returns the most recent statistic.
+     * Reads from and writes to the cache if not in a test context
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @param bool $all TRUE to return statistics for all dates
@@ -165,33 +178,39 @@ class StatisticsTable extends Table
      */
     public function getGroup(array $endpointGroup, bool $all = false): array
     {
-        $statistics = [];
-        $dataTypeIds = [
-            self::DATA_TYPE_VALUE,
-            self::DATA_TYPE_CHANGE,
-            self::DATA_TYPE_PERCENT_CHANGE,
-        ];
+        $retval = [];
+        $generateNewResults = !$this->useCache || $this->overwriteCache;
         foreach ($endpointGroup['endpoints'] as $endpoint) {
             $seriesId = $endpoint['id'];
-            $seriesName = $endpoint['name'];
-            foreach ($dataTypeIds as $dataTypeId) {
+            $retval[$seriesId]['name'] = $endpoint['name'];
+            $metric = $this->Metrics->getFromSeriesId($seriesId);
+            foreach (self::DATA_TYPES as $dataTypeId) {
+                // Use cached value if possible
                 $cacheKey = self::getStatsCacheKey($seriesId, $dataTypeId, $all);
-                $result = Cache::read($cacheKey, self::CACHE_CONFIG);
-                if (!$result) {
-                    $this->cacheGroup($endpointGroup, $all);
-                    $result = Cache::read($cacheKey, self::CACHE_CONFIG);
+                $cachedResult = $generateNewResults ? false : Cache::read($cacheKey, self::CACHE_CONFIG);
+                if ($cachedResult) {
+                    $retval[$seriesId]['statistics'][$dataTypeId] = $cachedResult;
+                    unset($cachedResult);
+                    continue;
                 }
-                $statistics[$seriesId]['name'] = $seriesName;
-                $statistics[$seriesId]['statistics'][$dataTypeId] = $result;
-                unset($result);
+
+                // Generate new value
+                $generatedResult = $this->getByMetricAndType($metric->id, $dataTypeId, $all);
+                $retval[$seriesId]['statistics'][$dataTypeId] = $generatedResult;
+
+                // And cache it, if appropriate
+                if ($this->useCache) {
+                    Cache::write($cacheKey, $generatedResult, self::CACHE_CONFIG);
+                }
+                unset($generatedResult);
             }
         }
 
-        return $statistics;
+        return $retval;
     }
 
     /**
-     * Returns a string describing the date range of known statistics
+     * Returns an array describing the date range of known statistics, using the cache if appropriate
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return array
@@ -202,144 +221,69 @@ class StatisticsTable extends Table
         $firstEndpoint = reset($endpointGroup['endpoints']);
         $seriesId = $firstEndpoint['id'];
         $cacheKey = self::getDateRangeCacheKey($seriesId);
-        $result = Cache::read($cacheKey, self::CACHE_CONFIG);
-
-        if (!$result) {
-            $this->cacheDateRange($endpointGroup);
-            $result = Cache::read($cacheKey, self::CACHE_CONFIG);
+        $generateNewResults = !$this->useCache || $this->overwriteCache;
+        $cachedResult = $generateNewResults ? false : Cache::read($cacheKey, self::CACHE_CONFIG);
+        if ($cachedResult) {
+            return $cachedResult;
         }
 
-        return $result;
-    }
-
-    /**
-     * Creates cache files for all metrics in the provided group, deleting any existing cache files
-     *
-     * If $all is TRUE, caches statistics for all dates. Otherwise, only caches the most recent statistic.
-     *
-     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
-     * @param bool $all TRUE to return statistics for all dates
-     * @return void
-     */
-    public function cacheGroup(array $endpointGroup, bool $all = false)
-    {
-        $dataTypeIds = [
-            self::DATA_TYPE_VALUE,
-            self::DATA_TYPE_CHANGE,
-            self::DATA_TYPE_PERCENT_CHANGE,
-        ];
-        foreach ($endpointGroup['endpoints'] as $endpoint) {
-            $seriesId = $endpoint['id'];
-            /** @var \App\Model\Entity\Metric $metric */
-            $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
-            if (!$metric) {
-                throw new InternalErrorException(sprintf('Metric named %s not found', $seriesId));
-            }
-
-            foreach ($dataTypeIds as $dataTypeId) {
-                $cacheKey = self::getStatsCacheKey($seriesId, $dataTypeId, $all);
-                $statistics = $this->getByMetricAndType($metric->id, $dataTypeId, $all);
-                Cache::write($cacheKey, $statistics, self::CACHE_CONFIG);
-                unset($statistics);
-                unset($cacheKey);
-            }
-            unset($metric);
-        }
-        unset($dataTypeIds);
-    }
-
-    /**
-     * Caches an array with the first and last dates of known statistics in this group
-     *
-     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
-     * @return void
-     * @throws \Cake\Http\Exception\NotFoundException
-     */
-    public function cacheDateRange(array $endpointGroup)
-    {
         $firstEndpoint = reset($endpointGroup['endpoints']);
         $seriesId = $firstEndpoint['id'];
-        $metric = $this->Metrics->find()->where(['name' => $seriesId])->first();
-        $query = $this
-            ->find()
-            ->select(['id', 'date'])
-            ->where(['metric_id' => $metric->id]);
-        $firstStat = $query->order(['date' => 'ASC'])->first();
-        if (!$firstStat) {
-            throw new NotFoundException(sprintf(
-                'No statistics were found for metric #%s (%s)',
-                $metric->id,
-                $seriesId,
-            ));
-        }
-        $lastStat = $query->order(['date' => 'DESC'])->first();
+        $metric = $this->Metrics->getFromSeriesId($seriesId);
         $frequency = $this->Metrics->getFrequency($endpointGroup);
         $dateRange = [
-            Formatter::getFormattedDate($firstStat->date, $frequency),
-            Formatter::getFormattedDate($lastStat->date, $frequency),
+            Formatter::getFormattedDate($this->getDateBoundaryForMetric($metric), $frequency),
+            Formatter::getFormattedDate($this->getDateBoundaryForMetric($metric, 'last'), $frequency),
         ];
 
-        $cacheKey = self::getDateRangeCacheKey($seriesId);
-        Cache::write($cacheKey, $dateRange, self::CACHE_CONFIG);
+        if ($this->useCache) {
+            Cache::write($cacheKey, $dateRange, self::CACHE_CONFIG);
+        }
 
         unset(
             $cacheKey,
-            $dateRange,
             $firstEndpoint,
-            $firstStat,
             $frequency,
-            $lastStat,
             $metric,
-            $query,
             $seriesId,
         );
+
+        return $dateRange;
     }
 
     /**
-     * Caches an array of data used to create sparklines
+     * Returns the first or last date of statistics associated with this metric
      *
-     * Depends on the 'all observations' cache value already being set
-     *
-     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
-     * @return void
+     * @param \App\Model\Entity\Metric $metric Metric entity
+     * @param string $boundary Either 'first' or 'last'
+     * @return \Cake\I18n\FrozenDate
+     * @throws \Cake\Http\Exception\InternalErrorException
      * @throws \Cake\Http\Exception\NotFoundException
      */
-    public function cacheStatsForSparklines(array $endpointGroup): void
+    private function getDateBoundaryForMetric(Metric $metric, $boundary = 'first'): FrozenDate
     {
-        $statsForSparklines = [];
-
-        // Applied inexactly
-        $maxDataPointsPerGraph = 50;
-
-        $metrics = $this->Metrics->getAllForEndpointGroup($endpointGroup);
-        foreach ($metrics as $metric) {
-            $readCacheKey = self::getStatsCacheKey(
-                seriesId: $metric->name,
-                dataTypeId: StatisticsTable::DATA_TYPE_VALUE,
-                all: true
-            );
-            $statistics = Cache::read($readCacheKey, StatisticsTable::CACHE_CONFIG);
-            if (!$statistics) {
-                throw new NotFoundException('Cached statistics not found for key ' . $readCacheKey);
-            }
-            $columnData = [['#', 'Value']];
-            $count = count($statistics);
-            $rate = round($count / $maxDataPointsPerGraph);
-            foreach ($statistics as $i => $statistic) {
-                // Limit number of data points collected
-                if ($count > $maxDataPointsPerGraph) {
-                    if ($i % $rate != 0) {
-                        continue;
-                    }
-                }
-
-                $columnData[] = [$i, (float)$statistic['value']];
-            }
-            $statsForSparklines[$metric->name] = $columnData;
+        if (!in_array($boundary, ['first', 'last'])) {
+            throw new InternalErrorException('Invalid date boundary: ' . $boundary);
         }
 
-        $writeCacheKey = self::getSparklinesCacheKey($endpointGroup['cacheKey']);
-        Cache::write($writeCacheKey, $statsForSparklines, self::CACHE_CONFIG);
+        /** @var \App\Model\Entity\Statistic|null $stat */
+        $stat = $this
+            ->find()
+            ->select(['id', 'date'])
+            ->where(['metric_id' => $metric->id])
+            ->order([
+                'date' => $boundary == 'first' ? 'ASC' : 'DESC',
+            ])
+            ->first();
+
+        if (!$stat) {
+            throw new NotFoundException(sprintf(
+                'No statistics were found for metric #%s',
+                $metric->id,
+            ));
+        }
+
+        return $stat->date;
     }
 
     /**
@@ -347,28 +291,106 @@ class StatisticsTable extends Table
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return array|null
+     * @throws \Cake\Http\Exception\NotFoundException
      */
     public function getStatsForSparklines(array $endpointGroup): ?array
     {
-        $cacheKey = self::getSparklinesCacheKey($endpointGroup['cacheKey']);
+        $generateNewResults = !$this->useCache || $this->overwriteCache;
+        $parentCacheKey = self::getSparklinesCacheKey($endpointGroup['cacheKey']);
+        $cachedResults = $generateNewResults ? false : Cache::read($parentCacheKey, self::CACHE_CONFIG);
 
-        return Cache::read($cacheKey, self::CACHE_CONFIG);
+        if ($cachedResults) {
+            return $cachedResults;
+        }
+
+        $statsForSparklines = [];
+        $maxDataPointsPerGraph = 50; // Applied inexactly
+        $metrics = $this->Metrics->getAllForEndpointGroup($endpointGroup);
+
+        foreach ($metrics as $metric) {
+            // Get cached statistics
+            $childCacheKey = self::getStatsCacheKey(
+                seriesId: $metric->name,
+                dataTypeId: StatisticsTable::DATA_TYPE_VALUE,
+                all: true
+            );
+            $cachedResults = $generateNewResults ? false : Cache::read($childCacheKey, self::CACHE_CONFIG);
+            if ($cachedResults) {
+                $statistics = $cachedResults;
+
+            // Or fetch a new set of statistics
+            } else {
+                $generatedResults = $this->getByMetricAndType(
+                    metricId: $metric->id,
+                    dataTypeId: self::DATA_TYPE_VALUE,
+                    all: true
+                );
+
+                if (!$generatedResults) {
+                    throw new NotFoundException(sprintf(
+                        'Statistics not found for metric #%s, data type %d',
+                        $metric->id,
+                        self::DATA_TYPE_VALUE
+                    ));
+                }
+
+                $statistics = $generatedResults;
+            }
+
+            $columnData = [['#', 'Value']];
+            $count = count($statistics);
+            $rate = round($count / $maxDataPointsPerGraph);
+            foreach ($statistics as $i => $statistic) {
+                // Limit number of data points stored
+                if ($count > $maxDataPointsPerGraph && $i % $rate != 0) {
+                    continue;
+                }
+
+                $columnData[] = [$i, (float)$statistic['value']];
+            }
+
+            $statsForSparklines[$metric->name] = $columnData;
+        }
+
+        // Write to the cache, if appropriate
+        if ($this->useCache) {
+            Cache::write($parentCacheKey, $statsForSparklines, self::CACHE_CONFIG);
+        }
+
+        return $statsForSparklines;
     }
 
     /**
      * Returns an array of the first date associated with statistics belonging to each endpoint
      *
+     * Uses ths cache if appropriate
+     *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return array
+     * @throws \Cake\Http\Exception\NotFoundException
      */
     public function getStartingDates(array $endpointGroup): array
     {
+        $generateNewResults = !$this->useCache || $this->overwriteCache;
         $cacheKey = $this->getStartingDateCacheKey($endpointGroup['cacheKey']);
-        $startingDates = Cache::read($cacheKey, self::CACHE_CONFIG);
 
-        if (!$startingDates) {
-            $this->cacheStartingDates($endpointGroup);
-            $startingDates = Cache::read($cacheKey, self::CACHE_CONFIG);
+        // Fetch from cache
+        $cachedResults = $generateNewResults ? false : Cache::read($cacheKey, self::CACHE_CONFIG);
+        if ($cachedResults) {
+            return $cachedResults;
+        }
+
+        // Or generate new results
+        $startingDates = [];
+        foreach ($endpointGroup['endpoints'] as $endpoint) {
+            $seriesId = $endpoint['id'];
+            $metric = $this->Metrics->getFromSeriesId($seriesId);
+            $startingDates[$seriesId] = $this->getDateBoundaryForMetric($metric);
+        }
+
+        // Write to the cache, if appropriate
+        if ($this->useCache) {
+            Cache::write($cacheKey, $startingDates, self::CACHE_CONFIG);
         }
 
         return $startingDates;
@@ -386,47 +408,6 @@ class StatisticsTable extends Table
             '%s-starting',
             $groupCacheKey,
         );
-    }
-
-    /**
-     * Caches an array of the first date associated with statistics belonging to each endpoint
-     *
-     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
-     * @return void
-     */
-    public function cacheStartingDates(array $endpointGroup)
-    {
-        $cacheKey = $this->getStartingDateCacheKey($endpointGroup['cacheKey']);
-        $startingDates = [];
-        foreach ($endpointGroup['endpoints'] as $endpoint) {
-            $seriesId = $endpoint['id'];
-            $metric = $this->Metrics->findByName($seriesId)->first();
-            if (!$metric) {
-                throw new NotFoundException('Metric ' . $seriesId . ' not found');
-            }
-
-            /** @var \App\Model\Entity\Statistic|null $statistic */
-            $statistic = $this
-                ->find(
-                    'byMetricAndType',
-                    [
-                        'metric_id' => $metric->id,
-                        'data_type_id' => StatisticsTable::DATA_TYPE_VALUE,
-                    ]
-                )
-                ->select(['date'])
-                ->orderAsc('date')
-                ->first();
-
-            if ($statistic) {
-                $startingDates[$seriesId] = $statistic->date;
-                continue;
-            }
-
-            throw new NotFoundException('No statistics found for metric ' . $seriesId);
-        }
-
-        Cache::write($cacheKey, $startingDates, self::CACHE_CONFIG);
     }
 
     /**
@@ -455,7 +436,7 @@ class StatisticsTable extends Table
      * @param bool $all TRUE to return all results rather than only the most recent
      * @return \Cake\Datasource\ResultSetInterface|array
      */
-    public function getByMetricAndType(int $metricId, int $dataTypeId, bool $all = false): ResultSetInterface|array
+    public function getByMetricAndType(int $metricId, int $dataTypeId, bool $all = false): ResultSetInterface | array
     {
         $query = $this
             ->find(
