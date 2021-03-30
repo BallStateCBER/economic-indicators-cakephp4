@@ -132,7 +132,7 @@ class ReleasesTable extends Table
         $nextReleaseDate = null;
 
         foreach ($metricNames as $metricName) {
-            $metric = is_string($metricNames) ? $this->Metrics->getFromSeriesId($metricName) : $metricName;
+            $metric = is_string($metricName) ? $this->Metrics->getFromSeriesId($metricName) : $metricName;
 
             /** @var \App\Model\Entity\Release $release */
             $release = $this
