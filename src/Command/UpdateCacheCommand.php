@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Fetcher\EndpointGroups;
+use App\Endpoints\EndpointGroups;
 use App\Model\Table\StatisticsTable;
 use Cake\Command\Command;
 use Cake\Console\Arguments;

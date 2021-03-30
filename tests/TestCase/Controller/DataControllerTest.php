@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
-use App\Fetcher\EndpointGroups;
+use App\Endpoints\EndpointGroups;
 use App\Test\Fixture\StatisticsFixture;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;

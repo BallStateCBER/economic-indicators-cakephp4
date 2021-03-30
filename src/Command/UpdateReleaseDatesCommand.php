@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Fetcher\EndpointGroups;
+use App\Endpoints\EndpointGroups;
 use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\ReleasesTable;

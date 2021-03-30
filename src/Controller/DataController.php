@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Fetcher\EndpointGroups;
+use App\Endpoints\EndpointGroups;
 use App\Formatter\Formatter;
 use App\Model\Table\StatisticsTable;
 use App\Spreadsheet\SpreadsheetSingleDate;

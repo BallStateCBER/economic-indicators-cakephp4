@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use App\Fetcher\EndpointGroups;
+use App\Endpoints\EndpointGroups;
 use App\Model\Entity\Metric;
 use Cake\Cache\Cache;
 use Cake\Database\Expression\QueryExpression;
