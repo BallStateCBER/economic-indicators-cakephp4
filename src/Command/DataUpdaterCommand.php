@@ -125,7 +125,7 @@ class DataUpdaterCommand extends AppCommand
     /**
      * Returns TRUE if the API has more recently-updated data than the database
      *
-     * @param string $endpointName Matching metric->name and a seriesID in the FRED API
+     * @param string $endpointName Matching metric->seriesId and a seriesID in the FRED API
      * @return bool
      * @throws \fred_api_exception
      */
@@ -134,7 +134,7 @@ class DataUpdaterCommand extends AppCommand
         /** @var \App\Model\Entity\Metric $metric */
         $metric = $this->metricsTable
             ->find()
-            ->where(['name' => $endpointName])
+            ->where(['seriesId' => $endpointName])
             ->first();
         if (!$metric) {
             $this->io->error('No metric record was found for ' . $endpointName);
@@ -167,7 +167,7 @@ class DataUpdaterCommand extends AppCommand
             // Find existing metric
             $metric = $this->metricsTable
                 ->find()
-                ->where(['name' => $endpointName])
+                ->where(['seriesId' => $endpointName])
                 ->first();
             if ($metric) {
                 $this->metrics[$endpointName] = $metric;

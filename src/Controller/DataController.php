@@ -206,7 +206,7 @@ class DataController extends AppController
         $this->set([
             'endpointGroupId' => $endpointGroupId,
             'endpointGroupName' => $endpointGroup['title'],
-            'pageTitle' => sprintf('%s: %s', $endpointGroup['title'], $this->getMetricName($metric->name)),
+            'pageTitle' => sprintf('%s: %s', $endpointGroup['title'], $this->getMetricName($metric->seriesId)),
             'statsForGraph' => $statsForGraph,
             'units' => ucwords($metric->units),
         ]);

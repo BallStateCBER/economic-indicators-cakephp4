@@ -42,7 +42,7 @@ class MetricsTable extends Table
         parent::initialize($config);
 
         $this->setTable('metrics');
-        $this->setDisplayField('name');
+        $this->setDisplayField('seriesId');
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');

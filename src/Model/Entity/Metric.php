@@ -9,7 +9,7 @@ use Cake\ORM\Entity;
  * Metric Entity
  *
  * @property int $id
- * @property string $name
+ * @property string $seriesId
  * @property \Cake\I18n\FrozenTime|null $last_updated
  * @property string $units
  * @property string $frequency
@@ -30,7 +30,7 @@ class Metric extends Entity
      * @var array
      */
     protected $_accessible = [
-        'name' => true,
+        'seriesId' => true,
         'last_updated' => true,
         'units' => true,
         'frequency' => true,
