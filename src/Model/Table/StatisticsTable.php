@@ -202,8 +202,15 @@ class StatisticsTable extends Table
                 if ($this->useCache) {
                     Cache::write($cacheKey, $generatedResult, self::CACHE_CONFIG);
                 }
-                unset($generatedResult);
+                unset(
+                    $cacheKey,
+                    $generatedResult,
+                );
             }
+            unset(
+                $metric,
+                $seriesId,
+            );
         }
 
         return $retval;
@@ -300,6 +307,11 @@ class StatisticsTable extends Table
         $cachedResults = $generateNewResults ? false : Cache::read($parentCacheKey, self::CACHE_CONFIG);
 
         if ($cachedResults) {
+            unset(
+                $generateNewResults,
+                $parentCacheKey,
+            );
+
             return $cachedResults;
         }
 
@@ -356,6 +368,20 @@ class StatisticsTable extends Table
         if ($this->useCache) {
             Cache::write($parentCacheKey, $statsForSparklines, self::CACHE_CONFIG);
         }
+
+        unset(
+            $cachedResults,
+            $childCacheKey,
+            $columnData,
+            $count,
+            $generatedResults,
+            $maxDataPointsPerGraph,
+            $metric,
+            $metrics,
+            $rate,
+            $statistic,
+            $statistics,
+        );
 
         return $statsForSparklines;
     }
