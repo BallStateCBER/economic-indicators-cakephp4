@@ -84,21 +84,37 @@ class DataControllerTest extends TestCase
     }
 
     /**
+     * Test group method
+     *
+     * @return void
+     */
+    public function testSeries(): void
+    {
+        foreach ($this->groupNames as $groupName) {
+            $endpointGroup = EndpointGroups::get($groupName);
+            foreach ($endpointGroup['endpoints'] as $endpoint) {
+                $this->get([
+                    'controller' => 'Data',
+                    'action' => 'series',
+                    'groupName' => $groupName,
+                    'seriesId' => $endpoint['id'],
+                ]);
+                $this->assertResponseOk("Not-OK response returned for /data/series/$groupName/{$endpoint['id']}");
+                $this->assertResponseContains(sprintf(
+                    '%s: %s',
+                    $endpointGroup['title'],
+                    $endpoint['name']
+                ));
+            }
+        }
+    }
+
+    /**
      * Test download method
      *
      * @return void
      */
     public function testDownload(): void
-    {
-        $this->markTestIncomplete('Not implemented yet.');
-    }
-
-    /**
-     * Test series method
-     *
-     * @return void
-     */
-    public function testSeries(): void
     {
         $this->markTestIncomplete('Not implemented yet.');
     }
