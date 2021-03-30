@@ -221,6 +221,13 @@ class DataController extends AppController
      */
     private function getMetricName(string $seriesId): string
     {
+        // Override to account for 'Indiana Manufacturing Employment' having different names on different pages
+        if ($seriesId == 'INMFG') {
+            $groupName = $this->getRequest()->getParam('groupName');
+
+            return $groupName == 'manufacturing-employment' ? 'Indiana' : 'Manufacturing';
+        }
+
         $endpointGroups = EndpointGroups::getAll();
         foreach ($endpointGroups as $endpointGroup) {
             foreach ($endpointGroup['endpoints'] as $endpoint) {
