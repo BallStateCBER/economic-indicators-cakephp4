@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Test\Fixture;
 
+use App\Fetcher\EndpointGroups;
+use App\Model\Table\StatisticsTable;
 use Cake\TestSuite\Fixture\TestFixture;
 
 /**
@@ -21,7 +23,7 @@ class StatisticsFixture extends TestFixture
         'metric_id' => ['type' => 'integer', 'length' => null, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
         'data_type_id' => ['type' => 'integer', 'length' => null, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'precision' => null, 'autoIncrement' => null],
         'value' => ['type' => 'string', 'length' => 30, 'null' => true, 'default' => null, 'collate' => 'latin1_swedish_ci', 'comment' => '', 'precision' => null],
-        'date' => ['type' => 'string', 'length' => 20, 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'comment' => '', 'precision' => null],
+        'date' => ['type' => 'date', 'precision' => null, 'null' => false, 'default' => null, 'comment' => ''],
         'created' => ['type' => 'datetime', 'length' => null, 'precision' => null, 'null' => false, 'default' => null, 'comment' => ''],
         'modified' => ['type' => 'datetime', 'length' => null, 'precision' => null, 'null' => false, 'default' => null, 'comment' => ''],
         '_constraints' => [
@@ -33,6 +35,12 @@ class StatisticsFixture extends TestFixture
         ],
     ];
     // phpcs:enable
+
+    public const VALUE_FIRST = '123';
+    public const VALUE_SECOND = '234';
+    public const VALUE_CHANGE = '-1';
+    public const VALUE_CHANGE_PERCENT = '2';
+
     /**
      * Init method
      *
@@ -40,17 +48,55 @@ class StatisticsFixture extends TestFixture
      */
     public function init(): void
     {
-        $this->records = [
-            [
-                'id' => 1,
-                'metric_id' => 1,
-                'data_type_id' => 1,
-                'value' => 'Lorem ipsum dolor sit amet',
-                'date' => 'Lorem ipsum dolor ',
-                'created' => '2021-03-10 19:59:20',
-                'modified' => '2021-03-10 19:59:20',
-            ],
-        ];
+        $id = 1;
+        $metricId = 1;
+        $endpointGroups = EndpointGroups::getAll();
+        foreach ($endpointGroups as $endpointGroup) {
+            $endpointCount = count($endpointGroup['endpoints']);
+            for ($n = 1; $n <= $endpointCount; $n++) {
+                $this->records[] = [
+                    'id' => $id,
+                    'metric_id' => $metricId,
+                    'data_type_id' => StatisticsTable::DATA_TYPE_VALUE,
+                    'value' => self::VALUE_FIRST,
+                    'date' => '2000-01-01 00:00:00',
+                    'created' => '2021-01-01 00:00:00',
+                    'modified' => '2021-01-01 00:00:00',
+                ];
+                $id++;
+                $this->records[] = [
+                    'id' => $id,
+                    'metric_id' => $metricId,
+                    'data_type_id' => StatisticsTable::DATA_TYPE_VALUE,
+                    'value' => self::VALUE_SECOND,
+                    'date' => '2001-01-01 00:00:00',
+                    'created' => '2021-01-01 00:00:00',
+                    'modified' => '2021-01-01 00:00:00',
+                ];
+                $id++;
+                $this->records[] = [
+                    'id' => $id,
+                    'metric_id' => $metricId,
+                    'data_type_id' => StatisticsTable::DATA_TYPE_CHANGE,
+                    'value' => self::VALUE_CHANGE,
+                    'date' => '2001-01-01 00:00:00',
+                    'created' => '2021-01-01 00:00:00',
+                    'modified' => '2021-01-01 00:00:00',
+                ];
+                $id++;
+                $this->records[] = [
+                    'id' => $id,
+                    'metric_id' => $metricId,
+                    'data_type_id' => StatisticsTable::DATA_TYPE_PERCENT_CHANGE,
+                    'value' => self::VALUE_CHANGE_PERCENT,
+                    'date' => '2001-01-01 00:00:00',
+                    'created' => '2021-01-01 00:00:00',
+                    'modified' => '2021-01-01 00:00:00',
+                ];
+                $id++;
+                $metricId++;
+            }
+        }
         parent::init();
     }
 }

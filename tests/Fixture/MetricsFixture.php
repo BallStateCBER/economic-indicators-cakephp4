@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Test\Fixture;
 
+use App\Fetcher\EndpointGroups;
 use Cake\TestSuite\Fixture\TestFixture;
 
 /**
@@ -40,17 +41,22 @@ class MetricsFixture extends TestFixture
      */
     public function init(): void
     {
-        $this->records = [
-            [
-                'id' => 1,
-                'name' => 'Lorem ipsum dolor sit amet',
-                'last_updated' => '2021-03-10 18:10:40',
-                'units' => 'Lorem ipsum dolor sit amet',
-                'frequency' => 'Lorem ipsum dolor ',
-                'created' => '2021-03-10 18:10:40',
-                'modified' => '2021-03-10 18:10:40',
-            ],
-        ];
+        $id = 1;
+        $endpointGroups = EndpointGroups::getAll();
+        foreach ($endpointGroups as $endpointGroup) {
+            foreach ($endpointGroup['endpoints'] as $endpoint) {
+                $this->records[] = [
+                    'id' => $id,
+                    'name' => $endpoint['id'],
+                    'last_updated' => '2021-01-01 00:00:00',
+                    'units' => 'Units',
+                    'frequency' => 'Frequency',
+                    'created' => '2021-01-01 00:00:00',
+                    'modified' => '2021-01-01 00:00:00',
+                ];
+                $id++;
+            }
+        }
         parent::init();
     }
 }
