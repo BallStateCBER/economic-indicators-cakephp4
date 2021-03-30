@@ -45,7 +45,9 @@ class DataControllerTest extends TestCase
      */
     public function setUp(): void
     {
-        define('RUNNING_TEST', true);
+        if (!defined('RUNNING_TEST')) {
+            define('RUNNING_TEST', true);
+        }
 
         parent::setUp();
     }
