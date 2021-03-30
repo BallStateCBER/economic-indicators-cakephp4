@@ -310,7 +310,7 @@ class StatisticsTable extends Table
         foreach ($metrics as $metric) {
             // Get cached statistics
             $childCacheKey = self::getStatsCacheKey(
-                seriesId: $metric->seriesId,
+                seriesId: $metric->series_id,
                 dataTypeId: StatisticsTable::DATA_TYPE_VALUE,
                 all: true
             );
@@ -349,7 +349,7 @@ class StatisticsTable extends Table
                 $columnData[] = [$i, (float)$statistic['value']];
             }
 
-            $statsForSparklines[$metric->seriesId] = $columnData;
+            $statsForSparklines[$metric->series_id] = $columnData;
         }
 
         // Write to the cache, if appropriate

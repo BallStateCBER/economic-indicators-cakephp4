@@ -148,7 +148,7 @@ class DataController extends AppController
         $firstEndpoint = reset($endpointGroup['endpoints']);
         $metricName = $firstEndpoint['id'];
         /** @var \App\Model\Entity\Metric $metric */
-        $metric = $this->Metrics->find()->where(['name' => $metricName])->first();
+        $metric = $this->Metrics->find()->where(['series_id' => $metricName])->first();
         /** @var \App\Model\Entity\Statistic $statistic */
         $statistic = $this->Statistics->find()
             ->select(['id', 'date'])
@@ -170,7 +170,7 @@ class DataController extends AppController
     public function series(string $endpointGroupId, string $seriesId)
     {
         /** @var \App\Model\Entity\Metric|null $metric */
-        $metric = $this->Metrics->findByName($seriesId)->first();
+        $metric = $this->Metrics->findBySeriesId($seriesId)->first();
         if (!$metric) {
             throw new NotFoundException('Metric with series ID ' . $seriesId . ' not found');
         }
@@ -206,7 +206,7 @@ class DataController extends AppController
         $this->set([
             'endpointGroupId' => $endpointGroupId,
             'endpointGroupName' => $endpointGroup['title'],
-            'pageTitle' => sprintf('%s: %s', $endpointGroup['title'], $this->getMetricName($metric->seriesId)),
+            'pageTitle' => sprintf('%s: %s', $endpointGroup['title'], $this->getMetricName($metric->series_id)),
             'statsForGraph' => $statsForGraph,
             'units' => ucwords($metric->units),
         ]);

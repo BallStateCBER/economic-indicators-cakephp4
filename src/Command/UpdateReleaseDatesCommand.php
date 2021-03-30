@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Endpoints\EndpointGroups;
-use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\ReleasesTable;
 use Cake\Console\Arguments;
@@ -70,7 +69,7 @@ class UpdateReleaseDatesCommand extends AppCommand
                 $this->throttle();
 
                 $releaseDates = $this->getUpcomingReleaseDates($releaseId);
-                $metric = $this->getMetric($endpoint['id']);
+                $metric = $this->metricsTable->getFromSeriesId($endpoint['id']);
                 $this->removeInvalidReleases($releaseDates, $metric->id);
                 $this->addMissingReleases($releaseDates, $metric->id);
                 $this->throttle();
@@ -122,28 +121,6 @@ class UpdateReleaseDatesCommand extends AppCommand
         $releaseDates = $releaseDates->release_dates;
 
         return Hash::extract($releaseDates, '{n}.date');
-    }
-
-    /**
-     * Returns a metric matching $endpointName
-     *
-     * @param string $endpointName A valid "series_id" string for use with the API
-     * @return \App\Model\Entity\Metric
-     */
-    private function getMetric(string $endpointName): Metric
-    {
-        /** @var \App\Model\Entity\Metric $metric */
-        $metric = $this->metricsTable
-            ->find()
-            ->where(['name' => $endpointName])
-            ->first();
-
-        if (!$metric) {
-            $this->io->error('No metric record was found for ' . $endpointName);
-            exit;
-        }
-
-        return $metric;
     }
 
     /**

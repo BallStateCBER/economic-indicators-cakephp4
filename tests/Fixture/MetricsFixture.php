@@ -19,7 +19,7 @@ class MetricsFixture extends TestFixture
     // phpcs:disable
     public $fields = [
         'id' => ['type' => 'integer', 'length' => null, 'unsigned' => false, 'null' => false, 'default' => null, 'comment' => '', 'autoIncrement' => true, 'precision' => null],
-        'seriesId' => ['type' => 'string', 'length' => 50, 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'comment' => '', 'precision' => null],
+        'series_id' => ['type' => 'string', 'length' => 50, 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'comment' => '', 'precision' => null],
         'last_updated' => ['type' => 'datetime', 'length' => null, 'precision' => null, 'null' => true, 'default' => null, 'comment' => ''],
         'units' => ['type' => 'string', 'length' => 100, 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'comment' => '', 'precision' => null],
         'frequency' => ['type' => 'string', 'length' => 20, 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'comment' => '', 'precision' => null],
@@ -47,7 +47,7 @@ class MetricsFixture extends TestFixture
             foreach ($endpointGroup['endpoints'] as $endpoint) {
                 $this->records[] = [
                     'id' => $id,
-                    'seriesId' => $endpoint['id'],
+                    'series_id' => $endpoint['id'],
                     'last_updated' => '2021-01-01 00:00:00',
                     'units' => 'Units',
                     'frequency' => 'Frequency',

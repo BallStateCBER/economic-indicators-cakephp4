@@ -26,7 +26,7 @@ use Cake\Validation\Validator;
  * @method \App\Model\Entity\Metric[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable $entities, $options = [])
  * @method \App\Model\Entity\Metric[]|\Cake\Datasource\ResultSetInterface|false saveMany(iterable $entities, $options = [])
  * @method \App\Model\Entity\Metric|false save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \Cake\ORM\Query findByName(string $name)
+ * @method \Cake\ORM\Query findBySeriesId(string $name)
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class MetricsTable extends Table
@@ -42,7 +42,7 @@ class MetricsTable extends Table
         parent::initialize($config);
 
         $this->setTable('metrics');
-        $this->setDisplayField('seriesId');
+        $this->setDisplayField('series_id');
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
@@ -65,10 +65,10 @@ class MetricsTable extends Table
             ->allowEmptyString('id', null, 'create');
 
         $validator
-            ->scalar('name')
-            ->maxLength('name', 50)
-            ->requirePresence('name', 'create')
-            ->notEmptyString('name');
+            ->scalar('series_id')
+            ->maxLength('series_id', 50)
+            ->requirePresence('series_id', 'create')
+            ->notEmptyString('series_id');
 
         $validator
             ->dateTime('last_updated')
@@ -97,17 +97,9 @@ class MetricsTable extends Table
      */
     public function getFrequency(array $endpointGroup): string
     {
-        $metricName = $endpointGroup['endpoints'][0]['id'];
+        $seriesId = $endpointGroup['endpoints'][0]['id'];
         /** @var \App\Model\Entity\Metric|null $metric */
-        $metric = $this
-            ->find()
-            ->select(['frequency'])
-            ->where(['name' => $metricName])
-            ->first();
-
-        if (!$metric) {
-            throw new InternalErrorException("Metric $metricName not found");
-        }
+        $metric = $this->getFromSeriesId($seriesId);
 
         return $metric->frequency;
     }
@@ -121,7 +113,7 @@ class MetricsTable extends Table
     public function getFirstForEndpointGroup(array $endpointGroup): Metric | EntityInterface
     {
         $metricName = $endpointGroup['endpoints'][0]['id'];
-        $metric = $this->findByName($metricName)->first();
+        $metric = $this->findBySeriesId($metricName)->first();
         if (!$metric) {
             throw new InternalErrorException("Metric $metricName not found");
         }
@@ -140,7 +132,7 @@ class MetricsTable extends Table
         $metrics = [];
         foreach ($endpointGroup['endpoints'] as $endpoint) {
             $metricName = $endpoint['id'];
-            $metric = $this->findByName($metricName)->first();
+            $metric = $this->findBySeriesId($metricName)->first();
             if (!$metric) {
                 throw new InternalErrorException("Metric $metricName not found");
             }
@@ -161,7 +153,7 @@ class MetricsTable extends Table
     public function getFromSeriesId(string $seriesId): Metric
     {
         /** @var \App\Model\Entity\Metric|null $metric */
-        $metric = $this->find()->where(['name' => $seriesId])->first();
+        $metric = $this->find()->where(['series_id' => $seriesId])->first();
         if (!$metric) {
             throw new InternalErrorException(sprintf('Metric with seriesID %s not found', $seriesId));
         }

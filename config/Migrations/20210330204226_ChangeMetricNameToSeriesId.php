@@ -16,6 +16,7 @@ class ChangeMetricNameToSeriesId extends AbstractMigration
     public function change()
     {
         $this->table('metrics')
-            ->renameColumn('name', 'seriesId');
+            ->renameColumn('name', 'series_id')
+            ->update();
     }
 }

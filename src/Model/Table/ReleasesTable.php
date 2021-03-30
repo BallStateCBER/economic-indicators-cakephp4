@@ -132,18 +132,7 @@ class ReleasesTable extends Table
         $nextReleaseDate = null;
 
         foreach ($metricNames as $metricName) {
-            if (is_string($metricNames)) {
-                $metric = $this->Metrics
-                    ->find()
-                    ->select(['id'])
-                    ->where(['name' => $metricName])
-                    ->first();
-                if (!$metric) {
-                    throw new NotFoundException("Metric named $metricName not found");
-                }
-            } else {
-                $metric = $metricName;
-            }
+            $metric = is_string($metricNames) ? $this->Metrics->getFromSeriesId($metricName) : $metricName;
 
             /** @var \App\Model\Entity\Release $release */
             $release = $this
