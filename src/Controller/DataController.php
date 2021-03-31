@@ -200,6 +200,7 @@ class DataController extends AppController
                 (float)$statistic['value'],
             ];
         }
+        unset($statistics, $statistic);
 
         $endpointGroup = EndpointGroups::get($endpointGroupId);
 
