@@ -21,6 +21,7 @@ use Cake\ORM\TableRegistry;
  */
 class UpdateCacheCommand extends Command
 {
+    private bool $verbose;
     private ConsoleIo $io;
     private Helper $progress;
     private StatisticsTable $statisticsTable;
@@ -52,6 +53,11 @@ class UpdateCacheCommand extends Command
     {
         $parser = parent::buildOptionParser($parser);
         $parser->setDescription('Refreshes the cache for data pulled from the statistics table');
+        $parser->addOption('verbose', [
+            'short' => 'v',
+            'help' => 'Output information about memory usage',
+            'boolean' => true,
+        ]);
 
         return $parser;
     }
@@ -67,6 +73,7 @@ class UpdateCacheCommand extends Command
     {
         $this->io = $io;
         $this->progress = $io->helper('Progress');
+        $this->verbose = (bool)$args->getOption('verbose');
         $endpointGroups = EndpointGroups::getAll();
         $count = count($endpointGroups);
         foreach ($endpointGroups as $i => $endpointGroup) {
@@ -90,15 +97,39 @@ class UpdateCacheCommand extends Command
      */
     public function refreshGroup(array $endpointGroup): void
     {
+        $this->showMemoryUsage();
         $this->io->out(' - Rebuilding cached date range');
         $this->statisticsTable->getDateRange($endpointGroup);
+
+        $this->showMemoryUsage();
         $this->io->out(' - Rebuilding cached data for most recent date');
         $this->statisticsTable->getGroup($endpointGroup);
+
+        $this->showMemoryUsage();
         $this->io->out(' - Rebuilding cached data for all dates');
         $this->statisticsTable->getGroup($endpointGroup, true);
+
+        $this->showMemoryUsage();
         $this->io->out(' - Rebuilding cached sparkline data');
         $this->statisticsTable->getStatsForSparklines($endpointGroup);
+
+        $this->showMemoryUsage();
         $this->io->out(' - Rebuilding cached starting dates');
         $this->statisticsTable->getStartingDates($endpointGroup);
+    }
+
+    /**
+     * Displays the peak memory usage since the start of this script
+     *
+     * @return void
+     */
+    private function showMemoryUsage()
+    {
+        if (!$this->verbose) {
+            return;
+        }
+        $peakMemoryKb = number_format(round(memory_get_peak_usage() / 1024));
+        $currentMemoryKb = number_format(round(memory_get_usage() / 1024));
+        $this->io->info(" - Current and peak memory usage: {$currentMemoryKb}KB, {$peakMemoryKb}KB");
     }
 }
