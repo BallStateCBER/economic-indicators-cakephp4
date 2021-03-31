@@ -469,6 +469,7 @@ class StatisticsTable extends Table
                 'byMetricAndType',
                 ['metric_id' => $metricId, 'data_type_id' => $dataTypeId]
             )
+            ->select(['date', 'value'])
             ->enableHydration(false);
         if ($all) {
             return $query->all();
