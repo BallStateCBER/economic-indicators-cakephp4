@@ -103,11 +103,11 @@ class UpdateCacheCommand extends Command
 
         $this->showMemoryUsage();
         $this->io->out(' - Rebuilding cached data for most recent date');
-        $this->statisticsTable->getGroup($endpointGroup);
+        $this->statisticsTable->getGroup(endpointGroup: $endpointGroup, all: true, onlyCache: true);
 
         $this->showMemoryUsage();
         $this->io->out(' - Rebuilding cached data for all dates');
-        $this->statisticsTable->getGroup($endpointGroup, true);
+        $this->statisticsTable->getGroup(endpointGroup: $endpointGroup, all: true, onlyCache: true);
 
         $this->showMemoryUsage();
         $this->io->out(' - Rebuilding cached sparkline data');

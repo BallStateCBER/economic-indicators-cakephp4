@@ -174,29 +174,36 @@ class StatisticsTable extends Table
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @param bool $all TRUE to return statistics for all dates
+     * @param bool $onlyCache TRUE only cache data and return an empty array (saves memory)
      * @return array
      */
-    public function getGroup(array $endpointGroup, bool $all = false): array
+    public function getGroup(array $endpointGroup, bool $all = false, $onlyCache = false): array
     {
         $retval = [];
         $generateNewResults = !$this->useCache || $this->overwriteCache;
         foreach ($endpointGroup['endpoints'] as $endpoint) {
             $seriesId = $endpoint['id'];
-            $retval[$seriesId]['name'] = $endpoint['name'];
+            if (!$onlyCache) {
+                $retval[$seriesId]['name'] = $endpoint['name'];
+            }
             $metric = $this->Metrics->getFromSeriesId($seriesId);
             foreach (self::DATA_TYPES as $dataTypeId) {
                 // Use cached value if possible
                 $cacheKey = self::getStatsCacheKey($seriesId, $dataTypeId, $all);
                 $cachedResult = $generateNewResults ? false : Cache::read($cacheKey, self::CACHE_CONFIG);
                 if ($cachedResult) {
-                    $retval[$seriesId]['statistics'][$dataTypeId] = $cachedResult;
+                    if (!$onlyCache) {
+                        $retval[$seriesId]['statistics'][$dataTypeId] = $cachedResult;
+                    }
                     unset($cachedResult);
                     continue;
                 }
 
                 // Generate new value
                 $generatedResult = $this->getByMetricAndType($metric->id, $dataTypeId, $all);
-                $retval[$seriesId]['statistics'][$dataTypeId] = $generatedResult;
+                if (!$onlyCache) {
+                    $retval[$seriesId]['statistics'][$dataTypeId] = $generatedResult;
+                }
 
                 // And cache it, if appropriate
                 if ($this->useCache) {
