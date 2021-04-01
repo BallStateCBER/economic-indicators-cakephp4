@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Test\Fixture;
 
+use App\Endpoints\EndpointGroups;
+use Cake\I18n\FrozenDate;
 use Cake\TestSuite\Fixture\TestFixture;
 
 /**
@@ -32,23 +34,46 @@ class ReleasesFixture extends TestFixture
         ],
     ];
     // phpcs:enable
+
+    public const NEXT_RELEASE_DATE = '+1 day';
+    public const FOLLOWING_RELEASE_DATE = '+2 days';
+
     /**
      * Init method
+     *
+     * Creates two upcoming releases for each metric, the first being tomorrow, and the following being the next day
      *
      * @return void
      */
     public function init(): void
     {
-        $this->records = [
-            [
-                'id' => 1,
-                'metric_id' => 1,
-                'date' => '2021-03-16',
-                'imported' => 1,
-                'created' => '2021-03-16 22:23:09',
-                'modified' => '2021-03-16 22:23:09',
-            ],
-        ];
+        $id = 1;
+        $metricId = 1;
+        $endpointGroups = EndpointGroups::getAll();
+        $this->records = [];
+        foreach ($endpointGroups as $endpointGroup) {
+            $endpointCount = count($endpointGroup['endpoints']);
+            for ($n = 1; $n <= $endpointCount; $n++) {
+                $this->records[] = [
+                    'id' => $id,
+                    'metric_id' => $metricId,
+                    'date' => new FrozenDate(self::NEXT_RELEASE_DATE),
+                    'imported' => 0,
+                    'created' => '2021-01-01 00:00:00',
+                    'modified' => '2021-01-01 00:00:00',
+                ];
+                $id++;
+                $this->records[] = [
+                    'id' => $id,
+                    'metric_id' => $metricId,
+                    'date' => new FrozenDate(self::FOLLOWING_RELEASE_DATE),
+                    'imported' => 0,
+                    'created' => '2021-01-01 00:00:00',
+                    'modified' => '2021-01-01 00:00:00',
+                ];
+                $id++;
+            }
+        }
         parent::init();
     }
 }

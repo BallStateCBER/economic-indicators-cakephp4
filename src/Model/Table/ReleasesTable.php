@@ -33,6 +33,8 @@ use Cake\Validation\Validator;
  */
 class ReleasesTable extends Table
 {
+    private bool $useCache;
+
     /**
      * Initialize method
      *
@@ -53,6 +55,8 @@ class ReleasesTable extends Table
             'foreignKey' => 'metric_id',
             'joinType' => 'INNER',
         ]);
+
+        $this->useCache = !(defined('RUNNING_TEST') && RUNNING_TEST);
     }
 
     /**
@@ -101,23 +105,29 @@ class ReleasesTable extends Table
     public function getNextReleaseDates(): array
     {
         $cacheKey = 'next_release_dates';
+        $cachedResult = $this->useCache ? Cache::read($cacheKey, StatisticsTable::CACHE_CONFIG) : false;
+        if ($cachedResult) {
+            return $cachedResult;
+        }
 
-        return Cache::remember($cacheKey, function () {
-            $endpointGroups = EndpointGroups::getAll();
-            $dates = [];
-            foreach ($endpointGroups as $endpointGroup) {
-                foreach ($endpointGroup['endpoints'] as $endpoint) {
-                    $date = $this->getNextReleaseDate($endpoint['id']);
-                    if ($date) {
-                        $group = $endpoint['group'];
-                        $dates[$date->format('Y-m-d')][$group][] = $endpoint['name'];
-                    }
+        $endpointGroups = EndpointGroups::getAll();
+        $dates = [];
+        foreach ($endpointGroups as $endpointGroup) {
+            foreach ($endpointGroup['endpoints'] as $endpoint) {
+                $date = $this->getNextReleaseDate($endpoint['id']);
+                if ($date) {
+                    $group = $endpoint['group'];
+                    $dates[$date->format('Y-m-d')][$group][] = $endpoint['name'];
                 }
             }
-            ksort($dates);
+        }
+        ksort($dates);
 
-            return $dates;
-        }, StatisticsTable::CACHE_CONFIG);
+        if ($this->useCache) {
+            Cache::write($cacheKey, $dates, StatisticsTable::CACHE_CONFIG);
+        }
+
+        return $dates;
     }
 
     /**

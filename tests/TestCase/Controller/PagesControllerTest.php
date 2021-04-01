@@ -16,7 +16,10 @@ declare(strict_types=1);
  */
 namespace App\Test\TestCase\Controller;
 
+use App\Formatter\Formatter;
+use App\Test\Fixture\ReleasesFixture;
 use Cake\Core\Configure;
+use Cake\I18n\FrozenDate;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
@@ -28,6 +31,31 @@ use Cake\TestSuite\TestCase;
 class PagesControllerTest extends TestCase
 {
     use IntegrationTestTrait;
+
+    /**
+     * Fixtures
+     *
+     * @var array
+     */
+    protected $fixtures = [
+        'app.Metrics',
+        'app.Releases',
+        'app.Statistics',
+    ];
+
+    /**
+     * Sets up this collection of tests
+     *
+     * @return void
+     */
+    public function setUp(): void
+    {
+        if (!defined('RUNNING_TEST')) {
+            define('RUNNING_TEST', true);
+        }
+
+        parent::setUp();
+    }
 
     /**
      * testMultipleGet method
@@ -105,5 +133,23 @@ class PagesControllerTest extends TestCase
 
         $this->assertResponseCode(200);
         $this->assertResponseContains('Economic Indicators');
+    }
+
+    /**
+     * Tests that dynamically generated content on the home page appears as expected
+     *
+     * @return void
+     */
+    public function testHomeContent()
+    {
+        $this->get('/');
+
+        // Check that the releases table contains the appropriate release date (tomorrow)
+        $expectedDate = Formatter::formatReleaseDate(new FrozenDate(ReleasesFixture::NEXT_RELEASE_DATE));
+        $this->assertResponseContains($expectedDate);
+
+        // And not subsequent release dates
+        $forbiddenDate = Formatter::formatReleaseDate(new FrozenDate(ReleasesFixture::FOLLOWING_RELEASE_DATE));
+        $this->assertResponseNotContains($forbiddenDate);
     }
 }
