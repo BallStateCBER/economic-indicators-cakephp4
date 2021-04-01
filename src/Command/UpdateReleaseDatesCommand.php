@@ -67,13 +67,10 @@ class UpdateReleaseDatesCommand extends AppCommand
             $this->io->info($endpointGroup['title']);
             foreach ($endpointGroup['endpoints'] as $endpoint) {
                 $releaseId = $this->getReleaseId($endpoint);
-                $this->throttle();
-
                 $releaseDates = $this->getUpcomingReleaseDates($releaseId);
                 $metric = $this->metricsTable->getFromSeriesId($endpoint['seriesId']);
                 $this->removeInvalidReleases($releaseDates, $metric->id);
                 $this->addMissingReleases($releaseDates, $metric->id);
-                $this->throttle();
             }
             $this->io->out();
         }
@@ -107,6 +104,7 @@ class UpdateReleaseDatesCommand extends AppCommand
                 requiredProperty: 'releases',
                 haltOnError: $finalAttempt,
             );
+            $this->throttle();
             if ($responseObj) {
                 break;
             }
@@ -126,6 +124,7 @@ class UpdateReleaseDatesCommand extends AppCommand
         $this->io->out(' - Fetching upcoming release dates');
         for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts--) {
             $finalAttempt = $attempts == 1;
+            $this->throttle();
             $response = $this->releaseApi->dates([
                 'file_type' => 'json',
                 'release_id' => $releaseId,
