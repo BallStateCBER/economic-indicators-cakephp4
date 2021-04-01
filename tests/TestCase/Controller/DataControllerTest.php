@@ -42,6 +42,8 @@ class DataControllerTest extends TestCase
 
     /**
      * Sets up this collection of tests
+     *
+     * @return void
      */
     public function setUp(): void
     {
