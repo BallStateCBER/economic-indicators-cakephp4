@@ -7,7 +7,6 @@ use App\Endpoints\EndpointGroups;
 use App\Model\Entity\Metric;
 use Cake\Cache\Cache;
 use Cake\Database\Expression\QueryExpression;
-use Cake\Http\Exception\NotFoundException;
 use Cake\I18n\FrozenDate;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
