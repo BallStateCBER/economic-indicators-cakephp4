@@ -105,7 +105,7 @@ class UpdateReleaseDatesCommand extends AppCommand
             $response = $this->decodeResponse(
                 response: $response,
                 requiredProperty: 'releases',
-                throwException: $finalAttempt,
+                haltOnError: $finalAttempt,
             );
             if (!$response) {
                 continue;
@@ -135,7 +135,7 @@ class UpdateReleaseDatesCommand extends AppCommand
             $responseObj = $this->decodeResponse(
                 response: $response,
                 requiredProperty: 'release_dates',
-                throwException: $finalAttempt,
+                haltOnError: $finalAttempt,
             );
             if (!$responseObj) {
                 continue;

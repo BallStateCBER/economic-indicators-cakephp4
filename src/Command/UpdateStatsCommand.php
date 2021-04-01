@@ -266,7 +266,7 @@ class UpdateStatsCommand extends AppCommand
             $responseObj = $this->decodeResponse(
                 response: $response,
                 requiredProperty: 'observations',
-                throwException: $finalAttempt,
+                haltOnError: $finalAttempt,
             );
             if (!$responseObj) {
                 continue;

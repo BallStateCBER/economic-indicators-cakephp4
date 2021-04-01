@@ -77,24 +77,27 @@ abstract class AppCommand extends DataCenterCommand
     }
 
     /**
-     * Returns a decoded object if $response is valid JSON, returns FALSE if it's invalid
+     * Returns a decoded object if $response is valid JSON or FALSE if it's invalid
      *
-     * Outputs a message to the console if returning FALSE
-     * Throws an exception if $throwException is TRUE
-     * Halts execution if $response is not a string
+     * Outputs messages to the console if $response is invalid
+     * Halts execution instead of returning FALSE if $haltOnError is set to TRUE
      *
      * @param mixed $response JSON response from FRED API
      * @param string|null $requiredProperty A property expected to be in the decoded object
-     * @param bool $throwException Set to TRUE to throw a NotFoundException instead of returning FALSE
+     * @param bool $haltOnError Set to TRUE to halt execution on error instead of returning FALSE
      * @return bool|\stdClass
      */
-    protected function decodeResponse(mixed $response, ?string $requiredProperty = null, $throwException = false)
+    protected function decodeResponse(mixed $response, ?string $requiredProperty = null, $haltOnError = false)
     {
         if (!is_string($response)) {
-            $this->io->err('JSON response is not a string. API returned:');
+            $this->io->error('JSON response is not a string. API returned:');
             var_dump($response);
 
-            exit;
+            if ($haltOnError) {
+                exit;
+            }
+
+            return false;
         }
 
         $responseObj = json_decode($response);
@@ -108,8 +111,12 @@ abstract class AppCommand extends DataCenterCommand
             return $responseObj;
         }
 
-        if ($throwException) {
-            throw new NotFoundException();
+        if ($haltOnError) {
+            $this->io->error(sprintf(
+                'API failed to return a valid response %d times in a row, aborting',
+                $this->apiRetryCount + 1
+            ));
+            exit;
         }
 
         $this->io->error('Failed, retrying');
