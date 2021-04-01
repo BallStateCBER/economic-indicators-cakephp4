@@ -102,8 +102,10 @@ class DataController extends AppController
             $spreadsheet = $isTimeSeries
                 ? new SpreadsheetTimeSeries($endpointGroup, $data)
                 : new SpreadsheetSingleDate($endpointGroup, $data);
+            unset($data);
             $spreadsheetWriter = IOFactory::createWriter($spreadsheet->get(), 'Xlsx');
             $this->set(compact('spreadsheetWriter'));
+            unset($spreadsheetWriter);
 
             $this->viewBuilder()->setPlugin('DataCenter');
 
