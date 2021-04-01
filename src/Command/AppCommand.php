@@ -85,7 +85,7 @@ abstract class AppCommand extends DataCenterCommand
      *
      * @param mixed $response JSON response from FRED API
      * @param string|null $requiredProperty A property expected to be in the decoded object
-     * @param false $throwException Set to TRUE to throw a NotFoundException instead of returning FALSE
+     * @param bool $throwException Set to TRUE to throw a NotFoundException instead of returning FALSE
      * @return bool|\stdClass
      */
     protected function decodeResponse(mixed $response, ?string $requiredProperty = null, $throwException = false)
@@ -113,6 +113,7 @@ abstract class AppCommand extends DataCenterCommand
         }
 
         $this->io->error('Failed, retrying');
+
         return false;
     }
 }
