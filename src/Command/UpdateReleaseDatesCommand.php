@@ -6,6 +6,7 @@ namespace App\Command;
 use App\Endpoints\EndpointGroups;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\ReleasesTable;
+use Cake\Cache\Cache;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
@@ -76,6 +77,9 @@ class UpdateReleaseDatesCommand extends AppCommand
             }
             $this->io->out();
         }
+        $this->io->out('Rebuilding cache');
+        Cache::clear(ReleasesTable::CACHE_CONFIG);
+        $this->releasesTable->getNextReleaseDates();
         $this->io->success('Done');
     }
 
