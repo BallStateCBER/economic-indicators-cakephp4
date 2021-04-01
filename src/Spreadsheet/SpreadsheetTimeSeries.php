@@ -71,9 +71,9 @@ class SpreadsheetTimeSeries extends Spreadsheet
             ->nextRow();
 
         $prepend = Formatter::getPrepend($metric->units);
-        foreach ($data as $endpointName => $endpoint) {
-            $row = [$endpointName];
-            foreach ($endpoint[StatisticsTable::DATA_TYPE_VALUE] as $statistic) {
+        foreach ($data as $seriesId => $endpoint) {
+            $row = [$endpoint['name']];
+            foreach ($endpoint['statistics'][StatisticsTable::DATA_TYPE_VALUE] as $statistic) {
                 $row[] = Formatter::formatValue($statistic['value'], $prepend);
             }
             $this
@@ -97,7 +97,7 @@ class SpreadsheetTimeSeries extends Spreadsheet
     {
         $years = [];
         $firstEndpoint = reset($data);
-        foreach ($firstEndpoint[StatisticsTable::DATA_TYPE_VALUE] as $statistic) {
+        foreach ($firstEndpoint['statistics'][StatisticsTable::DATA_TYPE_VALUE] as $statistic) {
             $years[] = $statistic['date'];
         }
 
