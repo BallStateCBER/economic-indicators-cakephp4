@@ -1,6 +1,7 @@
 <?php
 /** @var array $releaseDates */
 
+use App\Formatter\Formatter;
 use Cake\I18n\FrozenDate;
 
 $i = 0;
@@ -51,15 +52,7 @@ $i = 0;
         <?php foreach ($releaseDates as $date => $endpoints): ?>
             <div>
                 <h2>
-                    <?php
-                        $dateObj = new FrozenDate($date);
-                        echo sprintf(
-                            '%s<sup>%s</sup>%s',
-                            $dateObj->format('F j'),
-                            $dateObj->format('S'),
-                            $dateObj->format(', Y'),
-                        );
-                    ?>
+                    <?= Formatter::formatReleaseDate(new FrozenDate($date)) ?>
                 </h2>
                 <ul class="list-unstyled">
                     <?php foreach ($endpoints as $group => $names): ?>

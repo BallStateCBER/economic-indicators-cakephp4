@@ -88,4 +88,20 @@ class Formatter
     {
         return str_contains(strtolower($unit), 'dollar') ? '$' : null;
     }
+
+    /**
+     * Returns a formatted date string
+     *
+     * @param \Cake\I18n\FrozenDate $date Date object
+     * @return string
+     */
+    public static function formatReleaseDate(FrozenDate $date): string
+    {
+        return sprintf(
+            '%s<sup>%s</sup>%s',
+            $date->format('F j'),
+            $date->format('S'),
+            $date->format(', Y'),
+        );
+    }
 }
