@@ -7,6 +7,7 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Core\Configure;
 use Cake\Http\Exception\InternalErrorException;
+use Cake\Http\Exception\NotFoundException;
 use DataCenter\Command\AppCommand as DataCenterCommand;
 use fred_api;
 use fred_api_exception;
@@ -73,5 +74,45 @@ abstract class AppCommand extends DataCenterCommand
     {
         $microseconds = (int)($this->rateThrottle * 1000000);
         usleep($microseconds);
+    }
+
+    /**
+     * Returns a decoded object if $response is valid JSON, returns FALSE if it's invalid
+     *
+     * Outputs a message to the console if returning FALSE
+     * Throws an exception if $throwException is TRUE
+     * Halts execution if $response is not a string
+     *
+     * @param mixed $response JSON response from FRED API
+     * @param string|null $requiredProperty A property expected to be in the decoded object
+     * @param false $throwException Set to TRUE to throw a NotFoundException instead of returning FALSE
+     * @return bool|\stdClass
+     */
+    protected function decodeResponse(mixed $response, ?string $requiredProperty = null, $throwException = false)
+    {
+        if (!is_string($response)) {
+            $this->io->err('JSON response is not a string. API returned:');
+            var_dump($response);
+
+            exit;
+        }
+
+        $responseObj = json_decode($response);
+
+        $responseIsValid = json_last_error() == JSON_ERROR_NONE && is_object($responseObj);
+        if ($requiredProperty) {
+            $responseIsValid = $responseIsValid && property_exists($responseObj, $requiredProperty);
+        }
+
+        if ($responseIsValid) {
+            return $responseObj;
+        }
+
+        if ($throwException) {
+            throw new NotFoundException();
+        }
+
+        $this->io->error('Failed, retrying');
+        return false;
     }
 }

@@ -263,26 +263,16 @@ class UpdateStatsCommand extends AppCommand
 
             $this->throttle();
             $response = $api->observations($parameters);
-            if (!is_string($response)) {
-                $this->io->err('JSON response is not a string. API returned:');
-                var_dump($response);
-
-                exit;
-            }
-            $response = json_decode($response);
-            $responseIsInvalid = (json_last_error() != JSON_ERROR_NONE)
-                && !is_object($response)
-                || !property_exists($response, 'observations');
-            if ($responseIsInvalid) {
-                if ($finalAttempt) {
-                    throw new NotFoundException();
-                } else {
-                    $this->io->error('Failed, retrying');
-                    continue;
-                }
+            $responseObj = $this->decodeResponse(
+                response: $response,
+                requiredProperty: 'observations',
+                throwException: $finalAttempt,
+            );
+            if (!$responseObj) {
+                continue;
             }
 
-            $observations = $response->observations;
+            $observations = $responseObj->observations;
 
             // Adjust for requests with limit = 1
             if (isset($observations['@attributes'])) {
