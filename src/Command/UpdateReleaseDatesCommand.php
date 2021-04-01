@@ -91,11 +91,10 @@ class UpdateReleaseDatesCommand extends AppCommand
     private function getReleaseId(mixed $endpoint): int
     {
         $this->io->out($endpoint['name']);
-        $endpointName = $endpoint['seriesId'];
         $this->io->out(' - Fetching release ID');
         $series = $this->seriesApi->release([
             'file_type' => 'json',
-            'series_id' => $endpointName,
+            'series_id' => $endpoint['seriesId'],
         ]);
         $series = json_decode($series);
 

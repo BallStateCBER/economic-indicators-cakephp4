@@ -125,19 +125,19 @@ class DataUpdaterCommand extends AppCommand
     /**
      * Returns TRUE if the API has more recently-updated data than the database
      *
-     * @param string $endpointName Matching metric->series_id and a seriesID in the FRED API
+     * @param string $seriesId Matching metric->series_id and a seriesID in the FRED API
      * @return bool
      * @throws \fred_api_exception
      */
-    private function updateIsAvailable(string $endpointName): bool
+    private function updateIsAvailable(string $seriesId): bool
     {
         /** @var \App\Model\Entity\Metric $metric */
         $metric = $this->metricsTable
             ->find()
-            ->where(['series_id' => $endpointName])
+            ->where(['series_id' => $seriesId])
             ->first();
         if (!$metric) {
-            $this->io->error('No metric record was found for ' . $endpointName);
+            $this->io->error('No metric record was found for ' . $seriesId);
             exit;
         }
 
@@ -145,7 +145,7 @@ class DataUpdaterCommand extends AppCommand
             return true;
         }
 
-        $this->setEndpoint($endpointName);
+        $this->setEndpoint($seriesId);
         $endpointMeta = $this->getEndpointMetadata();
         $responseUpdated = $endpointMeta['@attributes']['last_updated'];
 
@@ -162,24 +162,24 @@ class DataUpdaterCommand extends AppCommand
     private function loadMetrics(array $endpointGroup)
     {
         foreach ($endpointGroup['endpoints'] as $endpoint) {
-            $endpointName = $endpoint['seriesId'];
+            $seriesId = $endpoint['seriesId'];
 
             // Find existing metric
             $metric = $this->metricsTable
                 ->find()
-                ->where(['series_id' => $endpointName])
+                ->where(['series_id' => $seriesId])
                 ->first();
             if ($metric) {
-                $this->metrics[$endpointName] = $metric;
+                $this->metrics[$seriesId] = $metric;
                 continue;
             }
 
             // Create missing metric
-            $this->io->out('Adding ' . $endpointName . ' to metrics table');
-            $this->setEndpoint($endpointName);
+            $this->io->out('Adding ' . $seriesId . ' to metrics table');
+            $this->setEndpoint($seriesId);
             $endpointMeta = $this->getEndpointMetadata();
             $data = [
-                'name' => $endpointName,
+                'series_id' => $seriesId,
                 'units' => $endpointMeta['@attributes']['units'],
                 'frequency' => $endpointMeta['@attributes']['frequency'],
             ];
@@ -189,26 +189,26 @@ class DataUpdaterCommand extends AppCommand
                 $this->io->out(print_r($metric->getErrors(), true));
                 exit;
             }
-            $this->metrics[$endpointName] = $metric;
+            $this->metrics[$seriesId] = $metric;
         }
     }
 
     /**
      * Sets the series_id parameter for the next API request
      *
-     * @param string|array $endpointName Endpoint name (aka series ID) or array that contains 'seriesId' key
+     * @param string|array $seriesId Valid FRED API series_id argument or array that contains 'seriesId' key
      * @return void
      */
-    public function setEndpoint(mixed $endpointName): void
+    public function setEndpoint(mixed $seriesId): void
     {
-        if (is_array($endpointName)) {
-            if (!isset($endpointName['seriesId'])) {
+        if (is_array($seriesId)) {
+            if (!isset($seriesId['seriesId'])) {
                 throw new InternalErrorException('Series ID not provided');
             }
-            $endpointName = $endpointName['seriesId'];
+            $seriesId = $seriesId['seriesId'];
         }
 
-        $this->apiParameters['series_id'] = $endpointName;
+        $this->apiParameters['series_id'] = $seriesId;
     }
 
     /**
@@ -324,10 +324,10 @@ class DataUpdaterCommand extends AppCommand
         // Fetch from API
         $this->io->out(' - Retrieving from API...');
         $this->setEndpoint($endpoint);
-        $endpointName = $endpoint['seriesId'];
         $this->io->out(sprintf('%s: %s metadata', $endpoint['group'], $endpoint['name']));
         $endpointMeta = $this->getEndpointMetadata();
-        $metric = $this->metrics[$endpointName];
+        $seriesId = $endpoint['seriesId'];
+        $metric = $this->metrics[$seriesId];
         $this->apiParameters['sort_order'] = 'asc';
 
         $this->io->out('- Values');
