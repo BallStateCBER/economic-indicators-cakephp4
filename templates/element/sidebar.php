@@ -48,6 +48,10 @@ if (!function_exists('showSidebarLinks')) {
 ?>
 
 <section>
+    <?= $this->Html->link('<h2>Home</h2>', '/', ['escape' => false])  ?>
+</section>
+
+<section>
     <h2>
         United States
     </h2>
