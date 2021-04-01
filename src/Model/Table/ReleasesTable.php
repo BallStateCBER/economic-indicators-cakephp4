@@ -34,6 +34,7 @@ use Cake\Validation\Validator;
 class ReleasesTable extends Table
 {
     private bool $useCache;
+    public const CACHE_CONFIG = 'releases';
 
     /**
      * Initialize method
@@ -105,7 +106,7 @@ class ReleasesTable extends Table
     public function getNextReleaseDates(): array
     {
         $cacheKey = 'next_release_dates';
-        $cachedResult = $this->useCache ? Cache::read($cacheKey, StatisticsTable::CACHE_CONFIG) : false;
+        $cachedResult = $this->useCache ? Cache::read($cacheKey, self::CACHE_CONFIG) : false;
         if ($cachedResult) {
             return $cachedResult;
         }
@@ -124,7 +125,7 @@ class ReleasesTable extends Table
         ksort($dates);
 
         if ($this->useCache) {
-            Cache::write($cacheKey, $dates, StatisticsTable::CACHE_CONFIG);
+            Cache::write($cacheKey, $dates, self::CACHE_CONFIG);
         }
 
         return $dates;
