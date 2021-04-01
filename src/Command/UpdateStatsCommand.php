@@ -270,9 +270,10 @@ class UpdateStatsCommand extends AppCommand
                 exit;
             }
             $response = json_decode($response);
-            $responseIsValid = json_last_error() != JSON_ERROR_NONE;
-            $responseIsValid = $responseIsValid && !is_object($response) || !property_exists($response, 'observations');
-            if ($responseIsValid) {
+            $responseIsInvalid = (json_last_error() != JSON_ERROR_NONE)
+                && !is_object($response)
+                || !property_exists($response, 'observations');
+            if ($responseIsInvalid) {
                 if ($finalAttempt) {
                     throw new NotFoundException();
                 } else {
