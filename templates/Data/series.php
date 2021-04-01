@@ -1,17 +1,17 @@
 <?php
 /**
  * @var array $statsForGraph
- * @var string $endpointGroupId
- * @var string $endpointGroupName
+ * @var string $groupId
+ * @var string $groupTitle
  */
 ?>
 
 <p>
     <?= $this->Html->link(
-        '<i class="fas fa-arrow-circle-left"></i> Back to ' . $endpointGroupName,
+        '<i class="fas fa-arrow-circle-left"></i> Back to ' . $groupTitle,
         [
             'action' => 'group',
-            'groupName' => $endpointGroupId,
+            'groupId' => $groupId,
         ],
         [
             'class' => 'btn btn-secondary',

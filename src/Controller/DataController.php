@@ -49,13 +49,13 @@ class DataController extends AppController
     /**
      * Displays a page with statistics for a group of endpoints
      *
-     * @param string $groupName The name of a group of endpoints
+     * @param string $groupId An identifier of a group of endpoints
      * @return void
      * @throws \Cake\Http\Exception\NotFoundException
      */
-    public function group(string $groupName)
+    public function group(string $groupId)
     {
-        $endpointGroup = EndpointGroups::get($groupName);
+        $endpointGroup = EndpointGroups::get($groupId);
         $this->loadModel('Releases');
         $metrics = $this->Metrics->getAllForEndpointGroup($endpointGroup);
         /** @var \App\Model\Entity\Metric $firstMetric */
@@ -63,7 +63,7 @@ class DataController extends AppController
         $this->set([
             'dateRange' => $this->Statistics->getDateRange($endpointGroup),
             'frequency' => $firstMetric->frequency,
-            'groupName' => $groupName,
+            'groupId' => $groupId,
             'lastUpdated' => $firstMetric->last_updated->format('F j, Y'),
             'nextRelease' => $this->Releases->getNextReleaseDate(...$metrics),
             'pageTitle' => $endpointGroup['title'],
@@ -80,12 +80,12 @@ class DataController extends AppController
      *
      * The ?timeSeries=1 query string is used to download an alternate version of the spreadsheet
      *
-     * @param string $groupName The name of a group of endpoints
+     * @param string $groupId An identifier for a group of endpoints
      * @return \Cake\Http\Response|null
      */
-    public function download(string $groupName): ?Response
+    public function download(string $groupId): ?Response
     {
-        $endpointGroup = EndpointGroups::get($groupName);
+        $endpointGroup = EndpointGroups::get($groupId);
         $isTimeSeries = (bool)$this->getRequest()->getQuery('timeSeries');
 
         try {
@@ -127,7 +127,7 @@ class DataController extends AppController
 
         return $this->redirect([
             'action' => 'group',
-            'groupName' => $groupName,
+            'groupId' => $groupId,
             '_ext' => null,
         ]);
     }
@@ -165,11 +165,11 @@ class DataController extends AppController
     /**
      * Displays a page with a line graph of this metric's values over time
      *
-     * @param string $endpointGroupId String used for accessing an endpoint group
+     * @param string $groupId Identifier for accessing an endpoint group
      * @param string $seriesId Metric seriesID, used in API calls
      * @return void
      */
-    public function series(string $endpointGroupId, string $seriesId)
+    public function series(string $groupId, string $seriesId)
     {
         /** @var \App\Model\Entity\Metric|null $metric */
         $metric = $this->Metrics->findBySeriesId($seriesId)->first();
@@ -204,11 +204,11 @@ class DataController extends AppController
         }
         unset($statistics, $statistic);
 
-        $endpointGroup = EndpointGroups::get($endpointGroupId);
+        $endpointGroup = EndpointGroups::get($groupId);
 
         $this->set([
-            'endpointGroupId' => $endpointGroupId,
-            'endpointGroupName' => $endpointGroup['title'],
+            'groupId' => $groupId,
+            'groupTitle' => $endpointGroup['title'],
             'pageTitle' => sprintf('%s: %s', $endpointGroup['title'], $this->getMetricName($metric->series_id)),
             'statsForGraph' => $statsForGraph,
             'units' => ucwords($metric->units),
@@ -226,9 +226,9 @@ class DataController extends AppController
     {
         // Override to account for 'Indiana Manufacturing Employment' having different names on different pages
         if ($seriesId == 'INMFG') {
-            $groupName = $this->getRequest()->getParam('groupName');
+            $groupId = $this->getRequest()->getParam('groupId');
 
-            return $groupName == 'manufacturing-employment' ? 'Indiana' : 'Manufacturing';
+            return $groupId == 'manufacturing-employment' ? 'Indiana' : 'Manufacturing';
         }
 
         $endpointGroups = EndpointGroups::getAll();

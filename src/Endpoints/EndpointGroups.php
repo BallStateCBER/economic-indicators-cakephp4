@@ -170,15 +170,15 @@ class EndpointGroups
     }
 
     /**
-     * Returns an endpoint group, identified by the $groupName string
+     * Returns an endpoint group, identified by the $groupId string
      *
-     * @param string $groupName String used for accessing an endpoint group
+     * @param string $groupId String used for accessing an endpoint group
      * @return array
      * @throws \Cake\Http\Exception\NotFoundException
      */
-    public static function get(string $groupName): array
+    public static function get(string $groupId): array
     {
-        switch ($groupName) {
+        switch ($groupId) {
             case 'housing':
                 return self::HOUSING;
             case 'vehicle-sales':
@@ -199,6 +199,6 @@ class EndpointGroups
                 return self::getStateManufacturing();
         }
 
-        throw new NotFoundException('Data group ' . $groupName . ' not found');
+        throw new NotFoundException('Data group ' . $groupId . ' not found');
     }
 }

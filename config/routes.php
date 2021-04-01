@@ -49,17 +49,17 @@ $routes->scope('/', function (RouteBuilder $builder) {
     foreach (['group', 'download'] as $action) {
         $builder
             ->connect(
-                "/$action/{groupName}",
+                "/$action/{groupId}",
                 ['controller' => 'Data', 'action' => $action]
             )
-            ->setPass(['groupName']);
+            ->setPass(['groupId']);
     }
     $builder
         ->connect(
-            '/series/{groupName}/{seriesId}',
+            '/series/{groupId}/{seriesId}',
             ['controller' => 'Data', 'action' => 'series']
         )
-        ->setPass(['groupName', 'seriesId']);
+        ->setPass(['groupId', 'seriesId']);
     $builder->fallbacks();
 });
 

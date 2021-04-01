@@ -31,14 +31,14 @@ if (!function_exists('showSidebarLinks')) {
      */
     function showSidebarLinks(AppView $view, array $links)
     {
-        foreach ($links as $groupName => $label) {
+        foreach ($links as $groupId => $label) {
             echo '<li>';
             echo $view->Html->link(
                 $label,
                 [
                     'controller' => 'Data',
                     'action' => 'group',
-                    'groupName' => $groupName,
+                    'groupId' => $groupId,
                 ]
             );
             echo '</li>';

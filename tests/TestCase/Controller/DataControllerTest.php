@@ -28,7 +28,7 @@ class DataControllerTest extends TestCase
         'app.Statistics',
     ];
 
-    private array $groupNames = [
+    private array $groupIds = [
         'county-unemployment',
         'earnings',
         'employment-by-sector',
@@ -61,15 +61,15 @@ class DataControllerTest extends TestCase
      */
     public function testGroup(): void
     {
-        foreach ($this->groupNames as $groupName) {
+        foreach ($this->groupIds as $groupId) {
             $this->get([
                 'controller' => 'Data',
                 'action' => 'group',
-                'groupName' => $groupName,
+                'groupId' => $groupId,
             ]);
-            $this->assertResponseOk("Not-OK response returned for /data/group/$groupName");
+            $this->assertResponseOk("Not-OK response returned for /data/group/$groupId");
 
-            $endpointGroup = EndpointGroups::get($groupName);
+            $endpointGroup = EndpointGroups::get($groupId);
             $this->assertResponseContains($endpointGroup['title']);
 
             foreach ($endpointGroup['endpoints'] as $endpoint) {
@@ -94,16 +94,16 @@ class DataControllerTest extends TestCase
      */
     public function testSeries(): void
     {
-        foreach ($this->groupNames as $groupName) {
-            $endpointGroup = EndpointGroups::get($groupName);
+        foreach ($this->groupIds as $groupId) {
+            $endpointGroup = EndpointGroups::get($groupId);
             foreach ($endpointGroup['endpoints'] as $endpoint) {
                 $this->get([
                     'controller' => 'Data',
                     'action' => 'series',
-                    'groupName' => $groupName,
+                    'groupId' => $groupId,
                     'seriesId' => $endpoint['seriesId'],
                 ]);
-                $this->assertResponseOk("Not-OK response returned for /data/series/$groupName/{$endpoint['seriesId']}");
+                $this->assertResponseOk("Not-OK response returned for /data/series/$groupId/{$endpoint['seriesId']}");
                 $this->assertResponseContains(sprintf(
                     '%s: %s',
                     $endpointGroup['title'],

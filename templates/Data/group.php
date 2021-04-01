@@ -7,7 +7,7 @@
  * @var array $statsForSparklines
  * @var array|bool $statistics
  * @var string $frequency
- * @var string $groupName
+ * @var string $groupId
  * @var string $lastUpdated
  * @var string $prepend
  * @var string $unit
@@ -82,7 +82,7 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                             ),
                             [
                                 'action' => 'series',
-                                'groupName' => $groupName,
+                                'groupId' => $groupId,
                                 'seriesId' => $seriesId,
                             ],
                             [
@@ -136,7 +136,7 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                     'This table',
                     [
                         'action' => 'download',
-                        'groupName' => $this->getRequest()->getParam('groupName'),
+                        'groupId' => $this->getRequest()->getParam('groupId'),
                     ],
                 ) ?>
             </li>
@@ -145,7 +145,7 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                     sprintf('%s - %s time series data', $dateRange[0], $dateRange[1]),
                     [
                         'action' => 'download',
-                        'groupName' => $this->getRequest()->getParam('groupName'),
+                        'groupId' => $this->getRequest()->getParam('groupId'),
                         '?' => ['timeSeries' => 1],
                     ],
                 ) ?>
