@@ -59,18 +59,29 @@ class SpreadsheetSingleDate extends Spreadsheet
 
         $prepend = Formatter::getPrepend($metric->units);
         $frequency = $metricsTable->getFrequency($endpointGroup);
-        foreach ($data as $endpointName => $endpoint) {
+        foreach ($data as $seriesId => $endpoint) {
             $this
                 ->writeRow([
-                    $endpointName,
-                    Formatter::formatValue($endpoint[StatisticsTable::DATA_TYPE_VALUE]['value'], $prepend),
-                    Formatter::formatValue($endpoint[StatisticsTable::DATA_TYPE_CHANGE]['value'], $prepend),
-                    Formatter::formatValue($endpoint[StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']) . '%',
+                    $endpoint['name'],
+                    Formatter::formatValue(
+                        $endpoint['statistics'][StatisticsTable::DATA_TYPE_VALUE]['value'],
+                        $prepend
+                    ),
+                    Formatter::formatValue(
+                        $endpoint['statistics'][StatisticsTable::DATA_TYPE_CHANGE]['value'],
+                        $prepend
+                    ),
+                    Formatter::formatValue(
+                        $endpoint['statistics'][StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
+                    ) . '%',
                 ])
                 ->alignHorizontal('right', 2);
 
             // Write date explicitly as a string so it doesn't get reformatted into a different date format by Excel
-            $date = Formatter::getFormattedDate($endpoint[StatisticsTable::DATA_TYPE_VALUE]['date'], $frequency);
+            $date = Formatter::getFormattedDate(
+                $endpoint['statistics'][StatisticsTable::DATA_TYPE_VALUE]['date'],
+                $frequency
+            );
             $dateCol = 5;
             $cell = $this->getColumnKey($dateCol) . $this->currentRow;
             $this->objPHPExcel
