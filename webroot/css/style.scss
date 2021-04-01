@@ -62,18 +62,39 @@ table.observations {
 #sidebar {
     h2 {
         margin-bottom: 0;
+
+        &[data-toggle="collapse"] {
+            cursor: pointer;
+            font-size: 1.7em;
+            margin-bottom: 0;
+
+            &[aria-expanded="true"] {
+                margin-bottom: 0.5em;
+            }
+        }
     }
 
     ul {
-        padding-left: 0;
-        margin-top: 0;
+        margin-bottom: 0;
         margin-left: 20px;
+        margin-top: 0;
+        padding-left: 0;
     }
 
     a {
         h2 {
             color: $link-color;
         }
+    }
+
+    button.navbar-toggler {
+        float: right;
+        font-size: 100%;
+        padding: 4px;
+    }
+
+    section {
+        margin-bottom: 1em;
     }
 }
 

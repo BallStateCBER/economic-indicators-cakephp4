@@ -47,33 +47,51 @@ if (!function_exists('showSidebarLinks')) {
 }
 ?>
 
-<section>
-    <?= $this->Html->link('<h2>Home</h2>', '/', ['escape' => false])  ?>
-</section>
+<div class="navbar-light navbar-expand-md sidebar-collapse">
+    <div class="row d-md-none">
+        <div class="col">
+            <h2 data-toggle="collapse" data-target="#sidebar-links">
+                Menu
+            </h2>
+        </div>
+        <div class="col-2">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#sidebar-links"
+                    aria-controls="sidebar-links" aria-expanded="false" aria-label="Toggle menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </div>
 
-<section>
-    <h2>
-        United States
-    </h2>
-    <ul>
-        <?php showSidebarLinks($this, $usLinks); ?>
-    </ul>
-</section>
+    <div id="sidebar-links" class="collapse navbar-collapse">
+        <section>
+            <?= $this->Html->link('<h2>Home</h2>', '/', ['escape' => false])  ?>
+        </section>
 
-<section>
-    <h2>
-        Indiana
-    </h2>
-    <ul>
-        <?php showSidebarLinks($this, $inLinks); ?>
-    </ul>
-</section>
+        <section>
+            <h2>
+                United States
+            </h2>
+            <ul>
+                <?php showSidebarLinks($this, $usLinks); ?>
+            </ul>
+        </section>
 
-<section>
-    <h2>
-        Indiana Counties
-    </h2>
-    <ul>
-        <?php showSidebarLinks($this, $countyLinks); ?>
-    </ul>
-</section>
+        <section>
+            <h2>
+                Indiana
+            </h2>
+            <ul>
+                <?php showSidebarLinks($this, $inLinks); ?>
+            </ul>
+        </section>
+
+        <section>
+            <h2>
+                Indiana Counties
+            </h2>
+            <ul>
+                <?php showSidebarLinks($this, $countyLinks); ?>
+            </ul>
+        </section>
+    </div>
+</div>
