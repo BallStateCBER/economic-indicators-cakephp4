@@ -96,13 +96,23 @@ class UpdateReleaseDatesCommand extends AppCommand
     {
         $this->io->out($endpoint['name']);
         $this->io->out(' - Fetching release ID');
-        $series = $this->seriesApi->release([
-            'file_type' => 'json',
-            'series_id' => $endpoint['seriesId'],
-        ]);
-        $series = json_decode($series);
+        for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts--) {
+            $finalAttempt = $attempts == 1;
+            $response = $this->seriesApi->release([
+                'file_type' => 'json',
+                'series_id' => $endpoint['seriesId'],
+            ]);
+            $response = $this->decodeResponse(
+                response: $response,
+                requiredProperty: 'releases',
+                throwException: $finalAttempt,
+            );
+            if (!$response) {
+                continue;
+            }
+        }
 
-        return $series->releases[0]->id;
+        return $response->releases[0]->id;
     }
 
     /**
@@ -114,16 +124,25 @@ class UpdateReleaseDatesCommand extends AppCommand
     private function getUpcomingReleaseDates(int $releaseId): array
     {
         $this->io->out(' - Fetching upcoming release dates');
-        $releaseDates = $this->releaseApi->dates([
-            'file_type' => 'json',
-            'release_id' => $releaseId,
-            'realtime_start' => date('Y-m-d'),
-            'include_release_dates_with_no_data' => 'true',
-        ]);
-        $releaseDates = json_decode($releaseDates);
-        $releaseDates = $releaseDates->release_dates;
+        for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts--) {
+            $finalAttempt = $attempts == 1;
+            $response = $this->releaseApi->dates([
+                'file_type' => 'json',
+                'release_id' => $releaseId,
+                'realtime_start' => date('Y-m-d'),
+                'include_release_dates_with_no_data' => 'true',
+            ]);
+            $responseObj = $this->decodeResponse(
+                response: $response,
+                requiredProperty: 'release_dates',
+                throwException: $finalAttempt,
+            );
+            if (!$responseObj) {
+                continue;
+            }
+        }
 
-        return Hash::extract($releaseDates, '{n}.date');
+        return Hash::extract($responseObj->release_dates, '{n}.date');
     }
 
     /**
