@@ -16,254 +16,254 @@ class FredEndpoints
     public const HOUSING_TOTAL = [
         'group' => self::VAR_HOUSING,
         'name' => 'Total – new private owned',
-        'id' => 'HOUST',
+        'seriesId' => 'HOUST',
     ];
     public const HOUSING_1_UNIT = [
         'group' => self::VAR_HOUSING,
         'name' => '1 unit structures',
-        'id' => 'HOUST1F',
+        'seriesId' => 'HOUST1F',
     ];
     public const HOUSING_2_4_UNIT = [
         'group' => self::VAR_HOUSING,
         'name' => '2-4 unit structures',
-        'id' => 'HOUST2F',
+        'seriesId' => 'HOUST2F',
     ];
     public const HOUSING_5_UNIT = [
         'group' => self::VAR_HOUSING,
         'name' => '5 unit structures',
-        'id' => 'HOUST5F',
+        'seriesId' => 'HOUST5F',
     ];
 
     public const VAR_VEHICLE_SALES = 'Motor Vehicle Sales';
     public const VEHICLE_SALES_TOTAL = [
         'group' => self::VAR_VEHICLE_SALES,
         'name' => 'Total vehicle sales',
-        'id' => 'TOTALSA',
+        'seriesId' => 'TOTALSA',
     ];
     public const VEHICLE_SALES_AUTOS = [
         'group' => self::VAR_VEHICLE_SALES,
         'name' => 'Total autos',
-        'id' => 'LAUTOSA',
+        'seriesId' => 'LAUTOSA',
     ];
     public const VEHICLE_SALES_AUTOS_DOMESTIC = [
         'group' => self::VAR_VEHICLE_SALES,
         'name' => 'Total autos - Domestic autos',
-        'id' => 'DAUTOSAAR',
+        'seriesId' => 'DAUTOSAAR',
     ];
     public const VEHICLE_SALES_AUTOS_FOREIGN = [
         'group' => self::VAR_VEHICLE_SALES,
         'name' => 'Total autos - Foreign autos',
-        'id' => 'FAUTOSAAR',
+        'seriesId' => 'FAUTOSAAR',
     ];
     public const VEHICLE_SALES_LW_TRUCKS = [
         'group' => self::VAR_VEHICLE_SALES,
         'name' => 'Total light weight trucks',
-        'id' => 'LTRUCKSA',
+        'seriesId' => 'LTRUCKSA',
     ];
     public const VEHICLE_SALES_LW_TRUCKS_DOMESTIC = [
         'group' => self::VAR_VEHICLE_SALES,
         'name' => 'Domestic light weight trucks',
-        'id' => 'DLTRUCKSSAAR',
+        'seriesId' => 'DLTRUCKSSAAR',
     ];
     public const VEHICLE_SALES_LW_TRUCKS_FOREIGN = [
         'group' => self::VAR_VEHICLE_SALES,
         'name' => 'Foreign light weight trucks',
-        'id' => 'FLTRUCKSSAAR',
+        'seriesId' => 'FLTRUCKSSAAR',
     ];
     public const VEHICLE_SALES_HW_TRUCKS = [
         'group' => self::VAR_VEHICLE_SALES,
         'name' => 'Heavy weight trucks',
-        'id' => 'HTRUCKSSAAR',
+        'seriesId' => 'HTRUCKSSAAR',
     ];
 
     public const VAR_RETAIL_FOOD = 'Retail and Food Services';
     public const RETAIL_FOOD_TOTAL = [
         'group' => self::VAR_RETAIL_FOOD,
         'name' => 'Advance retail sales: Retail and food services, Total',
-        'id' => 'RSAFS',
+        'seriesId' => 'RSAFS',
     ];
     public const RETAIL_FOOD_EX_DEALERS = [
         'group' => self::VAR_RETAIL_FOOD,
         'name' => 'Advance retail sales: Retail and food services (excluding motor vehicle and parts dealers)',
-        'id' => 'RSFSXMV',
+        'seriesId' => 'RSFSXMV',
     ];
     public const RETAIL_FOOD_EX_FOOD = [
         'group' => self::VAR_RETAIL_FOOD,
         'name' => 'Advance retail sales: Retail (excluding food services)',
-        'id' => 'RSXFS',
+        'seriesId' => 'RSXFS',
     ];
 
     public const VAR_GDP = 'Gross Domestic Product';
     public const GDP = [
         'group' => self::VAR_GDP,
         'name' => 'Gross Domestic Product',
-        'id' => 'GDP',
+        'seriesId' => 'GDP',
     ];
     public const GDP_REAL = [
         'group' => self::VAR_GDP,
         'name' => 'Real Gross Domestic Product (2012) dollars',
-        'id' => 'GDPC1',
+        'seriesId' => 'GDPC1',
     ];
     public const GDP_PERSONAL_CONSUMPTION = [
         'group' => self::VAR_GDP,
         'name' => 'Personal consumption expenditures',
-        'id' => 'PCEC',
+        'seriesId' => 'PCEC',
     ];
     public const GDP_PERSONAL_CONSUMPTION_REAL = [
         'group' => self::VAR_GDP,
         'name' => 'Real personal consumption expenditures (2012) dollars',
-        'id' => 'PCEC96',
+        'seriesId' => 'PCEC96',
     ];
 
     public const VAR_UNEMPLOYMENT = 'Unemployment Rate - Indiana';
     public const UNEMPLOYMENT_INDIANA = [
         'group' => self::VAR_UNEMPLOYMENT,
         'name' => 'Unemployment rate (seasonally adjusted)',
-        'id' => 'INUR',
+        'seriesId' => 'INUR',
     ];
 
     public const VAR_EMPLOYMENT_BY_SECTOR = 'Employment by Sector (seasonally adjusted)';
     public const EMP_TOTAL_NONFARM = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Total nonfarm',
-        'id' => 'INNA',
+        'seriesId' => 'INNA',
     ];
     public const EMP_MINING_LOGGING = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Mining and logging',
-        'id' => 'SMS18000001000000001',
+        'seriesId' => 'SMS18000001000000001',
     ];
     public const EMP_CONSTRUCTION = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Construction',
-        'id' => 'INCONS',
+        'seriesId' => 'INCONS',
     ];
     public const EMP_MANUFACTURING = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Manufacturing',
-        'id' => 'INMFG',
+        'seriesId' => 'INMFG',
     ];
     public const EMP_DURABLE_GOODS = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Durable goods',
-        'id' => 'SMS18000003100000001',
+        'seriesId' => 'SMS18000003100000001',
     ];
     public const EMP_NON_DURABLE_GOODS = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Non-durable goods',
-        'id' => 'SMS18000003200000001',
+        'seriesId' => 'SMS18000003200000001',
     ];
     public const EMP_TRADE_TRANSP_UTILITIES = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Trade, transportation and utilities',
-        'id' => 'INTRADN',
+        'seriesId' => 'INTRADN',
     ];
     public const EMP_WHOLESALE = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Wholesale trade',
-        'id' => 'SMS18000004100000001',
+        'seriesId' => 'SMS18000004100000001',
     ];
     public const EMP_RETAIL = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Retail trade',
-        'id' => 'SMS18000004200000001',
+        'seriesId' => 'SMS18000004200000001',
     ];
     public const EMP_TRANSP_WH_UTILITIES = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Transportation, warehousing and utilities',
-        'id' => 'SMS18000004300000001',
+        'seriesId' => 'SMS18000004300000001',
     ];
     public const EMP_INFORMATION = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Information',
-        'id' => 'ININFO',
+        'seriesId' => 'ININFO',
     ];
     public const EMP_FINANCIAL = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Financial activities',
-        'id' => 'INFIRE',
+        'seriesId' => 'INFIRE',
     ];
     public const EMP_PROFESSIONAL = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Professional and business services',
-        'id' => 'INPBSV',
+        'seriesId' => 'INPBSV',
     ];
     public const EMP_EDU_HEALTH = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Education and health service',
-        'id' => 'INEDUH',
+        'seriesId' => 'INEDUH',
     ];
     public const EMP_LEISURE_HOSPITALITY = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Leisure and hospitality',
-        'id' => 'INLEIH',
+        'seriesId' => 'INLEIH',
     ];
     public const EMP_OTHER_SERVICES = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Other services',
-        'id' => 'INSRVO',
+        'seriesId' => 'INSRVO',
     ];
     public const EMP_GOVERNMENT = [
         'group' => self::VAR_EMPLOYMENT_BY_SECTOR,
         'name' => 'Government',
-        'id' => 'INGOVT',
+        'seriesId' => 'INGOVT',
     ];
 
     public const VAR_EARNINGS = 'Average Weekly Earnings (seasonally adjusted)';
     public const EARNINGS_PRIVATE = [
         'group' => self::VAR_EARNINGS,
         'name' => 'Total private',
-        'id' => 'SMU18000000500000011SA',
+        'seriesId' => 'SMU18000000500000011SA',
     ];
     public const EARNINGS_GOODS = [
         'group' => self::VAR_EARNINGS,
         'name' => 'Goods producing',
-        'id' => 'SMU18000000600000011SA',
+        'seriesId' => 'SMU18000000600000011SA',
     ];
     public const EARNINGS_SERVICE = [
         'group' => self::VAR_EARNINGS,
         'name' => 'Private service providing',
-        'id' => 'SMU18000000800000011SA',
+        'seriesId' => 'SMU18000000800000011SA',
     ];
     public const EARNINGS_CONSTRUCTION = [
         'group' => self::VAR_EARNINGS,
         'name' => 'Construction',
-        'id' => 'SMU18000002000000011SA',
+        'seriesId' => 'SMU18000002000000011SA',
     ];
     public const EARNINGS_MANUFACTURING = [
         'group' => self::VAR_EARNINGS,
         'name' => 'Manufacturing',
-        'id' => 'SMU18000003000000011SA',
+        'seriesId' => 'SMU18000003000000011SA',
     ];
     public const EARNINGS_TRADE_TRANSPORT_UTILITIES = [
         'group' => self::VAR_EARNINGS,
         'name' => 'Trade, transportation and utilities',
-        'id' => 'SMU18000004000000011SA',
+        'seriesId' => 'SMU18000004000000011SA',
     ];
     public const EARNINGS_FINANCIAL = [
         'group' => self::VAR_EARNINGS,
         'name' => 'Financial activities',
-        'id' => 'SMU18000005500000011SA',
+        'seriesId' => 'SMU18000005500000011SA',
     ];
     public const EARNINGS_PROFESSIONAL = [
         'group' => self::VAR_EARNINGS,
         'name' => 'Professional and business services',
-        'id' => 'SMU18000006000000011SA',
+        'seriesId' => 'SMU18000006000000011SA',
     ];
     public const EARNINGS_EDUCATION_HEALTH = [
         'group' => self::VAR_EARNINGS,
         'name' => 'Education and health service',
-        'id' => 'SMU18000006500000011SA',
+        'seriesId' => 'SMU18000006500000011SA',
     ];
     public const EARNINGS_LEISURE = [
         'group' => self::VAR_EARNINGS,
         'name' => 'Leisure and Hospitality',
-        'id' => 'SMU18000007000000011SA',
+        'seriesId' => 'SMU18000007000000011SA',
     ];
     public const EARNINGS_OTHER = [
         'group' => self::VAR_EARNINGS,
         'name' => 'Other services',
-        'id' => 'SMU18000008000000011SA',
+        'seriesId' => 'SMU18000008000000011SA',
     ];
 
     public const VAR_COUNTY_UNEMPLOYMENT = 'County Unemployment Rate';

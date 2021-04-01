@@ -114,7 +114,7 @@ class ReleasesTable extends Table
         $dates = [];
         foreach ($endpointGroups as $endpointGroup) {
             foreach ($endpointGroup['endpoints'] as $endpoint) {
-                $date = $this->getNextReleaseDate($endpoint['id']);
+                $date = $this->getNextReleaseDate($endpoint['seriesId']);
                 if ($date) {
                     $group = $endpoint['group'];
                     $dates[$date->format('Y-m-d')][$group][] = $endpoint['name'];

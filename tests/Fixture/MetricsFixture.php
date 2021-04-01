@@ -47,7 +47,7 @@ class MetricsFixture extends TestFixture
             foreach ($endpointGroup['endpoints'] as $endpoint) {
                 $this->records[] = [
                     'id' => $id,
-                    'series_id' => $endpoint['id'],
+                    'series_id' => $endpoint['seriesId'],
                     'last_updated' => '2021-01-01 00:00:00',
                     'units' => 'Units',
                     'frequency' => 'Frequency',

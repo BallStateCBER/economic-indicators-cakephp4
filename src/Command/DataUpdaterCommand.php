@@ -97,8 +97,8 @@ class DataUpdaterCommand extends AppCommand
             $groupUpdated = false;
 
             foreach ($endpointGroup['endpoints'] as $endpoint) {
-                if ($this->updateIsAvailable($endpoint['id'])) {
-                    $io->out(sprintf('%s: Update available', $endpoint['id']));
+                if ($this->updateIsAvailable($endpoint['seriesId'])) {
+                    $io->out(sprintf('%s: Update available', $endpoint['seriesId']));
                     try {
                         $this->updateEndpoint($endpoint);
                         $groupUpdated = true;
@@ -107,7 +107,7 @@ class DataUpdaterCommand extends AppCommand
                         exit;
                     }
                 } else {
-                    $io->out(sprintf('%s: No update available', $endpoint['id']));
+                    $io->out(sprintf('%s: No update available', $endpoint['seriesId']));
                     continue;
                 }
             }
@@ -162,7 +162,7 @@ class DataUpdaterCommand extends AppCommand
     private function loadMetrics(array $endpointGroup)
     {
         foreach ($endpointGroup['endpoints'] as $endpoint) {
-            $endpointName = $endpoint['id'];
+            $endpointName = $endpoint['seriesId'];
 
             // Find existing metric
             $metric = $this->metricsTable
@@ -196,16 +196,16 @@ class DataUpdaterCommand extends AppCommand
     /**
      * Sets the series_id parameter for the next API request
      *
-     * @param string|array $endpointName Endpoint name (aka series ID) or array that contains 'id' key
+     * @param string|array $endpointName Endpoint name (aka series ID) or array that contains 'seriesId' key
      * @return void
      */
     public function setEndpoint(mixed $endpointName): void
     {
         if (is_array($endpointName)) {
-            if (!isset($endpointName['id'])) {
+            if (!isset($endpointName['seriesId'])) {
                 throw new InternalErrorException('Series ID not provided');
             }
-            $endpointName = $endpointName['id'];
+            $endpointName = $endpointName['seriesId'];
         }
 
         $this->apiParameters['series_id'] = $endpointName;
@@ -324,7 +324,7 @@ class DataUpdaterCommand extends AppCommand
         // Fetch from API
         $this->io->out(' - Retrieving from API...');
         $this->setEndpoint($endpoint);
-        $endpointName = $endpoint['id'];
+        $endpointName = $endpoint['seriesId'];
         $this->io->out(sprintf('%s: %s metadata', $endpoint['group'], $endpoint['name']));
         $endpointMeta = $this->getEndpointMetadata();
         $metric = $this->metrics[$endpointName];

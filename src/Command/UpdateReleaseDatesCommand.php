@@ -69,7 +69,7 @@ class UpdateReleaseDatesCommand extends AppCommand
                 $this->throttle();
 
                 $releaseDates = $this->getUpcomingReleaseDates($releaseId);
-                $metric = $this->metricsTable->getFromSeriesId($endpoint['id']);
+                $metric = $this->metricsTable->getFromSeriesId($endpoint['seriesId']);
                 $this->removeInvalidReleases($releaseDates, $metric->id);
                 $this->addMissingReleases($releaseDates, $metric->id);
                 $this->throttle();
@@ -91,7 +91,7 @@ class UpdateReleaseDatesCommand extends AppCommand
     private function getReleaseId(mixed $endpoint): int
     {
         $this->io->out($endpoint['name']);
-        $endpointName = $endpoint['id'];
+        $endpointName = $endpoint['seriesId'];
         $this->io->out(' - Fetching release ID');
         $series = $this->seriesApi->release([
             'file_type' => 'json',

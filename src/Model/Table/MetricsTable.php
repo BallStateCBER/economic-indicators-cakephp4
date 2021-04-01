@@ -97,7 +97,7 @@ class MetricsTable extends Table
      */
     public function getFrequency(array $endpointGroup): string
     {
-        $seriesId = $endpointGroup['endpoints'][0]['id'];
+        $seriesId = $endpointGroup['endpoints'][0]['seriesId'];
         /** @var \App\Model\Entity\Metric|null $metric */
         $metric = $this->getFromSeriesId($seriesId);
 
@@ -112,7 +112,7 @@ class MetricsTable extends Table
      */
     public function getFirstForEndpointGroup(array $endpointGroup): Metric | EntityInterface
     {
-        $metricName = $endpointGroup['endpoints'][0]['id'];
+        $metricName = $endpointGroup['endpoints'][0]['seriesId'];
         $metric = $this->findBySeriesId($metricName)->first();
         if (!$metric) {
             throw new InternalErrorException("Metric $metricName not found");
@@ -131,7 +131,7 @@ class MetricsTable extends Table
     {
         $metrics = [];
         foreach ($endpointGroup['endpoints'] as $endpoint) {
-            $metricName = $endpoint['id'];
+            $metricName = $endpoint['seriesId'];
             $metric = $this->findBySeriesId($metricName)->first();
             if (!$metric) {
                 throw new InternalErrorException("Metric $metricName not found");

@@ -101,9 +101,9 @@ class DataControllerTest extends TestCase
                     'controller' => 'Data',
                     'action' => 'series',
                     'groupName' => $groupName,
-                    'seriesId' => $endpoint['id'],
+                    'seriesId' => $endpoint['seriesId'],
                 ]);
-                $this->assertResponseOk("Not-OK response returned for /data/series/$groupName/{$endpoint['id']}");
+                $this->assertResponseOk("Not-OK response returned for /data/series/$groupName/{$endpoint['seriesId']}");
                 $this->assertResponseContains(sprintf(
                     '%s: %s',
                     $endpointGroup['title'],

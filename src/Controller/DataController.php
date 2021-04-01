@@ -148,7 +148,7 @@ class DataController extends AppController
         }
 
         $firstEndpoint = reset($endpointGroup['endpoints']);
-        $metricName = $firstEndpoint['id'];
+        $metricName = $firstEndpoint['seriesId'];
         /** @var \App\Model\Entity\Metric $metric */
         $metric = $this->Metrics->find()->where(['series_id' => $metricName])->first();
         /** @var \App\Model\Entity\Statistic $statistic */
@@ -234,7 +234,7 @@ class DataController extends AppController
         $endpointGroups = EndpointGroups::getAll();
         foreach ($endpointGroups as $endpointGroup) {
             foreach ($endpointGroup['endpoints'] as $endpoint) {
-                if ($endpoint['id'] == $seriesId) {
+                if ($endpoint['seriesId'] == $seriesId) {
                     return $endpoint['name'];
                 }
             }

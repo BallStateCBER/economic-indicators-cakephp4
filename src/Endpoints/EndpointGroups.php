@@ -114,7 +114,7 @@ class EndpointGroups
             $endpoints[] = [
                 'group' => FredEndpoints::VAR_COUNTY_UNEMPLOYMENT,
                 'name' => $countyName,
-                'id' => $seriesId,
+                'seriesId' => $seriesId,
             ];
         }
 
@@ -138,7 +138,7 @@ class EndpointGroups
             $endpoints[] = [
                 'group' => FredEndpoints::VAR_STATE_MANUFACTURING_EMPLOYMENT,
                 'name' => $states[$stateAbbreviation],
-                'id' => $seriesId,
+                'seriesId' => $seriesId,
             ];
         }
 
