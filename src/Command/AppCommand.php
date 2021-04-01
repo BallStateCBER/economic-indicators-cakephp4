@@ -33,7 +33,7 @@ abstract class AppCommand extends DataCenterCommand
     protected float $rateThrottle = 1;
 
     /**
-     * DataUpdaterCommand constructor.
+     * UpdateStatsCommand constructor.
      */
     public function __construct()
     {

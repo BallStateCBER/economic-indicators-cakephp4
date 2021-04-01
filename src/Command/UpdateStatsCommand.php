@@ -18,7 +18,7 @@ use Cake\ORM\TableRegistry;
 use fred_api_exception;
 
 /**
- * DataUpdater command.
+ * UpdateStats command.
  *
  * This command is intended to be run via a cron job and overwrite cached values every 24 hours.
  * This application's cache configuration has cached values retained for a longer period of time so that in the event
@@ -31,7 +31,7 @@ use fred_api_exception;
  * @property \Cake\Console\ConsoleIo $io
  * @property \Cake\Shell\Helper\ProgressHelper $progress
  */
-class DataUpdaterCommand extends AppCommand
+class UpdateStatsCommand extends AppCommand
 {
     private array $apiParameters;
     private array $metrics;
@@ -52,7 +52,7 @@ class DataUpdaterCommand extends AppCommand
     protected float $rateThrottle = 1;
 
     /**
-     * DataUpdaterCommand constructor.
+     * UpdateStatsCommand constructor.
      */
     public function __construct()
     {
