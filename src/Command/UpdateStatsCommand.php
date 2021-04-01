@@ -42,16 +42,6 @@ class UpdateStatsCommand extends AppCommand
     private StatisticsTable $statisticsTable;
 
     /**
-     * @var int The number of times to retry a failing API call after the first attempt
-     */
-    protected int $apiRetryCount = 2;
-
-    /**
-     * @var float Seconds to wait between each API call
-     */
-    protected float $rateThrottle = 1;
-
-    /**
      * UpdateStatsCommand constructor.
      */
     public function __construct()
