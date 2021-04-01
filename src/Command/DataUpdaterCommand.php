@@ -199,7 +199,7 @@ class DataUpdaterCommand extends AppCommand
      * @param string|array $seriesId Valid FRED API series_id argument or array that contains 'seriesId' key
      * @return void
      */
-    public function setEndpoint(mixed $seriesId): void
+    private function setEndpoint(mixed $seriesId): void
     {
         if (is_array($seriesId)) {
             if (!isset($seriesId['seriesId'])) {
@@ -219,7 +219,7 @@ class DataUpdaterCommand extends AppCommand
      * @throws \fred_api_exception
      * @link https://fred.stlouisfed.org/docs/api/fred/
      */
-    public function getEndpointMetadata(array $parameters = []): ?array
+    private function getEndpointMetadata(array $parameters = []): ?array
     {
         /** @var \fred_api_series $api */
         $api = $this->api->factory('series');
@@ -262,7 +262,7 @@ class DataUpdaterCommand extends AppCommand
      * @throws \Cake\Http\Exception\NotFoundException
      * @link https://fred.stlouisfed.org/docs/api/fred/
      */
-    public function getObservations(array $parameters = []): array
+    private function getObservations(array $parameters = []): array
     {
         for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts++) {
             $finalAttempt = $attempts == 1;
@@ -319,7 +319,7 @@ class DataUpdaterCommand extends AppCommand
      * @return void
      * @throws \fred_api_exception
      */
-    public function updateEndpoint(array $endpoint): void
+    private function updateEndpoint(array $endpoint): void
     {
         // Fetch from API
         $this->io->out(' - Retrieving from API...');
