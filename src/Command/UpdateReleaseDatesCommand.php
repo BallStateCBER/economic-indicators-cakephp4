@@ -102,17 +102,17 @@ class UpdateReleaseDatesCommand extends AppCommand
                 'file_type' => 'json',
                 'series_id' => $endpoint['seriesId'],
             ]);
-            $response = $this->decodeResponse(
+            $responseObj = $this->decodeResponse(
                 response: $response,
                 requiredProperty: 'releases',
                 haltOnError: $finalAttempt,
             );
-            if (!$response) {
-                continue;
+            if ($responseObj) {
+                break;
             }
         }
 
-        return $response->releases[0]->id;
+        return $responseObj->releases[0]->id;
     }
 
     /**
@@ -137,8 +137,8 @@ class UpdateReleaseDatesCommand extends AppCommand
                 requiredProperty: 'release_dates',
                 haltOnError: $finalAttempt,
             );
-            if (!$responseObj) {
-                continue;
+            if ($responseObj) {
+                break;
             }
         }
 
