@@ -47,6 +47,7 @@ class SpreadsheetTimeSeries extends Spreadsheet
 
         // Write dates explicitly as strings so they don't get reformatted into a different date format by Excel
         $frequency = $metricsTable->getFrequency($endpointGroup);
+        unset($endpointGroup);
         foreach ($dates as $i => $date) {
             $date = Formatter::getFormattedDate($date, $frequency);
             $colNum = $i + 2;
@@ -56,6 +57,15 @@ class SpreadsheetTimeSeries extends Spreadsheet
                 ->getCell($cell)
                 ->setValueExplicit($date, DataType::TYPE_STRING);
         }
+        unset(
+            $cell,
+            $colNum,
+            $date,
+            $dates,
+            $frequency,
+            $i,
+            $metricsTable,
+        );
 
         $this
             ->styleRow([
@@ -80,7 +90,14 @@ class SpreadsheetTimeSeries extends Spreadsheet
                 ->writeRow($row)
                 ->alignHorizontal('right', 2)
                 ->nextRow();
+            unset($row);
         }
+        unset(
+            $data,
+            $endpoint,
+            $prepend,
+            $seriesId,
+        );
 
         $this->setCellWidth();
     }
