@@ -21,7 +21,7 @@ use Cake\ORM\TableRegistry;
  */
 class UpdateCacheCommand extends Command
 {
-    private bool $verbose;
+    private bool $verbose = false;
     private ConsoleIo $io;
     private Helper $progress;
     private StatisticsTable $statisticsTable;
