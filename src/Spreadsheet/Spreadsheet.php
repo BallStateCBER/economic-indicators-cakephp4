@@ -3,8 +3,14 @@ declare(strict_types=1);
 
 namespace App\Spreadsheet;
 
+use App\Model\Table\StatisticsTable;
+use Cache\Adapter\Redis\RedisCachePool;
+use Cache\Bridge\SimpleCache\SimpleCacheBridge;
+use Cake\Cache\Cache;
 use DataCenter\Spreadsheet\Spreadsheet as DataCenterSpreadsheet;
 use Exception;
+use PhpOffice\PhpSpreadsheet\Settings as PhpSpreadsheetSettings;
+use Redis;
 
 class Spreadsheet extends DataCenterSpreadsheet
 {
@@ -18,6 +24,8 @@ class Spreadsheet extends DataCenterSpreadsheet
     public function __construct(array | bool $data)
     {
         parent::__construct();
+
+        $this->setCacheEngine();
 
         if ($data === false) {
             throw new Exception('No data found');
@@ -60,5 +68,22 @@ class Spreadsheet extends DataCenterSpreadsheet
             ->nextRow();
 
         return $this;
+    }
+
+    /**
+     * Sets up a cache engine
+     *
+     * This allows PhpSpreadsheet to build large spreadsheets that would otherwise require more RAM than is available
+     *
+     * @return void
+     */
+    protected function setCacheEngine()
+    {
+        $client = new Redis();
+        $config = Cache::getConfig(StatisticsTable::CACHE_CONFIG);
+        $client->connect($config['host'], $config['port']);
+        $pool = new RedisCachePool($client);
+        $simpleCache = new SimpleCacheBridge($pool);
+        PhpSpreadsheetSettings::setCache($simpleCache);
     }
 }
