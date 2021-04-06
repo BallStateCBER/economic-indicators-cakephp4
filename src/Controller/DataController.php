@@ -6,14 +6,10 @@ namespace App\Controller;
 use App\Endpoints\EndpointGroups;
 use App\Formatter\Formatter;
 use App\Model\Table\StatisticsTable;
-use App\Spreadsheet\SpreadsheetSingleDate;
-use App\Spreadsheet\SpreadsheetTimeSeries;
 use Cake\Core\Configure;
 use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;
-use Exception;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Writer\Exception as PhpOfficeException;
+use Cake\ORM\TableRegistry;
 
 /**
  * Class DataController
@@ -80,49 +76,41 @@ class DataController extends AppController
      * The ?timeSeries=1 query string is used to download an alternate version of the spreadsheet
      *
      * @param string $groupId An identifier for a group of endpoints
-     * @return \Cake\Http\Response|null
+     * @return \Cake\Http\Response
      */
-    public function download(string $groupId): ?Response
+    public function download(string $groupId): Response
     {
         $endpointGroup = EndpointGroups::get($groupId);
         $isTimeSeries = (bool)$this->getRequest()->getQuery('timeSeries');
+        $spreadsheetsTable = TableRegistry::getTableLocator()->get('Spreadsheets');
+        /** @var \App\Model\Entity\Spreadsheet|null $spreadsheet */
+        $spreadsheet = $spreadsheetsTable
+            ->find()
+            ->where([
+                'group_name' => $endpointGroup['title'],
+                'is_time_series' => $isTimeSeries,
+            ])
+            ->first();
 
-        try {
-            $filename = sprintf(
-                '%s-%s.xlsx',
-                str_replace([' ', '_'], '-', strtolower($endpointGroup['title'])),
-                $this->Statistics->getDateForFilename($endpointGroup, $isTimeSeries)
+        if ($spreadsheet) {
+            $this->response = $this->response->withFile(
+                WWW_ROOT . 'spreadsheets' . DS . $spreadsheet->filename,
+                ['name' => $spreadsheet->filename],
             );
-            $this->response = $this->response
-                ->withType('xlsx')
-                ->withDownload($filename);
 
-            $data = $this->Statistics->getGroup($endpointGroup, $isTimeSeries);
-            $spreadsheet = $isTimeSeries
-                ? new SpreadsheetTimeSeries($endpointGroup)
-                : new SpreadsheetSingleDate($endpointGroup);
-            unset($data);
-            $spreadsheetWriter = IOFactory::createWriter($spreadsheet->get(), 'Xlsx');
-            $this->set(compact('spreadsheetWriter'));
-            unset($spreadsheetWriter);
-
-            $this->viewBuilder()->setPlugin('DataCenter');
-
-            return $this->render('/Spreadsheet/spreadsheet', 'xlsx/spreadsheet');
-        } catch (Exception | PhpOfficeException $e) {
-            $adminEmail = Configure::read('admin_email');
-            $this->Flash->error(
-                sprintf(
-                    'Sorry, there was an error generating the requested spreadsheet. ' .
-                    'Please try again later, or contact <a href="mailto:%s">%s</a> for assistance. ' .
-                    '<br />Details: %s',
-                    $adminEmail,
-                    $adminEmail,
-                    $e->getMessage()
-                ),
-                ['escape' => false]
-            );
+            return $this->response;
         }
+
+        $adminEmail = Configure::read('admin_email');
+        $this->Flash->error(
+            sprintf(
+                'Sorry, there was an error retrieving the requested spreadsheet. ' .
+                'Please try again later, or contact <a href="mailto:%s">%s</a> for assistance. ',
+                $adminEmail,
+                $adminEmail
+            ),
+            ['escape' => false]
+        );
 
         return $this->redirect([
             'action' => 'group',

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Endpoints\EndpointGroups;
+use App\Model\Table\SpreadsheetsTable;
 use App\Model\Table\StatisticsTable;
 use App\Spreadsheet\SpreadsheetSingleDate;
 use App\Spreadsheet\SpreadsheetTimeSeries;
@@ -20,6 +21,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Exception as PhpOfficeException;
 /**
  * MakeSpreadsheets command
  *
+ * @property \App\Model\Table\SpreadsheetsTable $spreadsheetsTable
  * @property \App\Model\Table\StatisticsTable $statisticsTable
  * @property \Cake\Console\ConsoleIo $io
  * @property \Cake\Shell\Helper\ProgressHelper $progress
@@ -29,6 +31,7 @@ class MakeSpreadsheetsCommand extends Command
     private bool $verbose = false;
     private ConsoleIo $io;
     private Helper $progress;
+    private SpreadsheetsTable $spreadsheetsTable;
     private StatisticsTable $statisticsTable;
 
     /**
@@ -44,6 +47,7 @@ class MakeSpreadsheetsCommand extends Command
             $this->progress = $io->helper('Progress');
         }
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
+        $this->spreadsheetsTable = TableRegistry::getTableLocator()->get('Spreadsheets');
     }
 
     /**
@@ -117,6 +121,7 @@ class MakeSpreadsheetsCommand extends Command
                 $this->io->out('- Saving file');
                 $spreadsheetWriter->save(WWW_ROOT . 'spreadsheets' . DS . $filename);
                 unset($spreadsheet, $spreadsheetWriter);
+                $this->updateSpreadsheetDbRecord($endpointGroup, $isTimeSeries, $filename);
             } catch (Exception | PhpOfficeException $e) {
                 $this->io->error('There was an error generating that spreadsheet. Details:');
                 $this->io->out($e->getMessage());
@@ -138,5 +143,49 @@ class MakeSpreadsheetsCommand extends Command
         $peakMemoryKb = number_format(round(memory_get_peak_usage() / 1024));
         $currentMemoryKb = number_format(round(memory_get_usage() / 1024));
         $this->io->out("- Current and peak memory usage: {$currentMemoryKb}KB, {$peakMemoryKb}KB");
+    }
+
+    /**
+     * Updates this spreadsheet's record in the database, creating a new record if necessary
+     *
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @param bool $isTimeSeries TRUE if this is a time-series spreadsheet
+     * @param string $filename The filename to save to the database
+     * @return void
+     */
+    private function updateSpreadsheetDbRecord(array $endpointGroup, bool $isTimeSeries, string $filename)
+    {
+        $groupName = $endpointGroup['title'];
+
+        // Get existing record
+        $spreadsheetRecord = $this->spreadsheetsTable
+            ->find()
+            ->where([
+                'group_name' => $groupName,
+                'is_time_series' => $isTimeSeries,
+            ])
+            ->first();
+        if ($spreadsheetRecord) {
+            $spreadsheetRecord = $this->spreadsheetsTable->patchEntity($spreadsheetRecord, compact('filename'));
+            if (!$this->spreadsheetsTable->save($spreadsheetRecord)) {
+                $this->io->error('There was an error updating that spreadsheet\'s DB record. Details:');
+                $this->io->out(print_r($spreadsheetRecord->getErrors(), true));
+                exit;
+            }
+
+            return;
+        }
+
+        // Or create new record
+        $spreadsheetRecord = $this->spreadsheetsTable->newEntity([
+            'filename' => $filename,
+            'group_name' => $groupName,
+            'is_time_series' => $isTimeSeries,
+        ]);
+        if (!$this->spreadsheetsTable->save($spreadsheetRecord)) {
+            $this->io->error('There was an error saving that spreadsheet\'s record to the database. Details:');
+            $this->io->out(print_r($spreadsheetRecord->getErrors(), true));
+            exit;
+        }
     }
 }
