@@ -108,7 +108,9 @@ class MakeSpreadsheetsCommand extends Command
         $this->showMemoryUsage();
         foreach ([false, true] as $isTimeSeries) {
             try {
-                $filename = $this->statisticsTable->getFilename($endpointGroup, $isTimeSeries);
+                $newFilename = $this->statisticsTable->getFilename($endpointGroup, $isTimeSeries);
+                $spreadsheetRecord = $this->getSpreadsheetRecord($endpointGroup['title'], $isTimeSeries);
+                $oldFilename = $spreadsheetRecord ? $spreadsheetRecord->filename : null;
 
                 $this->io->out(sprintf(
                     '- Creating %s spreadsheet',
@@ -117,11 +119,19 @@ class MakeSpreadsheetsCommand extends Command
                 $spreadsheet = $isTimeSeries
                     ? new SpreadsheetTimeSeries($endpointGroup)
                     : new SpreadsheetSingleDate($endpointGroup);
-                $spreadsheetWriter = IOFactory::createWriter($spreadsheet->get(), 'Xlsx');
+
                 $this->io->out('- Saving file');
-                $spreadsheetWriter->save(WWW_ROOT . 'spreadsheets' . DS . $filename);
+                $spreadsheetWriter = IOFactory::createWriter($spreadsheet->get(), 'Xlsx');
+                $spreadsheetWriter->save(WWW_ROOT . 'spreadsheets' . DS . $newFilename);
                 unset($spreadsheet, $spreadsheetWriter);
-                $this->updateSpreadsheetDbRecord($endpointGroup, $isTimeSeries, $filename);
+
+                $this->io->out('- Updating database');
+                $this->updateSpreadsheetDbRecord($endpointGroup, $isTimeSeries, $newFilename);
+
+                if ($oldFilename && $oldFilename != $newFilename) {
+                    $this->io->out('- Removing old file');
+                    unlink(WWW_ROOT . 'spreadsheets' . DS . $oldFilename);
+                }
             } catch (Exception | PhpOfficeException $e) {
                 $this->io->error('There was an error generating that spreadsheet. Details:');
                 $this->io->out($e->getMessage());
@@ -158,13 +168,7 @@ class MakeSpreadsheetsCommand extends Command
         $groupName = $endpointGroup['title'];
 
         // Get existing record
-        $spreadsheetRecord = $this->spreadsheetsTable
-            ->find()
-            ->where([
-                'group_name' => $groupName,
-                'is_time_series' => $isTimeSeries,
-            ])
-            ->first();
+        $spreadsheetRecord = $this->getSpreadsheetRecord($groupName, $isTimeSeries);
         if ($spreadsheetRecord) {
             $spreadsheetRecord = $this->spreadsheetsTable->patchEntity($spreadsheetRecord, compact('filename'));
             if (!$this->spreadsheetsTable->save($spreadsheetRecord)) {
@@ -187,5 +191,23 @@ class MakeSpreadsheetsCommand extends Command
             $this->io->out(print_r($spreadsheetRecord->getErrors(), true));
             exit;
         }
+    }
+
+    /**
+     * Returns a spreadsheet record, or NULL if the specified record doesn't exist
+     *
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @param bool $isTimeSeries TRUE if this is a time-series spreadsheet
+     * @return \App\Model\Entity\Spreadsheet|\Cake\Datasource\EntityInterface|null
+     */
+    private function getSpreadsheetRecord(mixed $groupName, bool $isTimeSeries)
+    {
+        return $this->spreadsheetsTable
+            ->find()
+            ->where([
+                'group_name' => $groupName,
+                'is_time_series' => $isTimeSeries,
+            ])
+            ->first();
     }
 }
