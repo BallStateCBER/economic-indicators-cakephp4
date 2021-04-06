@@ -543,10 +543,15 @@ class StatisticsTable extends Table
      */
     public function getFilename(array $endpointGroup, bool $isTimeSeries): string
     {
-        return sprintf(
+        $result = sprintf(
             '%s-%s.xlsx',
             str_replace([' ', '_'], '-', strtolower($endpointGroup['title'])),
             $this->getDateForFilename($endpointGroup, $isTimeSeries)
         );
+
+        $result = str_replace('---', '-', $result);
+        $result = str_replace('--', '-', $result);
+
+        return $result;
     }
 }
