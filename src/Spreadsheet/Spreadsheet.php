@@ -23,9 +23,8 @@ class Spreadsheet extends DataCenterSpreadsheet
      */
     public function __construct(array | bool $data)
     {
-        parent::__construct();
-
         $this->setCacheEngine();
+        parent::__construct();
 
         if ($data === false) {
             throw new Exception('No data found');
