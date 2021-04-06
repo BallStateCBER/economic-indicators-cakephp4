@@ -11,7 +11,6 @@ use App\Spreadsheet\SpreadsheetTimeSeries;
 use Cake\Core\Configure;
 use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;
-use Cake\Utility\Text;
 use Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as PhpOfficeException;
@@ -92,7 +91,7 @@ class DataController extends AppController
             $filename = sprintf(
                 '%s-%s.xlsx',
                 str_replace([' ', '_'], '-', strtolower($endpointGroup['title'])),
-                $this->getDateForFilename($endpointGroup, $isTimeSeries)
+                $this->Statistics->getDateForFilename($endpointGroup, $isTimeSeries)
             );
             $this->response = $this->response
                 ->withType('xlsx')
@@ -100,8 +99,8 @@ class DataController extends AppController
 
             $data = $this->Statistics->getGroup($endpointGroup, $isTimeSeries);
             $spreadsheet = $isTimeSeries
-                ? new SpreadsheetTimeSeries($endpointGroup, $data)
-                : new SpreadsheetSingleDate($endpointGroup, $data);
+                ? new SpreadsheetTimeSeries($endpointGroup)
+                : new SpreadsheetSingleDate($endpointGroup);
             unset($data);
             $spreadsheetWriter = IOFactory::createWriter($spreadsheet->get(), 'Xlsx');
             $this->set(compact('spreadsheetWriter'));
@@ -130,36 +129,6 @@ class DataController extends AppController
             'groupId' => $groupId,
             '_ext' => null,
         ]);
-    }
-
-    /**
-     * Returns a date string for use in a spreadsheet filename
-     *
-     * @param array $endpointGroup  A group defined in \App\Fetcher\EndpointGroups
-     * @param bool $isTimeSeries TRUE if a date range should be generated
-     * @return string
-     */
-    private function getDateForFilename(array $endpointGroup, bool $isTimeSeries): string
-    {
-        if ($isTimeSeries) {
-            $dateRange = $this->Statistics->getDateRange($endpointGroup);
-
-            return Text::slug(strtolower($dateRange[0] . '-' . $dateRange[1]));
-        }
-
-        $firstEndpoint = reset($endpointGroup['endpoints']);
-        $metricName = $firstEndpoint['seriesId'];
-        /** @var \App\Model\Entity\Metric $metric */
-        $metric = $this->Metrics->find()->where(['series_id' => $metricName])->first();
-        /** @var \App\Model\Entity\Statistic $statistic */
-        $statistic = $this->Statistics->find()
-            ->select(['id', 'date'])
-            ->where(['metric_id' => $metric->id])
-            ->orderDesc('date')
-            ->first();
-        $date = Formatter::getFormattedDate($statistic->date, $metric->frequency);
-
-        return Text::slug(strtolower($date));
     }
 
     /**

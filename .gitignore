@@ -42,3 +42,7 @@ nbproject/*
 .vscode
 # Sass preprocessor
 .sass-cache/
+
+# Other #
+#########
+/webroot/spreadsheets/*

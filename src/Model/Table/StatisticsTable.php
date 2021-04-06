@@ -13,6 +13,7 @@ use Cake\I18n\FrozenDate;
 use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
+use Cake\Utility\Text;
 use Cake\Validation\Validator;
 
 /**
@@ -467,10 +468,24 @@ class StatisticsTable extends Table
      * @param int $metricId Metric ID
      * @param int $dataTypeId Data type ID
      * @param bool $all TRUE to return all results rather than only the most recent
+     * @param bool $withCache If TRUE, first checks for value in cache, and if not found, populates cache
      * @return \Cake\Datasource\ResultSetInterface|array
      */
-    public function getByMetricAndType(int $metricId, int $dataTypeId, bool $all = false): ResultSetInterface | array
-    {
+    public function getByMetricAndType(
+        int $metricId,
+        int $dataTypeId,
+        bool $all = false,
+        bool $withCache = false
+    ): ResultSetInterface | array {
+        if ($withCache) {
+            $metric = $this->Metrics->get($metricId);
+            $cacheKey = StatisticsTable::getStatsCacheKey($metric->series_id, $dataTypeId, $all);
+            $cachedResult = Cache::read($cacheKey, StatisticsTable::CACHE_CONFIG);
+            if ($cachedResult) {
+                return $cachedResult;
+            }
+        }
+
         $query = $this
             ->find(
                 'byMetricAndType',
@@ -478,10 +493,60 @@ class StatisticsTable extends Table
             )
             ->select(['date', 'value'])
             ->enableHydration(false);
-        if ($all) {
-            return $query->all();
+        $result = $all ? $query->all() : $query->last();
+
+        if ($withCache) {
+            $metric = $this->Metrics->get($metricId);
+            $cacheKey = StatisticsTable::getStatsCacheKey($metric->series_id, $dataTypeId, $all);
+            Cache::write($cacheKey, $result, StatisticsTable::CACHE_CONFIG);
         }
 
-        return $query->last();
+        return $result;
+    }
+
+    /**
+     * Returns a date string for use in a spreadsheet filename
+     *
+     * @param array $endpointGroup  A group defined in \App\Fetcher\EndpointGroups
+     * @param bool $isTimeSeries TRUE if a date range should be generated
+     * @return string
+     */
+    public function getDateForFilename(array $endpointGroup, bool $isTimeSeries): string
+    {
+        if ($isTimeSeries) {
+            $dateRange = $this->getDateRange($endpointGroup);
+
+            return Text::slug(strtolower($dateRange[0] . '-' . $dateRange[1]));
+        }
+
+        $firstEndpoint = reset($endpointGroup['endpoints']);
+        $metricName = $firstEndpoint['seriesId'];
+        /** @var \App\Model\Entity\Metric $metric */
+        $metric = $this->Metrics->find()->where(['series_id' => $metricName])->first();
+        /** @var \App\Model\Entity\Statistic $statistic */
+        $statistic = $this->find()
+            ->select(['id', 'date'])
+            ->where(['metric_id' => $metric->id])
+            ->orderDesc('date')
+            ->first();
+        $date = Formatter::getFormattedDate($statistic->date, $metric->frequency);
+
+        return Text::slug(strtolower($date));
+    }
+
+    /**
+     * Returns a filename used for a spreadsheet
+     *
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @param bool $isTimeSeries TRUE if this spreadsheet will contain a time series
+     * @return string
+     */
+    public function getFilename(array $endpointGroup, bool $isTimeSeries): string
+    {
+        return sprintf(
+            '%s-%s.xlsx',
+            str_replace([' ', '_'], '-', strtolower($endpointGroup['title'])),
+            $this->getDateForFilename($endpointGroup, $isTimeSeries)
+        );
     }
 }

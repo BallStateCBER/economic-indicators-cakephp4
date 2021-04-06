@@ -5,7 +5,6 @@ namespace App\Spreadsheet;
 
 use App\Formatter\Formatter;
 use App\Model\Table\StatisticsTable;
-use Cake\ORM\TableRegistry;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -23,20 +22,17 @@ class SpreadsheetSingleDate extends Spreadsheet
      * Spreadsheet constructor.
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
-     * @param array|bool $data Data, or FALSE if not found
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws \Exception
      */
-    public function __construct(array $endpointGroup, array | bool $data)
+    public function __construct(array $endpointGroup)
     {
-        parent::__construct($data);
+        parent::__construct($endpointGroup);
+        $this->isTimeSeries = false;
 
-        /** @var \App\Model\Table\MetricsTable $metricsTable */
-        $metricsTable = TableRegistry::getTableLocator()->get('Metrics');
-        $metric = $metricsTable->getFirstForEndpointGroup($endpointGroup);
         $columnTitles = [
             'Metric',
-            $metric->units,
+            $this->firstMetric->units,
             'Change from One Year Prior',
             'Percent Change from One Year Prior',
             'Date',
@@ -57,30 +53,28 @@ class SpreadsheetSingleDate extends Spreadsheet
             ])
             ->nextRow();
 
-        $prepend = Formatter::getPrepend($metric->units);
-        $frequency = $metricsTable->getFrequency($endpointGroup);
-        foreach ($data as $seriesId => $endpoint) {
+        foreach ($this->getDataRows() as $rowData) {
             $this
                 ->writeRow([
-                    $endpoint['name'],
+                    $rowData['name'],
                     Formatter::formatValue(
-                        $endpoint['statistics'][StatisticsTable::DATA_TYPE_VALUE]['value'],
-                        $prepend
+                        $rowData['statistics'][StatisticsTable::DATA_TYPE_VALUE]['value'],
+                        $this->prepend
                     ),
                     Formatter::formatValue(
-                        $endpoint['statistics'][StatisticsTable::DATA_TYPE_CHANGE]['value'],
-                        $prepend
+                        $rowData['statistics'][StatisticsTable::DATA_TYPE_CHANGE]['value'],
+                        $this->prepend
                     ),
                     Formatter::formatValue(
-                        $endpoint['statistics'][StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
+                        $rowData['statistics'][StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
                     ) . '%',
                 ])
                 ->alignHorizontal('right', 2);
 
             // Write date explicitly as a string so it doesn't get reformatted into a different date format by Excel
             $date = Formatter::getFormattedDate(
-                $endpoint['statistics'][StatisticsTable::DATA_TYPE_VALUE]['date'],
-                $frequency
+                $rowData['statistics'][StatisticsTable::DATA_TYPE_VALUE]['date'],
+                $this->frequency,
             );
             $dateCol = 5;
             $cell = $this->getColumnKey($dateCol) . $this->currentRow;
