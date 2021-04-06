@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Endpoints\EndpointGroups;
 use App\Formatter\Formatter;
+use App\Model\Table\SpreadsheetsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Core\Configure;
 use Cake\Http\Exception\NotFoundException;
@@ -94,7 +95,7 @@ class DataController extends AppController
 
         if ($spreadsheet) {
             $this->response = $this->response->withFile(
-                WWW_ROOT . 'spreadsheets' . DS . $spreadsheet->filename,
+                SpreadsheetsTable::FILE_PATH . $spreadsheet->filename,
                 ['name' => $spreadsheet->filename],
             );
 

@@ -27,6 +27,8 @@ use Cake\Validation\Validator;
  */
 class SpreadsheetsTable extends Table
 {
+    public const FILE_PATH = WWW_ROOT . 'spreadsheets' . DS;
+
     /**
      * Initialize method
      *

@@ -122,7 +122,7 @@ class MakeSpreadsheetsCommand extends Command
 
                 $this->io->out('- Saving file');
                 $spreadsheetWriter = IOFactory::createWriter($spreadsheet->get(), 'Xlsx');
-                $spreadsheetWriter->save(WWW_ROOT . 'spreadsheets' . DS . $newFilename);
+                $spreadsheetWriter->save(SpreadsheetsTable::FILE_PATH . $newFilename);
                 unset($spreadsheet, $spreadsheetWriter);
 
                 $this->io->out('- Updating database');
@@ -130,7 +130,7 @@ class MakeSpreadsheetsCommand extends Command
 
                 if ($oldFilename && $oldFilename != $newFilename) {
                     $this->io->out('- Removing old file');
-                    unlink(WWW_ROOT . 'spreadsheets' . DS . $oldFilename);
+                    unlink(SpreadsheetsTable::FILE_PATH . $oldFilename);
                 }
             } catch (Exception | PhpOfficeException $e) {
                 $this->io->error('There was an error generating that spreadsheet. Details:');
