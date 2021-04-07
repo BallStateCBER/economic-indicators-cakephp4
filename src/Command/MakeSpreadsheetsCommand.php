@@ -86,6 +86,7 @@ class MakeSpreadsheetsCommand extends Command
         $this->verbose = (bool)$args->getOption('verbose');
         $endpointGroups = EndpointGroups::getAll();
         $count = count($endpointGroups);
+        $this->showMemoryUsage();
         foreach ($endpointGroups as $i => $endpointGroup) {
             $io->info(sprintf(
                 '%s (%s/%s)',
@@ -94,6 +95,7 @@ class MakeSpreadsheetsCommand extends Command
                 $count,
             ));
             $this->makeSpreadsheetsForGroup($endpointGroup);
+            $this->showMemoryUsage();
         }
 
         $io->success('Finished');
@@ -107,7 +109,6 @@ class MakeSpreadsheetsCommand extends Command
      */
     public function makeSpreadsheetsForGroup(array $endpointGroup): void
     {
-        $this->showMemoryUsage();
         foreach ([false, true] as $isTimeSeries) {
             try {
                 $newFilename = $this->statisticsTable->getFilename($endpointGroup, $isTimeSeries);
