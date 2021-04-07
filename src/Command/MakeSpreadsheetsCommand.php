@@ -128,9 +128,11 @@ class MakeSpreadsheetsCommand extends Command
                 $this->io->out('- Updating database');
                 $this->updateSpreadsheetDbRecord($endpointGroup, $isTimeSeries, $newFilename);
 
-                if ($oldFilename && $oldFilename != $newFilename) {
+                $oldFileNeedsDeleted = $oldFilename && $oldFilename != $newFilename;
+                $oldFilePath = SpreadsheetsTable::FILE_PATH . $oldFilename;
+                if ($oldFileNeedsDeleted && file_exists($oldFilePath)) {
                     $this->io->out('- Removing old file');
-                    unlink(SpreadsheetsTable::FILE_PATH . $oldFilename);
+                    unlink($oldFilePath);
                 }
             } catch (Exception | PhpOfficeException $e) {
                 $this->io->error('There was an error generating that spreadsheet. Details:');
