@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Endpoints\EndpointGroups;
+use App\Model\Entity\Spreadsheet;
 use App\Model\Table\SpreadsheetsTable;
 use App\Model\Table\StatisticsTable;
 use App\Spreadsheet\SpreadsheetSingleDate;
@@ -13,6 +14,7 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Console\Helper;
+use Cake\Datasource\EntityInterface;
 use Cake\ORM\TableRegistry;
 use Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -198,11 +200,11 @@ class MakeSpreadsheetsCommand extends Command
     /**
      * Returns a spreadsheet record, or NULL if the specified record doesn't exist
      *
-     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @param string $groupName A string used to uniquely identify an endpoint group
      * @param bool $isTimeSeries TRUE if this is a time-series spreadsheet
      * @return \App\Model\Entity\Spreadsheet|\Cake\Datasource\EntityInterface|null
      */
-    private function getSpreadsheetRecord(mixed $groupName, bool $isTimeSeries)
+    private function getSpreadsheetRecord(string $groupName, bool $isTimeSeries): Spreadsheet|EntityInterface|null
     {
         return $this->spreadsheetsTable
             ->find()
