@@ -123,7 +123,7 @@ class MakeSpreadsheetsCommand extends Command
                     ? new SpreadsheetTimeSeries($endpointGroup)
                     : new SpreadsheetSingleDate($endpointGroup);
 
-                $this->io->out('- Saving file');
+                $this->io->out('- Saving file: ' . $newFilename);
                 $spreadsheetWriter = IOFactory::createWriter($spreadsheet->get(), 'Xlsx');
                 $spreadsheetWriter->save(SpreadsheetsTable::FILE_PATH . $newFilename);
                 unset($spreadsheet, $spreadsheetWriter);
@@ -134,7 +134,7 @@ class MakeSpreadsheetsCommand extends Command
                 $oldFileNeedsDeleted = $oldFilename && $oldFilename != $newFilename;
                 $oldFilePath = SpreadsheetsTable::FILE_PATH . $oldFilename;
                 if ($oldFileNeedsDeleted && file_exists($oldFilePath)) {
-                    $this->io->out('- Removing old file');
+                    $this->io->out('- Removing old file: ' . $oldFilename);
                     unlink($oldFilePath);
                 }
             } catch (Exception | PhpOfficeException $e) {
