@@ -94,10 +94,8 @@ class DataController extends AppController
             ->first();
 
         if ($spreadsheet) {
-            $this->response = $this->response->withFile(
-                SpreadsheetsTable::FILE_PATH . $spreadsheet->filename,
-                ['name' => $spreadsheet->filename],
-            );
+            $this->response = $this->response->withFile(SpreadsheetsTable::FILE_PATH . $spreadsheet->filename);
+            $this->response = $this->response->withType('xlsx');
 
             return $this->response;
         }
