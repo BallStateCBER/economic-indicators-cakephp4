@@ -53,10 +53,22 @@ class SpreadsheetSingleDate extends Spreadsheet
             ])
             ->nextRow();
 
-        foreach ($this->getDataRows() as $rowData) {
+        foreach ($this->endpointGroup['endpoints'] as $endpoint) {
+            $rowData = [];
+            $metric = $this->metricsTable->getFromSeriesId($endpoint['seriesId']);
+            foreach (StatisticsTable::DATA_TYPES as $dataTypeId) {
+                $rowData['statistics'][$dataTypeId] = $this->statisticsTable->getByMetricAndType(
+                    metricId: $metric->id,
+                    dataTypeId: $dataTypeId,
+                    all: $this->isTimeSeries,
+                    withCache: true
+                );
+            }
+            unset($metric);
+
             $this
                 ->writeRow([
-                    $rowData['name'],
+                    $endpoint['name'],
                     Formatter::formatValue(
                         $rowData['statistics'][StatisticsTable::DATA_TYPE_VALUE]['value'],
                         $this->prepend

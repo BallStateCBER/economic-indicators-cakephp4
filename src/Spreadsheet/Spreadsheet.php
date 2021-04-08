@@ -12,7 +12,6 @@ use Cache\Bridge\SimpleCache\SimpleCacheBridge;
 use Cake\Cache\Cache;
 use Cake\ORM\TableRegistry;
 use DataCenter\Spreadsheet\Spreadsheet as DataCenterSpreadsheet;
-use Generator;
 use PhpOffice\PhpSpreadsheet\Settings as PhpSpreadsheetSettings;
 use Redis;
 
@@ -109,34 +108,5 @@ class Spreadsheet extends DataCenterSpreadsheet
         $pool = new RedisCachePool($client);
         $simpleCache = new SimpleCacheBridge($pool);
         PhpSpreadsheetSettings::setCache($simpleCache);
-    }
-
-    /**
-     * Generator that yields data for one spreadsheet row, corresponding to a metric/endpoint
-     *
-     * @return array|\Generator
-     */
-    protected function getDataRows(): array | Generator
-    {
-        $dataTypeIds = $this->isTimeSeries
-            ? [StatisticsTable::DATA_TYPE_VALUE]
-            : StatisticsTable::DATA_TYPES;
-
-        foreach ($this->endpointGroup['endpoints'] as $endpoint) {
-            $row = [];
-            $row['name'] = $endpoint['name'];
-            $metric = $this->metricsTable->getFromSeriesId($endpoint['seriesId']);
-            foreach ($dataTypeIds as $dataTypeId) {
-                $row['statistics'][$dataTypeId] = $this->statisticsTable->getByMetricAndType(
-                    metricId: $metric->id,
-                    dataTypeId: $dataTypeId,
-                    all: $this->isTimeSeries,
-                    withCache: true
-                );
-            }
-            unset($metric);
-
-            yield $row;
-        }
     }
 }

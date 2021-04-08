@@ -74,21 +74,28 @@ class SpreadsheetTimeSeries extends Spreadsheet
             ])
             ->nextRow();
 
-        foreach ($this->getDataRows() as $rowData) {
-            $row = [$rowData['name']];
-            foreach ($rowData['statistics'][StatisticsTable::DATA_TYPE_VALUE] as $statistic) {
+        foreach ($this->endpointGroup['endpoints'] as $endpoint) {
+            $metric = $this->metricsTable->getFromSeriesId($endpoint['seriesId']);
+            $dataTypeId = StatisticsTable::DATA_TYPE_VALUE;
+            $statistics = $this->statisticsTable->getByMetricAndType(
+                metricId: $metric->id,
+                dataTypeId: $dataTypeId,
+                all: $this->isTimeSeries,
+                withCache: true
+            );
+            $row = [$endpoint['name']];
+            foreach ($statistics as $statistic) {
                 $row[] = Formatter::formatValue($statistic['value'], $this->prepend);
             }
+            unset($statistics);
             $this
                 ->writeRow($row)
                 ->alignHorizontal('right', 2)
                 ->nextRow();
+            unset($row);
         }
 
-        unset(
-            $row,
-            $rowData,
-        );
+        unset($metric);
 
         $this->setCellWidth();
     }
