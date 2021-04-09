@@ -65,10 +65,10 @@ class UpdateReleaseDatesCommand extends AppCommand
         $endpointGroups = EndpointGroups::getAll();
         foreach ($endpointGroups as $endpointGroup) {
             $this->io->info($endpointGroup['title']);
-            foreach ($endpointGroup['endpoints'] as $endpoint) {
-                $releaseId = $this->getReleaseId($endpoint);
+            foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
+                $releaseId = $this->getReleaseId($seriesId, $name);
                 $releaseDates = $this->getUpcomingReleaseDates($releaseId);
-                $metric = $this->metricsTable->getFromSeriesId($endpoint['seriesId']);
+                $metric = $this->metricsTable->getFromSeriesId($seriesId);
                 $this->removeInvalidReleases($releaseDates, $metric->id);
                 $this->addMissingReleases($releaseDates, $metric->id);
             }
@@ -86,18 +86,19 @@ class UpdateReleaseDatesCommand extends AppCommand
      * This is fetched from the API every time instead of being stored in the database because it's unclear if the FRED
      * API ever changes a series's release ID
      *
-     * @param array $endpoint API endpoint information
+     * @param string $seriesId A FRED API series_id argument
+     * @param string $name The name of this endpoint
      * @return int
      */
-    private function getReleaseId(mixed $endpoint): int
+    private function getReleaseId(string $seriesId, string $name): int
     {
-        $this->io->out($endpoint['name']);
+        $this->io->out($name);
         $this->io->out(' - Fetching release ID');
         for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts--) {
             $finalAttempt = $attempts == 1;
             $response = $this->seriesApi->release([
                 'file_type' => 'json',
-                'series_id' => $endpoint['seriesId'],
+                'series_id' => $seriesId,
             ]);
             $responseObj = $this->decodeResponse(
                 response: $response,

@@ -44,10 +44,10 @@ class MetricsFixture extends TestFixture
         $id = 1;
         $endpointGroups = EndpointGroups::getAll();
         foreach ($endpointGroups as $endpointGroup) {
-            foreach ($endpointGroup['endpoints'] as $endpoint) {
+            foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
                 $this->records[] = [
                     'id' => $id,
-                    'series_id' => $endpoint['seriesId'],
+                    'series_id' => $seriesId,
                     'last_updated' => '2021-01-01 00:00:00',
                     'units' => 'Units',
                     'frequency' => 'Frequency',

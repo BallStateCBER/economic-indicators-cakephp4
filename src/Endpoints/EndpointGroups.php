@@ -8,153 +8,265 @@ use Cake\Http\Exception\NotFoundException;
 class EndpointGroups
 {
     public const HOUSING = [
-        'title' => FredEndpoints::VAR_HOUSING,
+        'title' => 'Housing Starts',
         'cacheKey' => 'housing',
         'endpoints' => [
-            FredEndpoints::HOUSING_TOTAL,
-            FredEndpoints::HOUSING_1_UNIT,
-            FredEndpoints::HOUSING_2_4_UNIT,
-            FredEndpoints::HOUSING_5_UNIT,
+            'HOUST' => 'Total – new private owned',
+            'HOUST1F' => '1 unit structures',
+            'HOUST2F' => '2-4 unit structures',
+            'HOUST5F' => '5 unit structures',
         ],
     ];
 
     public const VEHICLE_SALES = [
-        'title' => FredEndpoints::VAR_VEHICLE_SALES,
+        'title' => 'Motor Vehicle Sales',
         'cacheKey' => 'vehicle_sales',
         'endpoints' => [
-            FredEndpoints::VEHICLE_SALES_TOTAL,
-            FredEndpoints::VEHICLE_SALES_AUTOS,
-            FredEndpoints::VEHICLE_SALES_AUTOS_DOMESTIC,
-            FredEndpoints::VEHICLE_SALES_AUTOS_FOREIGN,
-            FredEndpoints::VEHICLE_SALES_LW_TRUCKS,
-            FredEndpoints::VEHICLE_SALES_LW_TRUCKS_DOMESTIC,
-            FredEndpoints::VEHICLE_SALES_LW_TRUCKS_FOREIGN,
-            FredEndpoints::VEHICLE_SALES_HW_TRUCKS,
+            'TOTALSA' => 'Total vehicle sales',
+            'LAUTOSA' => 'Total autos',
+            'DAUTOSAAR' => 'Total autos - Domestic autos',
+            'FAUTOSAAR' => 'Total autos - Foreign autos',
+            'LTRUCKSA' => 'Total light weight trucks',
+            'DLTRUCKSSAAR' => 'Domestic light weight trucks',
+            'FLTRUCKSSAAR' => 'Foreign light weight trucks',
+            'HTRUCKSSAAR' => 'Heavy weight trucks',
         ],
     ];
 
     public const RETAIL_FOOD_SERVICES = [
-        'title' => FredEndpoints::VAR_RETAIL_FOOD,
+        'title' => 'Retail and Food Services',
         'cacheKey' => 'retail',
         'endpoints' => [
-            FredEndpoints::RETAIL_FOOD_TOTAL,
-            FredEndpoints::RETAIL_FOOD_EX_DEALERS,
-            FredEndpoints::RETAIL_FOOD_EX_FOOD,
+            'RSAFS' => 'Advance retail sales: Retail and food services, Total',
+            'RSFSXMV' => 'Advance retail sales: Retail and food services (excluding motor vehicle and parts dealers)',
+            'RSXFS' => 'Advance retail sales: Retail (excluding food services)',
         ],
     ];
 
     public const GDP = [
-        'title' => FredEndpoints::VAR_GDP,
+        'title' => 'Gross Domestic Product',
         'cacheKey' => 'gdp',
         'endpoints' => [
-            FredEndpoints::GDP,
-            FredEndpoints::GDP_REAL,
-            FredEndpoints::GDP_PERSONAL_CONSUMPTION,
-            FredEndpoints::GDP_PERSONAL_CONSUMPTION_REAL,
+            'GDP' => 'Gross Domestic Product',
+            'GDPC1' => 'Real Gross Domestic Product (2012) dollars',
+            'PCEC' => 'Personal consumption expenditures',
+            'PCEC96' => 'Real personal consumption expenditures (2012) dollars',
         ],
     ];
 
     public const UNEMPLOYMENT = [
-        'title' => FredEndpoints::VAR_UNEMPLOYMENT,
+        'title' => 'Unemployment Rate - Indiana',
         'cacheKey' => 'unemployment',
-        'endpoints' => [FredEndpoints::UNEMPLOYMENT_INDIANA],
+        'endpoints' => ['INUR' => 'Unemployment rate (seasonally adjusted)'],
     ];
 
     public const EMP_BY_SECTOR = [
-        'title' => FredEndpoints::VAR_EMPLOYMENT_BY_SECTOR,
+        'title' => 'Employment by Sector (seasonally adjusted)',
         'cacheKey' => 'employment_by_sector',
         'endpoints' => [
-            FredEndpoints::EMP_TOTAL_NONFARM,
-            FredEndpoints::EMP_MINING_LOGGING,
-            FredEndpoints::EMP_CONSTRUCTION,
-            FredEndpoints::EMP_MANUFACTURING,
-            FredEndpoints::EMP_DURABLE_GOODS,
-            FredEndpoints::EMP_NON_DURABLE_GOODS,
-            FredEndpoints::EMP_TRADE_TRANSP_UTILITIES,
-            FredEndpoints::EMP_WHOLESALE,
-            FredEndpoints::EMP_RETAIL,
-            FredEndpoints::EMP_TRANSP_WH_UTILITIES,
-            FredEndpoints::EMP_INFORMATION,
-            FredEndpoints::EMP_FINANCIAL,
-            FredEndpoints::EMP_PROFESSIONAL,
-            FredEndpoints::EMP_EDU_HEALTH,
-            FredEndpoints::EMP_LEISURE_HOSPITALITY,
-            FredEndpoints::EMP_OTHER_SERVICES,
-            FredEndpoints::EMP_GOVERNMENT,
+            'INNA' => 'Total nonfarm',
+            'SMS18000001000000001' => 'Mining and logging',
+            'INCONS' => 'Construction',
+            'INMFG' => 'Manufacturing',
+            'SMS18000003100000001' => 'Durable goods',
+            'SMS18000003200000001' => 'Non-durable goods',
+            'INTRADN' => 'Trade, transportation and utilities',
+            'SMS18000004100000001' => 'Wholesale trade',
+            'SMS18000004200000001' => 'Retail trade',
+            'SMS18000004300000001' => 'Transportation, warehousing and utilities',
+            'ININFO' => 'Information',
+            'INFIRE' => 'Financial activities',
+            'INPBSV' => 'Professional and business services',
+            'INEDUH' => 'Education and health service',
+            'INLEIH' => 'Leisure and hospitality',
+            'INSRVO' => 'Other services',
+            'INGOVT' => 'Government',
         ],
     ];
 
     public const EARNINGS = [
-        'title' => FredEndpoints::VAR_EARNINGS,
+        'title' => 'Average Weekly Earnings (seasonally adjusted)',
         'cacheKey' => 'earnings',
         'endpoints' => [
-            FredEndpoints::EARNINGS_PRIVATE,
-            FredEndpoints::EARNINGS_GOODS,
-            FredEndpoints::EARNINGS_SERVICE,
-            FredEndpoints::EARNINGS_CONSTRUCTION,
-            FredEndpoints::EARNINGS_MANUFACTURING,
-            FredEndpoints::EARNINGS_TRADE_TRANSPORT_UTILITIES,
-            FredEndpoints::EARNINGS_FINANCIAL,
-            FredEndpoints::EARNINGS_PROFESSIONAL,
-            FredEndpoints::EARNINGS_EDUCATION_HEALTH,
-            FredEndpoints::EARNINGS_LEISURE,
-            FredEndpoints::EARNINGS_OTHER,
+            'SMU18000000500000011SA' => 'Total private',
+            'SMU18000000600000011SA' => 'Goods producing',
+            'SMU18000000800000011SA' => 'Private service providing',
+            'SMU18000002000000011SA' => 'Construction',
+            'SMU18000003000000011SA' => 'Manufacturing',
+            'SMU18000004000000011SA' => 'Trade, transportation and utilities',
+            'SMU18000005500000011SA' => 'Financial activities',
+            'SMU18000006000000011SA' => 'Professional and business services',
+            'SMU18000006500000011SA' => 'Education and health service',
+            'SMU18000007000000011SA' => 'Leisure and Hospitality',
+            'SMU18000008000000011SA' => 'Other services',
         ],
     ];
 
-    /**
-     * Returns the county unemployment group of endpoints
-     *
-     * @return array
-     */
-    public static function getCountyUnemployment()
-    {
-        $endpoints = [];
-        foreach (FredEndpoints::COUNTY_UNEMPLOYMENT_IDS as $countyName => $seriesId) {
-            $endpoints[] = [
-                'group' => FredEndpoints::VAR_COUNTY_UNEMPLOYMENT,
-                'name' => $countyName,
-                'seriesId' => $seriesId,
-            ];
-        }
+    public const COUNTY_UNEMPLOYMENT = [
+        'cacheKey' => 'county_unemployment',
+        'title' => 'Indiana County Unemployment',
+        'endpoints' => [
+            'INADAM1URN' => 'Adams County',
+            'INALLE3URN' => 'Allen County',
+            'INBART5URN' => 'Bartholomew County',
+            'INBENT7URN' => 'Benton County',
+            'INBLAC9URN' => 'Blackford County',
+            'INBOON1URN' => 'Boone County',
+            'INBROW3URN' => 'Brown County',
+            'INCARR5URN' => 'Carroll County',
+            'INCASS7URN' => 'Cass County',
+            'INCLURN' => 'Clark County',
+            'INCLAY1URN' => 'Clay County',
+            'INCLIN3URN' => 'Clinton County',
+            'INCRURN' => 'Crawford County',
+            'INDAURN' => 'Daviess County',
+            'INDEAR9URN' => 'Dearborn County',
+            'INDECA1URN' => 'Decatur County',
+            'INDEKA3URN' => 'DeKalb County',
+            'INDELA5URN' => 'Delaware County',
+            'INDUURN' => 'Dubois County',
+            'INELKH0URN' => 'Elkhart County',
+            'INFAYE1URN' => 'Fayette County',
+            'INFLURN' => 'Floyd County',
+            'INFOUN5URN' => 'Fountain County',
+            'INFRAN7URN' => 'Franklin County',
+            'INFULT9URN' => 'Fulton County',
+            'INGIURN' => 'Gibson County',
+            'INGRAN0URN' => 'Grant County',
+            'INGEURN' => 'Greene County',
+            'INHAMI5URN' => 'Hamilton County',
+            'INHANC9URN' => 'Hancock County',
+            'INHRURN' => 'Harrison County',
+            'INHEND0URN' => 'Hendricks County',
+            'INHENR5URN' => 'Henry County',
+            'INHOWA7URN' => 'Howard County',
+            'INHUNT9URN' => 'Huntington County',
+            'INJAURN' => 'Jackson County',
+            'INJASP3URN' => 'Jasper County',
+            'INJAYC5URN' => 'Jay County',
+            'INJEURN' => 'Jefferson County',
+            'INJENN9URN' => 'Jennings County',
+            'INJOHN5URN' => 'Johnson County',
+            'INKNURN' => 'Knox County',
+            'INKOSC5URN' => 'Kosciusko County',
+            'INLAGR7URN' => 'LaGrange County',
+            'INLAKE9URN' => 'Lake County',
+            'INLAPO0URN' => 'LaPorte County',
+            'INLWURN' => 'Lawrence County',
+            'INMADI5URN' => 'Madison County',
+            'INMARI0URN' => 'Marion County',
+            'INMARS9URN' => 'Marshall County',
+            'INMTURN' => 'Martin County',
+            'INMIAM3URN' => 'Miami County',
+            'INMONR5URN' => 'Monroe County',
+            'INMONT7URN' => 'Montgomery County',
+            'INMORG5URN' => 'Morgan County',
+            'INNEWT1URN' => 'Newton County',
+            'INNOBL3URN' => 'Noble County',
+            'INOHIO5URN' => 'Ohio County',
+            'INORURN' => 'Orange County',
+            'INOWEN9URN' => 'Owen County',
+            'INPARK1URN' => 'Parke County',
+            'INPEURN' => 'Perry County',
+            'INPIURN' => 'Pike County',
+            'INPORT5URN' => 'Porter County',
+            'INPSURN' => 'Posey County',
+            'INPULA1URN' => 'Pulaski County',
+            'INPUTN3URN' => 'Putnam County',
+            'INRAND5URN' => 'Randolph County',
+            'INRIPL7URN' => 'Ripley County',
+            'INRUSH9URN' => 'Rush County',
+            'INSCURN' => 'Scott County',
+            'INSHEL5URN' => 'Shelby County',
+            'INSPURN' => 'Spencer County',
+            'INSTAR9URN' => 'Starke County',
+            'INSTEU1URN' => 'Steuben County',
+            'INSTJO7URN' => 'St. Joseph County',
+            'INSUURN' => 'Sullivan County',
+            'INSWURN' => 'Switzerland County',
+            'INTIPP7URN' => 'Tippecanoe County',
+            'INTIPT9URN' => 'Tipton County',
+            'INUNIO1URN' => 'Union County',
+            'INVAURN' => 'Vanderburgh County',
+            'INVERM5URN' => 'Vermillion County',
+            'INVIGO0URN' => 'Vigo County',
+            'INWABA9URN' => 'Wabash County',
+            'INWARR1URN' => 'Warren County',
+            'INWIURN' => 'Warrick County',
+            'INWSURN' => 'Washington County',
+            'INWAYN0URN' => 'Wayne County',
+            'INWELL9URN' => 'Wells County',
+            'INWHIT1URN' => 'White County',
+            'INWHIT3URN' => 'Whitley County',
+        ],
+    ];
 
-        return [
-            'cacheKey' => 'county_unemployment',
-            'title' => 'Indiana County Unemployment',
-            'endpoints' => $endpoints,
-        ];
-    }
-
-    /**
-     * Returns the state manufacturing group of endpoints
-     *
-     * @return array
-     */
-    public static function getStateManufacturing()
-    {
-        $endpoints = [];
-        $states = array_flip(FredEndpoints::STATES);
-        foreach (FredEndpoints::STATE_MANUFACTURING_EMPLOYMENT_IDS as $stateAbbreviation => $seriesId) {
-            $endpoints[] = [
-                'group' => FredEndpoints::VAR_STATE_MANUFACTURING_EMPLOYMENT,
-                'name' => $states[$stateAbbreviation],
-                'seriesId' => $seriesId,
-            ];
-        }
-
-        return [
-            'cacheKey' => 'state_manufacturing_employment',
-            'endpoints' => $endpoints,
-            'title' => 'State Manufacturing Employment',
-        ];
-    }
+    public const STATE_MANUFACTURING_EMPLOYMENT = [
+        'title' => 'State Manufacturing Employment',
+        'cacheKey' => 'state_manufacturing_employment',
+        'endpoints' => [
+            'SMU01000003000000001SA' => 'Alabama',
+            'AKMFG' => 'Alaska',
+            'AZMFG' => 'Arizona',
+            'ARMFG' => 'Arkansas',
+            'CAMFG' => 'California',
+            'COMFG' => 'Colorado',
+            'CTMFG' => 'Connecticut',
+            'DEMFG' => 'Delaware',
+            'SMU11000003000000001SA' => 'District of Columbia',
+            'FLMFG' => 'Florida',
+            'GAMFG' => 'Georgia',
+            'HIMFG' => 'Hawaii',
+            'IDMFG' => 'Idaho',
+            'ILMFG' => 'Illinois',
+            'INMFG' => 'Indiana',
+            'IAMFG' => 'Iowa',
+            'KSMFG' => 'Kansas',
+            'KYMFG' => 'Kentucky',
+            'LAMFG' => 'Louisiana',
+            'MEMFG' => 'Maine',
+            'MDMFG' => 'Maryland',
+            'MAMFG' => 'Massachusetts',
+            'MIMFG' => 'Michigan',
+            'MNMFG' => 'Minnesota',
+            'MSMFG' => 'Mississippi',
+            'MOMFG' => 'Missouri',
+            'MTMFG' => 'Montana',
+            'NEMFG' => 'Nebraska',
+            'NVMFG' => 'Nevada',
+            'NHMFG' => 'New Hampshire',
+            'NJMFG' => 'New Jersey',
+            'NMMFG' => 'New Mexico',
+            'NYMFG' => 'New York',
+            'NCMFG' => 'North Carolina',
+            'NDMFG' => 'North Dakota',
+            'OHMFG' => 'Ohio',
+            'OKMFG' => 'Oklahoma',
+            'ORMFG' => 'Oregon',
+            'PAMFG' => 'Pennsylvania',
+            'SMS72000003000000001' => 'Puerto Rico',
+            'RIMFG' => 'Rhode Island',
+            'SCMFG' => 'South Carolina',
+            'SDMFG' => 'South Dakota',
+            'TNMFG' => 'Tennessee',
+            'TXMFG' => 'Texas',
+            'UTMFG' => 'Utah',
+            'VTMFG' => 'Vermont',
+            'VAMFG' => 'Virginia',
+            'SMU78000003000000001SA' => 'Virgin Islands',
+            'WAMFG' => 'Washington',
+            'WVMFG' => 'West Virginia',
+            'WIMFG' => 'Wisconsin',
+            'WYMFG' => 'Wyoming',
+        ],
+    ];
 
     /**
      * Returns an array of all endpoint groups
      *
      * @return array
      */
-    public static function getAll()
+    public static function getAll(): array
     {
         return [
             self::HOUSING,
@@ -164,8 +276,8 @@ class EndpointGroups
             self::UNEMPLOYMENT,
             self::EMP_BY_SECTOR,
             self::EARNINGS,
-            self::getCountyUnemployment(),
-            self::getStateManufacturing(),
+            self::COUNTY_UNEMPLOYMENT,
+            self::STATE_MANUFACTURING_EMPLOYMENT,
         ];
     }
 
@@ -194,9 +306,9 @@ class EndpointGroups
             case 'earnings':
                 return self::EARNINGS;
             case 'county-unemployment':
-                return self::getCountyUnemployment();
+                return self::COUNTY_UNEMPLOYMENT;
             case 'manufacturing-employment':
-                return self::getStateManufacturing();
+                return self::STATE_MANUFACTURING_EMPLOYMENT;
         }
 
         throw new NotFoundException('Data group ' . $groupId . ' not found');

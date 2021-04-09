@@ -189,10 +189,8 @@ class DataController extends AppController
 
         $endpointGroups = EndpointGroups::getAll();
         foreach ($endpointGroups as $endpointGroup) {
-            foreach ($endpointGroup['endpoints'] as $endpoint) {
-                if ($endpoint['seriesId'] == $seriesId) {
-                    return $endpoint['name'];
-                }
+            if (array_key_exists($seriesId, $endpointGroup['endpoints'])) {
+                return $endpointGroup['endpoints'][$seriesId];
             }
         }
 

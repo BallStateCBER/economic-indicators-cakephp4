@@ -53,9 +53,9 @@ class SpreadsheetSingleDate extends Spreadsheet
             ])
             ->nextRow();
 
-        foreach ($this->endpointGroup['endpoints'] as $endpoint) {
+        foreach ($this->endpointGroup['endpoints'] as $seriesId => $name) {
             $rowData = [];
-            $metric = $this->metricsTable->getFromSeriesId($endpoint['seriesId']);
+            $metric = $this->metricsTable->getFromSeriesId($seriesId);
             foreach (StatisticsTable::DATA_TYPES as $dataTypeId) {
                 $rowData['statistics'][$dataTypeId] = $this->statisticsTable->getByMetricAndType(
                     metricId: $metric->id,
@@ -68,7 +68,7 @@ class SpreadsheetSingleDate extends Spreadsheet
 
             $this
                 ->writeRow([
-                    $endpoint['name'],
+                    $name,
                     Formatter::formatValue(
                         $rowData['statistics'][StatisticsTable::DATA_TYPE_VALUE]['value'],
                         $this->prepend

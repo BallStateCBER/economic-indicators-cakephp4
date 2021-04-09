@@ -97,9 +97,9 @@ class MetricsTable extends Table
      */
     public function getFrequency(array $endpointGroup): string
     {
-        $seriesId = $endpointGroup['endpoints'][0]['seriesId'];
+        $seriesIds = array_keys($endpointGroup['endpoints']);
         /** @var \App\Model\Entity\Metric|null $metric */
-        $metric = $this->getFromSeriesId($seriesId);
+        $metric = $this->getFromSeriesId($seriesIds[0]);
 
         return $metric->frequency;
     }
@@ -109,13 +109,14 @@ class MetricsTable extends Table
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return \App\Model\Entity\Metric|\Cake\Datasource\EntityInterface
+     * @throws \Cake\Http\Exception\InternalErrorException
      */
     public function getFirstForEndpointGroup(array $endpointGroup): Metric | EntityInterface
     {
-        $metricName = $endpointGroup['endpoints'][0]['seriesId'];
-        $metric = $this->findBySeriesId($metricName)->first();
+        $seriesIds = array_keys($endpointGroup['endpoints']);
+        $metric = $this->findBySeriesId($seriesIds[0])->first();
         if (!$metric) {
-            throw new InternalErrorException("Metric $metricName not found");
+            throw new InternalErrorException("Metric with seriesID {$seriesIds[0]} not found");
         }
 
         return $metric;
@@ -130,11 +131,10 @@ class MetricsTable extends Table
     public function getAllForEndpointGroup(array $endpointGroup)
     {
         $metrics = [];
-        foreach ($endpointGroup['endpoints'] as $endpoint) {
-            $metricName = $endpoint['seriesId'];
-            $metric = $this->findBySeriesId($metricName)->first();
+        foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
+            $metric = $this->findBySeriesId($seriesId)->first();
             if (!$metric) {
-                throw new InternalErrorException("Metric $metricName not found");
+                throw new InternalErrorException("Metric \"$name\" with seriesID $seriesId not found");
             }
 
             $metrics[] = $metric;

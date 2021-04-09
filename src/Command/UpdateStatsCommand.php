@@ -82,22 +82,26 @@ class UpdateStatsCommand extends AppCommand
 
         $endpointGroups = EndpointGroups::getAll();
         foreach ($endpointGroups as $endpointGroup) {
-            $io->info($endpointGroup['endpoints'][0]['group']);
+            $io->info($endpointGroup['title']);
             $this->loadMetrics($endpointGroup);
             $groupUpdated = false;
 
-            foreach ($endpointGroup['endpoints'] as $endpoint) {
-                if ($this->updateIsAvailable($endpoint['seriesId'])) {
-                    $io->out(sprintf('%s: Update available', $endpoint['seriesId']));
+            foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
+                if ($this->updateIsAvailable($seriesId)) {
+                    $io->out(sprintf('%s: Update available', $seriesId));
                     try {
-                        $this->updateEndpoint($endpoint);
+                        $this->updateEndpoint(
+                            group: $endpointGroup['title'],
+                            seriesId: $seriesId,
+                            name: $name,
+                        );
                         $groupUpdated = true;
                     } catch (NotFoundException | fred_api_exception $e) {
                         $io->error($e->getMessage());
                         exit;
                     }
                 } else {
-                    $io->out(sprintf('%s: No update available', $endpoint['seriesId']));
+                    $io->out(sprintf('%s: No update available', $seriesId));
                     continue;
                 }
             }
@@ -149,11 +153,9 @@ class UpdateStatsCommand extends AppCommand
      * @return void
      * @throws \fred_api_exception
      */
-    private function loadMetrics(array $endpointGroup)
+    private function loadMetrics(array $endpointGroup): void
     {
-        foreach ($endpointGroup['endpoints'] as $endpoint) {
-            $seriesId = $endpoint['seriesId'];
-
+        foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
             // Find existing metric
             $metric = $this->metricsTable
                 ->find()
@@ -186,18 +188,11 @@ class UpdateStatsCommand extends AppCommand
     /**
      * Sets the series_id parameter for the next API request
      *
-     * @param string|array $seriesId Valid FRED API series_id argument or array that contains 'seriesId' key
+     * @param string $seriesId Valid FRED API series_id argument
      * @return void
      */
-    private function setEndpoint(mixed $seriesId): void
+    private function setEndpoint(string $seriesId): void
     {
-        if (is_array($seriesId)) {
-            if (!isset($seriesId['seriesId'])) {
-                throw new InternalErrorException('Series ID not provided');
-            }
-            $seriesId = $seriesId['seriesId'];
-        }
-
         $this->apiParameters['series_id'] = $seriesId;
     }
 
@@ -296,18 +291,19 @@ class UpdateStatsCommand extends AppCommand
     /**
      * Fetches data from the API and updates/adds corresponding records in the database
      *
-     * @param array $endpoint An endpoint defined in \App\Fetcher\FredEndpoints
+     * @param string $group Title of endpoint group
+     * @param string $seriesId Endpoint seriesID
+     * @param string $name Title of endpoint
      * @return void
      * @throws \fred_api_exception
      */
-    private function updateEndpoint(array $endpoint): void
+    private function updateEndpoint(string $group, string $seriesId, string $name): void
     {
         // Fetch from API
         $this->io->out(' - Retrieving from API...');
-        $this->setEndpoint($endpoint);
-        $this->io->out(sprintf('%s: %s metadata', $endpoint['group'], $endpoint['name']));
+        $this->setEndpoint($seriesId);
+        $this->io->out(sprintf('%s: %s metadata', $group, $name));
         $endpointMeta = $this->getEndpointMetadata();
-        $seriesId = $endpoint['seriesId'];
         $metric = $this->metrics[$seriesId];
         $this->apiParameters['sort_order'] = 'asc';
 

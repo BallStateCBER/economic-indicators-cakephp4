@@ -74,8 +74,8 @@ class SpreadsheetTimeSeries extends Spreadsheet
             ])
             ->nextRow();
 
-        foreach ($this->endpointGroup['endpoints'] as $endpoint) {
-            $metric = $this->metricsTable->getFromSeriesId($endpoint['seriesId']);
+        foreach ($this->endpointGroup['endpoints'] as $seriesId => $name) {
+            $metric = $this->metricsTable->getFromSeriesId($seriesId);
             $dataTypeId = StatisticsTable::DATA_TYPE_VALUE;
             $statistics = $this->statisticsTable->getByMetricAndType(
                 metricId: $metric->id,
@@ -83,7 +83,7 @@ class SpreadsheetTimeSeries extends Spreadsheet
                 all: $this->isTimeSeries,
                 withCache: true
             );
-            $row = [$endpoint['name']];
+            $row = [$name];
             foreach ($statistics as $statistic) {
                 $row[] = Formatter::formatValue($statistic['value'], $this->prepend);
             }

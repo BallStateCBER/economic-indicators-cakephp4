@@ -182,10 +182,9 @@ class StatisticsTable extends Table
     {
         $retval = [];
         $generateNewResults = !$this->useCache || $this->overwriteCache;
-        foreach ($endpointGroup['endpoints'] as $endpoint) {
-            $seriesId = $endpoint['seriesId'];
+        foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
             if (!$onlyCache) {
-                $retval[$seriesId]['name'] = $endpoint['name'];
+                $retval[$seriesId]['name'] = $name;
             }
             $metric = $this->Metrics->getFromSeriesId($seriesId);
             foreach (self::DATA_TYPES as $dataTypeId) {
@@ -233,18 +232,16 @@ class StatisticsTable extends Table
      */
     public function getDateRange(array $endpointGroup): array
     {
-        $firstEndpoint = reset($endpointGroup['endpoints']);
-        $seriesId = $firstEndpoint['seriesId'];
-        $cacheKey = self::getDateRangeCacheKey($seriesId);
+        $seriesIds = array_keys($endpointGroup['endpoints']);
+        $cacheKey = self::getDateRangeCacheKey($seriesIds[0]);
         $generateNewResults = !$this->useCache || $this->overwriteCache;
         $cachedResult = $generateNewResults ? false : Cache::read($cacheKey, self::CACHE_CONFIG);
         if ($cachedResult) {
             return $cachedResult;
         }
 
-        $firstEndpoint = reset($endpointGroup['endpoints']);
-        $seriesId = $firstEndpoint['seriesId'];
-        $metric = $this->Metrics->getFromSeriesId($seriesId);
+        $seriesIds = array_keys($endpointGroup['endpoints']);
+        $metric = $this->Metrics->getFromSeriesId($seriesIds[0]);
         $frequency = $this->Metrics->getFrequency($endpointGroup);
         $dateRange = [
             Formatter::getFormattedDate($this->getDateBoundaryForMetric($metric), $frequency),
@@ -257,10 +254,9 @@ class StatisticsTable extends Table
 
         unset(
             $cacheKey,
-            $firstEndpoint,
             $frequency,
             $metric,
-            $seriesId,
+            $seriesIds,
         );
 
         return $dateRange;
@@ -416,8 +412,7 @@ class StatisticsTable extends Table
 
         // Or generate new results
         $startingDates = [];
-        foreach ($endpointGroup['endpoints'] as $endpoint) {
-            $seriesId = $endpoint['seriesId'];
+        foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
             $metric = $this->Metrics->getFromSeriesId($seriesId);
             $startingDates[$seriesId] = $this->getDateBoundaryForMetric($metric);
         }
@@ -519,10 +514,9 @@ class StatisticsTable extends Table
             return Text::slug(strtolower($dateRange[0] . '-' . $dateRange[1]));
         }
 
-        $firstEndpoint = reset($endpointGroup['endpoints']);
-        $metricName = $firstEndpoint['seriesId'];
+        $seriesIds = array_keys($endpointGroup['endpoints']);
         /** @var \App\Model\Entity\Metric $metric */
-        $metric = $this->Metrics->find()->where(['series_id' => $metricName])->first();
+        $metric = $this->Metrics->find()->where(['series_id' => $seriesIds[0]])->first();
         /** @var \App\Model\Entity\Statistic $statistic */
         $statistic = $this->find()
             ->select(['id', 'date'])

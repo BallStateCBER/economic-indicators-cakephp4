@@ -72,8 +72,8 @@ class DataControllerTest extends TestCase
             $endpointGroup = EndpointGroups::get($groupId);
             $this->assertResponseContains($endpointGroup['title']);
 
-            foreach ($endpointGroup['endpoints'] as $endpoint) {
-                $this->assertResponseContains($endpoint['name']);
+            foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
+                $this->assertResponseContains($name);
             }
 
             $this->assertResponseContains(StatisticsFixture::VALUE_FIRST);
@@ -96,18 +96,18 @@ class DataControllerTest extends TestCase
     {
         foreach ($this->groupIds as $groupId) {
             $endpointGroup = EndpointGroups::get($groupId);
-            foreach ($endpointGroup['endpoints'] as $endpoint) {
+            foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
                 $this->get([
                     'controller' => 'Data',
                     'action' => 'series',
                     'groupId' => $groupId,
-                    'seriesId' => $endpoint['seriesId'],
+                    'seriesId' => $seriesId,
                 ]);
-                $this->assertResponseOk("Not-OK response returned for /data/series/$groupId/{$endpoint['seriesId']}");
+                $this->assertResponseOk("Not-OK response returned for /data/series/$groupId/$seriesId");
                 $this->assertResponseContains(sprintf(
                     '%s: %s',
                     $endpointGroup['title'],
-                    $endpoint['name']
+                    $name
                 ));
             }
         }
