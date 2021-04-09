@@ -205,7 +205,7 @@ class MakeSpreadsheetsCommand extends Command
      * @param bool $isTimeSeries TRUE if this is a time-series spreadsheet
      * @return \App\Model\Entity\Spreadsheet|\Cake\Datasource\EntityInterface|null
      */
-    private function getSpreadsheetRecord(string $groupName, bool $isTimeSeries): Spreadsheet|EntityInterface|null
+    private function getSpreadsheetRecord(string $groupName, bool $isTimeSeries): Spreadsheet | EntityInterface | null
     {
         return $this->spreadsheetsTable
             ->find()

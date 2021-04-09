@@ -10,7 +10,6 @@ use App\Model\Table\StatisticsTable;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Cake\Http\Exception\InternalErrorException;
 use Cake\Http\Exception\NotFoundException;
 use Cake\I18n\FrozenDate;
 use Cake\I18n\FrozenTime;

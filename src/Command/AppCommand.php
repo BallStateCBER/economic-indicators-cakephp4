@@ -7,7 +7,6 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Core\Configure;
 use Cake\Http\Exception\InternalErrorException;
-use Cake\Http\Exception\NotFoundException;
 use DataCenter\Command\AppCommand as DataCenterCommand;
 use fred_api;
 use fred_api_exception;

@@ -471,7 +471,7 @@ class StatisticsTable extends Table
         int $dataTypeId,
         bool $all = false,
         bool $withCache = false
-    ): ResultSetInterface | array {
+    ): array | ResultSetInterface {
         if ($withCache) {
             $metric = $this->Metrics->get($metricId);
             $cacheKey = StatisticsTable::getStatsCacheKey($metric->series_id, $dataTypeId, $all);
