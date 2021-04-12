@@ -21,6 +21,8 @@ $usLinks = [
     'iei' => 'Inflation Expectation Index',
     'labor-force-statistics' => 'Labor Force Statistics',
     'unemployment-by-state' => 'Unemployment Rate by State',
+    'gold' => 'Price of Gold',
+    'oil' => 'Price of Oil',
 ];
 
 $inLinks = [

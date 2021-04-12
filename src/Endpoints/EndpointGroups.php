@@ -519,6 +519,17 @@ class EndpointGroups
         ],
     ];
 
+    public const GOLD = [
+        'title' => 'Price of Gold',
+        'cacheKey' => 'gold',
+        'endpoints' => ['WTISPLC' => 'Price of Gold'],
+    ];
+
+    public const OIL = [
+        'title' => 'Price of Oil',
+        'cacheKey' => 'oil',
+        'endpoints' => ['WTISPLC' => 'Price of Oil'],
+    ];
 
     /**
      * Returns an array of all endpoint groups
@@ -547,6 +558,8 @@ class EndpointGroups
             'iei' => self::INFLATION_EXPECTATION_INDEX,
             'labor-force-statistics' => self::LABOR_FORCE_STATISTICS,
             'unemployment-by-state' => self::UNEMPLOYMENT_BY_STATE,
+            'gold' => self::GOLD,
+            'oil' => self::OIL,
         ];
     }
 
