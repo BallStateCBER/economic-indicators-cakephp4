@@ -25,18 +25,21 @@ $usLinks = [
     'oil' => 'Price of Oil',
     'housing-indicators' => 'Housing Indicators',
 ];
+asort($usLinks);
 
 $inLinks = [
     'unemployment' => 'Unemployment Rate',
     'employment-by-sector' => 'Employment by Sector',
     'earnings' => 'Weekly Earnings',
 ];
+asort($inLinks);
 
 $countyLinks = [
     'county-unemployment' => 'Unemployment',
     'income-by-county' => 'Personal Income',
     'population-by-county' => 'Population',
 ];
+asort($countyLinks);
 
 if (!function_exists('showSidebarLinks')) {
     /**
