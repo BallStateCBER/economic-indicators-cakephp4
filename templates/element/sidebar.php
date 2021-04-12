@@ -14,6 +14,7 @@ $usLinks = [
     'durable-goods' => 'Durable Goods Orders',
     'personal-income' => 'Personal Income',
     'industrial-production' => 'Industrial Production',
+    'interest-rates' => 'Interest Rates',
 ];
 
 $inLinks = [

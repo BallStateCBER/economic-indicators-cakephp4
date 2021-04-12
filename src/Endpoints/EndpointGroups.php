@@ -378,6 +378,17 @@ class EndpointGroups
         ],
     ];
 
+    public const INTEREST_RATES = [
+        'title' => 'Interest Rates',
+        'cacheKey' => 'interest_rates',
+        'endpoints' => [
+            'DPRIME' => 'Bank Prime Loan Rate',
+            'DGS3MO' => '3-Month Treasury Constant Maturity Rate',
+            'DGS10' => '10-Year Treasury Constant Maturity Rate',
+            'DGS20' => '20-Year Treasury Constant Maturity Rate',
+        ],
+    ];
+
     /**
      * Returns an array of all endpoint groups
      *
@@ -398,6 +409,7 @@ class EndpointGroups
             'durable-goods' => self::DURABLE_GOODS_ORDERS,
             'personal-income' => self::PERSONAL_INCOME,
             'industrial-production' => self::INDUSTRIAL_PRODUCTION,
+            'interest-rates'=> self::INTEREST_RATES,
         ];
     }
 
