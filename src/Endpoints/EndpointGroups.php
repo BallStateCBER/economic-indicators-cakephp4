@@ -386,18 +386,18 @@ class EndpointGroups
     public static function getAll(): array
     {
         return [
-            self::HOUSING,
-            self::VEHICLE_SALES,
-            self::RETAIL_FOOD_SERVICES,
-            self::GDP,
-            self::UNEMPLOYMENT,
-            self::EMP_BY_SECTOR,
-            self::EARNINGS,
-            self::COUNTY_UNEMPLOYMENT,
-            self::STATE_MANUFACTURING_EMPLOYMENT,
-            self::DURABLE_GOODS_ORDERS,
-            self::PERSONAL_INCOME,
-            self::INDUSTRIAL_PRODUCTION,
+            'housing' => self::HOUSING,
+            'vehicle-sales' => self::VEHICLE_SALES,
+            'retail-food-services' => self::RETAIL_FOOD_SERVICES,
+            'gdp' => self::GDP,
+            'unemployment' => self::UNEMPLOYMENT,
+            'employment-by-sector' => self::EMP_BY_SECTOR,
+            'earnings' => self::EARNINGS,
+            'county-unemployment' => self::COUNTY_UNEMPLOYMENT,
+            'manufacturing-employment' => self::STATE_MANUFACTURING_EMPLOYMENT,
+            'durable-goods' => self::DURABLE_GOODS_ORDERS,
+            'personal-income' => self::PERSONAL_INCOME,
+            'industrial-production' => self::INDUSTRIAL_PRODUCTION,
         ];
     }
 
@@ -410,31 +410,9 @@ class EndpointGroups
      */
     public static function get(string $groupId): array
     {
-        switch ($groupId) {
-            case 'housing':
-                return self::HOUSING;
-            case 'vehicle-sales':
-                return self::VEHICLE_SALES;
-            case 'retail-food-services':
-                return self::RETAIL_FOOD_SERVICES;
-            case 'gdp':
-                return self::GDP;
-            case 'unemployment':
-                return self::UNEMPLOYMENT;
-            case 'employment-by-sector':
-                return self::EMP_BY_SECTOR;
-            case 'earnings':
-                return self::EARNINGS;
-            case 'county-unemployment':
-                return self::COUNTY_UNEMPLOYMENT;
-            case 'manufacturing-employment':
-                return self::STATE_MANUFACTURING_EMPLOYMENT;
-            case 'durable-goods':
-                return self::DURABLE_GOODS_ORDERS;
-            case 'personal-income':
-                return self::PERSONAL_INCOME;
-            case 'industrial-production':
-                return self::INDUSTRIAL_PRODUCTION;
+        $groups = self::getAll();
+        if (array_key_exists($groupId, $groups)) {
+            return $groups[$groupId];
         }
 
         throw new NotFoundException('Data group ' . $groupId . ' not found');
