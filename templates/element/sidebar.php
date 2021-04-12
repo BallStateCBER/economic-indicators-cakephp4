@@ -15,6 +15,7 @@ $usLinks = [
     'personal-income' => 'Personal Income',
     'industrial-production' => 'Industrial Production',
     'interest-rates' => 'Interest Rates',
+    'money-supply' => 'Money Supply',
 ];
 
 $inLinks = [

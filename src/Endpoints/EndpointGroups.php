@@ -389,6 +389,15 @@ class EndpointGroups
         ],
     ];
 
+    public const MONEY_SUPPLY = [
+        'title' => 'Money Supply',
+        'cacheKey' => 'money_supply',
+        'endpoints' => [
+            'M1SL' => 'M1 Money Stock',
+            'M2SL' => 'M2 Money Stock',
+        ],
+    ];
+
     /**
      * Returns an array of all endpoint groups
      *
@@ -410,6 +419,7 @@ class EndpointGroups
             'personal-income' => self::PERSONAL_INCOME,
             'industrial-production' => self::INDUSTRIAL_PRODUCTION,
             'interest-rates'=> self::INTEREST_RATES,
+            'money-supply' => self::MONEY_SUPPLY,
         ];
     }
 
