@@ -460,6 +460,66 @@ class EndpointGroups
         ],
     ];
 
+    public const UNEMPLOYMENT_BY_STATE = [
+        'title' => 'Unemployment Rate by State',
+        'cacheKey' => 'unemployment_by_state',
+        'endpoints' => [
+            'ALUR' => 'Alabama',
+            'AKUR' => 'Alaska',
+            'AZUR' => 'Arizona',
+            'ARUR' => 'Arkansas',
+            'CAUR' => 'California',
+            'COUR' => 'Colorado',
+            'CTUR' => 'Connecticut',
+            'DEUR' => 'Delaware',
+            'DCUR' => 'District of Columbia',
+            'FLUR' => 'Florida',
+            'GAUR' => 'Georgia',
+            'HIUR' => 'Hawaii',
+            'IDUR' => 'Idaho',
+            'ILUR' => 'Illinois',
+            'INUR' => 'Indiana',
+            'IAUR' => 'Iowa',
+            'KSUR' => 'Kansas',
+            'KYUR' => 'Kentucky',
+            'LAUR' => 'Louisiana',
+            'MEUR' => 'Maine',
+            'MDUR' => 'Maryland',
+            'MAUR' => 'Massachusetts',
+            'MIUR' => 'Michigan',
+            'MNUR' => 'Minnesota',
+            'MSUR' => 'Mississippi',
+            'MOUR' => 'Missouri',
+            'MTUR' => 'Montana',
+            'NEUR' => 'Nebraska',
+            'NVUR' => 'Nevada',
+            'NHUR' => 'New Hampshire',
+            'NJUR' => 'New Jersey',
+            'NMUR' => 'New Mexico',
+            'NYUR' => 'New York',
+            'NCUR' => 'North Carolina',
+            'NDUR' => 'North Dakota',
+            'OHUR' => 'Ohio',
+            'OKUR' => 'Oklahoma',
+            'ORUR' => 'Oregon',
+            'PAUR' => 'Pennsylvania',
+            'PRUR' => 'Puerto Rico',
+            'RIUR' => 'Rhode Island',
+            'SCUR' => 'South Carolina',
+            'SDUR' => 'South Dakota',
+            'TNUR' => 'Tennessee',
+            'TXUR' => 'Texas',
+            'UTUR' => 'Utah',
+            'VTUR' => 'Vermont',
+            'VAUR' => 'Virginia',
+            'WAUR' => 'Washington',
+            'WVUR' => 'West Virginia',
+            'WIUR' => 'Wisconsin',
+            'WYUR' => 'Wyoming',
+        ],
+    ];
+
+
     /**
      * Returns an array of all endpoint groups
      *
@@ -486,6 +546,7 @@ class EndpointGroups
             'csi' => self::CONSUMER_SENTIMENT_INDEX,
             'iei' => self::INFLATION_EXPECTATION_INDEX,
             'labor-force-statistics' => self::LABOR_FORCE_STATISTICS,
+            'unemployment-by-state' => self::UNEMPLOYMENT_BY_STATE,
         ];
     }
 

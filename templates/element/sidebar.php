@@ -20,6 +20,7 @@ $usLinks = [
     'csi' => 'Consumer Sentiment Index',
     'iei' => 'Inflation Expectation Index',
     'labor-force-statistics' => 'Labor Force Statistics',
+    'unemployment-by-state' => 'Unemployment Rate by State',
 ];
 
 $inLinks = [
