@@ -6,7 +6,7 @@
 use App\View\AppView;
 
 $usLinks = [
-    'housing' => 'Housing',
+    'housing-starts' => 'Housing Starts',
     'vehicle-sales' => 'Vehicle Sales',
     'retail-food-services' => 'Retail & Food Services',
     'gdp' => 'Gross Domestic Product',
@@ -23,6 +23,7 @@ $usLinks = [
     'unemployment-by-state' => 'Unemployment Rate by State',
     'gold' => 'Price of Gold',
     'oil' => 'Price of Oil',
+    'housing-indicators' => 'Housing Indicators',
 ];
 
 $inLinks = [

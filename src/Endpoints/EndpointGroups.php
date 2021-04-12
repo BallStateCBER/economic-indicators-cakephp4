@@ -7,9 +7,9 @@ use Cake\Http\Exception\NotFoundException;
 
 class EndpointGroups
 {
-    public const HOUSING = [
+    public const HOUSING_STARTS = [
         'title' => 'Housing Starts',
-        'cacheKey' => 'housing',
+        'cacheKey' => 'housing_starts',
         'endpoints' => [
             'HOUST' => 'Total – new private owned',
             'HOUST1F' => '1 unit structures',
@@ -531,6 +531,19 @@ class EndpointGroups
         'endpoints' => ['WTISPLC' => 'Price of Oil'],
     ];
 
+    public const HOUSING_INDICATORS = [
+        'title' => 'Housing Indicators',
+        'cacheKey' => 'housing_indicators',
+        'endpoints' => [
+            'USSTHPI' => 'All-Transactions House Price Index',
+            'HPIPONM226S' => 'Purchase Only House Price Index',
+            'FIXHAI' => 'Housing Affordability Index (Fixed)',
+            'RSAHORUSQ156S' => 'Homeownership %',
+            'USHVAC' => 'Home Vacancy %',
+            'RRVRUSQ156N' => 'Rental Vacancy %',
+        ],
+    ];
+
     /**
      * Returns an array of all endpoint groups
      *
@@ -539,7 +552,7 @@ class EndpointGroups
     public static function getAll(): array
     {
         return [
-            'housing' => self::HOUSING,
+            'housing-starts' => self::HOUSING_STARTS,
             'vehicle-sales' => self::VEHICLE_SALES,
             'retail-food-services' => self::RETAIL_FOOD_SERVICES,
             'gdp' => self::GDP,
@@ -560,6 +573,7 @@ class EndpointGroups
             'unemployment-by-state' => self::UNEMPLOYMENT_BY_STATE,
             'gold' => self::GOLD,
             'oil' => self::OIL,
+            'housing-indicators' => self::HOUSING_INDICATORS,
         ];
     }
 
