@@ -31,6 +31,7 @@ $inLinks = [
     'employment-by-sector' => 'Employment by Sector',
     'earnings' => 'Weekly Earnings',
     'income-by-county' => 'Personal Income by County',
+    'population-by-county' => 'Population by County',
 ];
 
 $countyLinks = [
