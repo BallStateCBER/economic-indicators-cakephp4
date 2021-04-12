@@ -30,12 +30,12 @@ $inLinks = [
     'unemployment' => 'Unemployment Rate',
     'employment-by-sector' => 'Employment by Sector',
     'earnings' => 'Weekly Earnings',
-    'income-by-county' => 'Personal Income by County',
-    'population-by-county' => 'Population by County',
 ];
 
 $countyLinks = [
     'county-unemployment' => 'Unemployment',
+    'income-by-county' => 'Personal Income',
+    'population-by-county' => 'Population',
 ];
 
 if (!function_exists('showSidebarLinks')) {
