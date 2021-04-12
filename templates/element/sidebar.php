@@ -12,6 +12,7 @@ $usLinks = [
     'gdp' => 'Gross Domestic Product',
     'manufacturing-employment' => 'Manufacturing Employment by State',
     'durable-goods' => 'Durable Goods Orders',
+    'personal-income' => 'Personal Income',
 ];
 
 $inLinks = [

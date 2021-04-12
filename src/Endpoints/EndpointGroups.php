@@ -306,6 +306,52 @@ class EndpointGroups
         ],
     ];
 
+    public const PERSONAL_INCOME = [
+        'title' => 'Personal Income',
+        'cacheKey' => 'personal_income',
+        'endpoints' => [
+            'PI' => 'Personal Income',
+            'W209RC1' => 'Compensation of employees, received',
+            'A576RC1' => 'Wage & salary disbusements',
+            'A132RC1' => 'Private Industries',
+            'B202RC1' => 'Government',
+            'A038RC1' => 'Supplements to wages & salaries',
+            'B039RC1M027SBEA' => 'Employer contributions for government social insurance',
+            'A041RC1' => 'Proprietors\' income with inventory valuation & capital consumption adjustments',
+            'B042RC1' => 'Farm',
+            'A045RC1' => 'Nonfarm',
+            'A048RC1' => 'Rental income of persons with capital consumption adjustment',
+            'PIROA' => 'Personal income receipts on assets',
+            'PII' => 'Personal interest income',
+            'PDI' => 'Personal dividend income',
+            'PCTR' => 'Personal current transfer receipts',
+            'A063RC1' => 'Government social benefits to persons',
+            'W823RC1' => 'Social security',
+            'W824RC1' => 'Medicare',
+            'W729RC1' => 'Medicaid',
+            'W825RC1' => 'Unemployment insurance',
+            'W826RC1' => 'Veterans\' benefits',
+            'W827RC1' => 'Other',
+            'B931RC1' => 'Other current transfer receipts, from business (net)',
+            'A061RC1' => 'Less: Contributions for government social insurance, domestic',
+            'W055RC1' => 'Less: Personal current taxes',
+            'DSPI' => 'Equals: Disposable personal income',
+            'A068RC1' => 'Less: Personal outlays',
+            'PCE' => 'Personal consumption expenditures',
+            'B069RC1' => 'Personal interest payments',
+            'W211RC1' => 'Personal current transfer payments',
+            'W062RC1M027SBEA' => 'To government',
+            'B070RC1M027SBEA' => 'To the rest of the world (net)',
+            'PMSAVE' => 'Equals: Personal saving',
+            'PSAVERT' => 'Personal saving as a percentage of disposable personal income',
+            'W875RX1' => 'Personal income excluding current transfer receipts, billions of chained (2005) dollars',
+            'DSPIC96' => 'Total, billions of chained (2005) dollars',
+            'A229RC0' => 'Per capita: Current dollars',
+            'A229RX0' => 'Per capita: Chained (2005) dollars',
+            'POPTHM' => 'Population (midperiod, thousands)',
+        ],
+    ];
+
     /**
      * Returns an array of all endpoint groups
      *
@@ -324,6 +370,7 @@ class EndpointGroups
             self::COUNTY_UNEMPLOYMENT,
             self::STATE_MANUFACTURING_EMPLOYMENT,
             self::DURABLE_GOODS_ORDERS,
+            self::PERSONAL_INCOME,
         ];
     }
 
@@ -357,6 +404,8 @@ class EndpointGroups
                 return self::STATE_MANUFACTURING_EMPLOYMENT;
             case 'durable-goods':
                 return self::DURABLE_GOODS_ORDERS;
+            case 'personal-income':
+                return self::PERSONAL_INCOME;
         }
 
         throw new NotFoundException('Data group ' . $groupId . ' not found');
