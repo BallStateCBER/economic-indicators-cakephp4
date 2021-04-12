@@ -398,6 +398,35 @@ class EndpointGroups
         ],
     ];
 
+    public const CONSUMER_PRICE_INDEX = [
+        'title' => 'Consumer Price Index',
+        'cacheKey' => 'consumer_price_index',
+        'endpoints' => [
+            'CPIAUCSL' => 'All items',
+            'CUSR0000SA0L5' => 'All items less medical care',
+            'CPILEGSL' => 'All items less energy',
+            'CPIULFSL' => 'All items less food',
+            'CPILFESL' => 'All items less food & energy',
+            'CUSR0000SA0L2' => 'All items less shelter',
+            'CPIFABSL' => 'Food & beverages',
+            'CPIHOSSL' => 'Housing',
+            'CPIAPPSL' => 'Apparel',
+            'CPITRNSL' => 'Transportation',
+            'CPIMEDSL' => 'Medical care',
+            'CPIRECSL' => 'Recreation',
+            'CPIEDUSL' => 'Education & communication',
+            'CPIOGSSL' => 'Other goods & services',
+            'CUSR0000SAC' => 'Commodities',
+            'CUSR0000SAD' => 'Durables',
+            'CPIENGSL' => 'Energy',
+            'CUSR0000SAN' => 'Nondurables',
+            'CUUS0000SAGC' => 'Other goods',
+            'CUSR0000SAS367' => 'Other services',
+            'CUUS0000SARS' => 'Recreation services',
+            'CUSR0000SAS' => 'Services',
+        ],
+    ];
+
     /**
      * Returns an array of all endpoint groups
      *
@@ -420,6 +449,7 @@ class EndpointGroups
             'industrial-production' => self::INDUSTRIAL_PRODUCTION,
             'interest-rates' => self::INTEREST_RATES,
             'money-supply' => self::MONEY_SUPPLY,
+            'cpi' => self::CONSUMER_PRICE_INDEX,
         ];
     }
 

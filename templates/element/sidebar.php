@@ -16,6 +16,7 @@ $usLinks = [
     'industrial-production' => 'Industrial Production',
     'interest-rates' => 'Interest Rates',
     'money-supply' => 'Money Supply',
+    'cpi' => 'Consumer Price Index',
 ];
 
 $inLinks = [
