@@ -352,6 +352,32 @@ class EndpointGroups
         ],
     ];
 
+    public const INDUSTRIAL_PRODUCTION = [
+        'title' => 'Industrial Production',
+        'cacheKey' => 'industrial_production',
+        'endpoints' => [
+            'INDPRO' => 'Total Index',
+            'DIFFONE' => 'Diffusion Indexes of Diffusion Index of Industrial Production, One Month Earlier',
+            'DIFFTHREE' => 'Diffusion Indexes of Diffusion Index of Industrial Production, Three Months Earlier',
+            'DIFFSIX' => 'Diffusion Indexes of Diffusion Index of Industrial Production, Six Months Earlier',
+            'IPBUSEQ' => 'Equipment: Business Equipment',
+            'IPCONGD' => 'Consumer Goods',
+            'IPDCONGD' => 'Durable Consumer Goods',
+            'IPNCONGD' => 'Non-Durable Consumer Goods',
+            'IPUTIL' => 'Utilities: Electric and Gas Utilities (NAICS = 2211,2)',
+            'IPFINAL' => 'Final Products',
+            'IPMAN' => 'Manufacturing (NAICS)',
+            'IPDMAN' => 'Durable Manufacturing (NAICS)',
+            'IPNMAN' => 'Non-Durable Manufacturing (NAICS)',
+            'IPMAT' => 'Materials',
+            'IPDMAT' => 'Durable Goods Materials',
+            'IPNMAT' => 'Non-Durable Goods Materials',
+            'IPMINE' => 'Mining, Quarrying, and Oil and Gas Extraction: Mining (NAICS = 21)',
+            'TCU' => 'Capacity Utilization: Total Index',
+            'MCUMFN' => 'Capacity Utilization: Manufacturing (NAICS)',
+        ],
+    ];
+
     /**
      * Returns an array of all endpoint groups
      *
@@ -371,6 +397,7 @@ class EndpointGroups
             self::STATE_MANUFACTURING_EMPLOYMENT,
             self::DURABLE_GOODS_ORDERS,
             self::PERSONAL_INCOME,
+            self::INDUSTRIAL_PRODUCTION,
         ];
     }
 
@@ -406,6 +433,8 @@ class EndpointGroups
                 return self::DURABLE_GOODS_ORDERS;
             case 'personal-income':
                 return self::PERSONAL_INCOME;
+            case 'industrial-production':
+                return self::INDUSTRIAL_PRODUCTION;
         }
 
         throw new NotFoundException('Data group ' . $groupId . ' not found');

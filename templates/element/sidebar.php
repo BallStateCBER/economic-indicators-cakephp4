@@ -13,6 +13,7 @@ $usLinks = [
     'manufacturing-employment' => 'Manufacturing Employment by State',
     'durable-goods' => 'Durable Goods Orders',
     'personal-income' => 'Personal Income',
+    'industrial-production' => 'Industrial Production',
 ];
 
 $inLinks = [
