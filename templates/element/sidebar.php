@@ -11,6 +11,7 @@ $usLinks = [
     'retail-food-services' => 'Retail & Food Services',
     'gdp' => 'Gross Domestic Product',
     'manufacturing-employment' => 'Manufacturing Employment by State',
+    'durable-goods' => 'Durable Goods Orders',
 ];
 
 $inLinks = [

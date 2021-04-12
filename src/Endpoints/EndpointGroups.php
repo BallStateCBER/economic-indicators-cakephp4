@@ -261,6 +261,51 @@ class EndpointGroups
         ],
     ];
 
+    public const DURABLE_GOODS_ORDERS = [
+        'title' => 'Durable Goods Orders',
+        'cacheKey' => 'durable_goods_orders',
+        'endpoints' => [
+            'DGORDER' => 'Manufacturers\' New Orders: Durable Goods',
+            'ACDGNO' => 'Manufacturers\' New Orders: Consumer Durable Goods',
+            'ADXDNO' => 'Manufacturers\' New Orders: Durable Goods Excluding Defense',
+            'ADXTNO' => 'Manufacturers\' New Orders: Durable Goods Excluding Transportation',
+            'A34SNO' => 'Manufacturers\' New Orders: Computers & Electronic Products',
+            'A34ENO' => 'Manufacturers\' New Orders: Communications Eqpt. Manufacturing, Defense',
+            'A34JNO' => 'Manufacturers\' New Orders: Search & Navigation Eqpt., Defense',
+            'A34KNO' => 'Manufacturers\' New Orders: Electromedical, Measuring & Control Instrument Manufacturing',
+            'A34HNO' => 'Manufacturers\' New Orders: Other Electronic Component Manufacturing',
+            'A34DNO' => 'Manufacturers\' New Orders: Communications Eqpt. Manufacturing, Nondefense',
+            'A34INO' => 'Manufacturers\' New Orders: Search & Navigation Eqpt., Nondefense',
+            'A35SNO' => 'Manufacturers\' New Orders: Electrical Eqpt., Appliances & Components',
+            'A35CNO' => 'Manufacturers\' New Orders: Electrical Eqpt. Manufacturing',
+            'A35ANO' => 'Manufacturers\' New Orders: Electric Lighting Eqpt. Manufacturing',
+            'A35BNO' => 'Manufacturers\' New Orders: Household Appliance Manufacturing',
+            'A32SNO' => 'Manufacturers\' New Orders: Fabricated Metal Products',
+            'A37SNO' => 'Manufacturers\' New Orders: Furniture & Related Products',
+            'A33SNO' => 'Manufacturers\' New Orders: Machinery',
+            'A33CNO' => 'Manufacturers\' New Orders: Construction Machinery Manufacturing',
+            'A33ENO' => 'Manufacturers\' New Orders: Industrial Machinery Manufacturing',
+            'A33MNO' => 'Manufacturers\' New Orders: Material Handling Eqpt. Manufacturing',
+            'A33INO' => 'Manufacturers\' New Orders: Metalworking Machinery Manufacturing',
+            'A33DNO' => 'Manufacturers\' New Orders: Mining, Oil & Gas Field Machinery Manufacturing',
+            'A33GNO' => 'Manufacturers\' New Orders: Photographic Eqpt. Manufacturing',
+            'ATGPNO' => 'Manufacturers\' New Orders: Turbines, Generators & Other Power Transmission Eqpt.',
+            'A33HNO' => 'Manufacturers\' New Orders: Ventilation, Heating, ' .
+                'Air-Conditioning & Refridgeration Eqpt. Manufacturing',
+            'A31SNO' => 'Manufacturers\' New Orders: Primary Metals',
+            'AANMNO' => 'Manufacturers\' New Orders: Aluminum & Nonferrous Metal Products',
+            'A31CNO' => 'Manufacturers\' New Orders: Ferrous Metal Foundries',
+            'A31ANO' => 'Manufacturers\' New Orders: Iron & Steel Mills & Ferroalloy & Steel Product Manufacturing',
+            'A36SNO' => 'Manufacturers\' New Orders: Transportation Eqpt. ',
+            'ADAPNO' => 'Manufacturers\' New Orders: Defense Aircraft & Parts',
+            'ABTPNO' => 'Manufacturers\' New Orders: Motor Vehicle Bodies, Trailers & Parts',
+            'ANAPNO' => 'Manufacturers\' New Orders: Nondefense Aircraft & Parts',
+            'A36ZNO' => 'Manufacturers\' New Orders: Ships & Boats',
+            'AODGNO' => 'Manufacturers\' New Orders: All Other Durable Goods',
+            'AMNMNO' => 'Manufacturers\' New Orders: Nondurable Goods',
+        ],
+    ];
+
     /**
      * Returns an array of all endpoint groups
      *
@@ -278,6 +323,7 @@ class EndpointGroups
             self::EARNINGS,
             self::COUNTY_UNEMPLOYMENT,
             self::STATE_MANUFACTURING_EMPLOYMENT,
+            self::DURABLE_GOODS_ORDERS,
         ];
     }
 
@@ -309,6 +355,8 @@ class EndpointGroups
                 return self::COUNTY_UNEMPLOYMENT;
             case 'manufacturing-employment':
                 return self::STATE_MANUFACTURING_EMPLOYMENT;
+            case 'durable-goods':
+                return self::DURABLE_GOODS_ORDERS;
         }
 
         throw new NotFoundException('Data group ' . $groupId . ' not found');
