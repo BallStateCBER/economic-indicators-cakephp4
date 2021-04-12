@@ -427,6 +427,39 @@ class EndpointGroups
         ],
     ];
 
+    public const CONSUMER_SENTIMENT_INDEX = [
+        'title' => 'Consumer Sentiment Index',
+        'cacheKey' => 'consumer_sentiment_index',
+        'endpoints' => ['UMCSENT' => 'Consumer Sentiment Index'],
+    ];
+
+    public const INFLATION_EXPECTATION_INDEX = [
+        'title' => 'Inflation Expectation Index',
+        'cacheKey' => 'inflation_expectation_index',
+        'endpoints' => ['MICH' => 'Inflation Expectation Index'],
+    ];
+
+    public const LABOR_FORCE_STATISTICS = [
+        'title' => 'Labor Force Statistics',
+        'cacheKey' => 'labor_force_statistics',
+        'endpoints' => [
+            'CNP16OV' => 'Population Level',
+            'CLF16OV' => 'Civilian Labor Force Level',
+            'CIVPART' => 'Labor Force Participation Rate',
+            'EMRATIO' => 'Employment-Population Ratio',
+            'CE16OV' => 'Employment Level',
+            'LNS12500000' => 'Usually Work Full Time',
+            'LNS12600000' => 'Usually Work Part Time',
+            'UNEMPLOY' => 'Unemployment Level',
+            'LNS13100000' => 'Looking For Full-Time Work',
+            'LNS13200000' => 'Looking For Part-Time Work',
+            'UNRATE' => 'Unemployment Rate',
+            'LNS14100000' => 'Full-Time Workers',
+            'LNS14200000' => 'Part-Time Workers',
+            'LNS15000000' => 'Not in Labor Force',
+        ],
+    ];
+
     /**
      * Returns an array of all endpoint groups
      *
@@ -450,6 +483,9 @@ class EndpointGroups
             'interest-rates' => self::INTEREST_RATES,
             'money-supply' => self::MONEY_SUPPLY,
             'cpi' => self::CONSUMER_PRICE_INDEX,
+            'csi' => self::CONSUMER_SENTIMENT_INDEX,
+            'iei' => self::INFLATION_EXPECTATION_INDEX,
+            'labor-force-statistics' => self::LABOR_FORCE_STATISTICS,
         ];
     }
 

@@ -17,6 +17,9 @@ $usLinks = [
     'interest-rates' => 'Interest Rates',
     'money-supply' => 'Money Supply',
     'cpi' => 'Consumer Price Index',
+    'csi' => 'Consumer Sentiment Index',
+    'iei' => 'Inflation Expectation Index',
+    'labor-force-statistics' => 'Labor Force Statistics',
 ];
 
 $inLinks = [
