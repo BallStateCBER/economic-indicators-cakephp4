@@ -418,7 +418,7 @@ class EndpointGroups
             'durable-goods' => self::DURABLE_GOODS_ORDERS,
             'personal-income' => self::PERSONAL_INCOME,
             'industrial-production' => self::INDUSTRIAL_PRODUCTION,
-            'interest-rates'=> self::INTEREST_RATES,
+            'interest-rates' => self::INTEREST_RATES,
             'money-supply' => self::MONEY_SUPPLY,
         ];
     }
