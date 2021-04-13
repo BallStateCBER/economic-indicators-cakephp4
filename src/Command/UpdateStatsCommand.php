@@ -78,6 +78,7 @@ class UpdateStatsCommand extends AppCommand
     {
         parent::execute($args, $io);
         $cacheUpdater = new UpdateCacheCommand($io);
+        $spreadsheetWriter = new MakeSpreadsheetsCommand($io);
 
         $endpointGroups = EndpointGroups::getAll();
         foreach ($endpointGroups as $endpointGroup) {
@@ -107,6 +108,7 @@ class UpdateStatsCommand extends AppCommand
 
             if ($groupUpdated) {
                 $cacheUpdater->refreshGroup($endpointGroup);
+                $spreadsheetWriter->makeSpreadsheetsForGroup($endpointGroup);
             }
 
             $io->out();
