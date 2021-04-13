@@ -128,7 +128,7 @@ class MakeSpreadsheetsCommand extends Command
                 $spreadsheetWriter->save(SpreadsheetsTable::FILE_PATH . $newFilename);
                 unset($spreadsheet, $spreadsheetWriter);
 
-                $this->io->out('- Updating database');
+                $this->io->out('- Updating spreadsheet database record');
                 $this->updateSpreadsheetDbRecord($endpointGroup, $isTimeSeries, $newFilename);
 
                 $oldFileNeedsDeleted = $oldFilename && $oldFilename != $newFilename;
