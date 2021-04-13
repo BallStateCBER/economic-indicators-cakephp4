@@ -351,24 +351,33 @@ class UpdateStatsCommand extends AppCommand
             'data_type_id' => $dataTypeId,
             'date' => $date,
         ];
+        /** @var \App\Model\Entity\Statistic|null $statistic */
         $statistic = $this->statisticsTable
             ->find()
+            ->select(['id', 'value'])
             ->where($data)
             ->first();
 
-        $updating = false;
-        if ($statistic) {
-            $updating = true;
-            $this->statisticsTable->patchEntity($statistic, ['value' => $value]);
-        } else {
+        $isNewStat = false;
+        $updateNeeded = false;
+        if (!$statistic) {
+            $isNewStat = true;
+            $updateNeeded = true;
             $data['value'] = $value;
             $statistic = $this->statisticsTable->newEntity($data);
+        } elseif ($statistic->value != $value) {
+            $updateNeeded = true;
+            $this->statisticsTable->patchEntity($statistic, ['value' => $value]);
+        }
+
+        if (!$updateNeeded) {
+            return;
         }
 
         if (!$this->statisticsTable->save($statistic)) {
             $this->io->error(sprintf(
                 'There was an error %s that statistic. Details:',
-                $updating ? 'updating' : 'adding'
+                $isNewStat ? 'adding' : 'updating'
             ));
             $this->io->out(print_r($statistic->getErrors(), true));
             $this->io->out('Data:');
