@@ -31,7 +31,7 @@ class SpreadsheetSingleDate extends Spreadsheet
         $this->isTimeSeries = false;
 
         $columnTitles = [
-            'Metric',
+            'Category',
             $this->firstMetric->units,
             'Change from One Year Prior',
             'Percent Change from One Year Prior',
