@@ -315,14 +315,14 @@ class UpdateStatsCommand extends AppCommand
             dataTypeId: StatisticsTable::DATA_TYPE_VALUE,
         );
 
-        $this->io->overwrite('- Changes');
+        $this->io->out('- Changes');
         $this->saveAllStatistics(
             observations: $this->getObservations(['units' => self::UNITS_CHANGE_FROM_1_YEAR_AGO]),
             metricId: $metric->id,
             dataTypeId: StatisticsTable::DATA_TYPE_CHANGE,
         );
 
-        $this->io->overwrite('- Percent changes');
+        $this->io->out('- Percent changes');
         $this->saveAllStatistics(
             observations: $this->getObservations(['units' => self::UNITS_PERCENT_CHANGE_FROM_1_YEAR_AGO]),
             metricId: $metric->id,
