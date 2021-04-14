@@ -166,6 +166,7 @@ class UpdateReleaseDatesCommand extends AppCommand
                     if ($releaseDates) {
                         $exp->notIn('date', $releaseDates);
                     }
+
                     return $exp;
                 },
             ])
