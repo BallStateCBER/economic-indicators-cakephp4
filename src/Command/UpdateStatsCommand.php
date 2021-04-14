@@ -102,7 +102,6 @@ class UpdateStatsCommand extends AppCommand
                     }
                 } else {
                     $io->out(sprintf('%s: No update available', $seriesId));
-                    continue;
                 }
             }
 
@@ -301,9 +300,9 @@ class UpdateStatsCommand extends AppCommand
     private function updateEndpoint(string $group, string $seriesId, string $name): void
     {
         // Fetch from API
-        $this->io->out(' - Retrieving from API...');
+        $this->io->out('- Retrieving from API...');
         $this->setEndpoint($seriesId);
-        $this->io->out(sprintf('%s: %s metadata', $group, $name));
+        $this->io->out(sprintf('- %s: %s metadata', $group, $name));
         $endpointMeta = $this->getEndpointMetadata();
         $metric = $this->metrics[$seriesId];
         $this->apiParameters['sort_order'] = 'asc';
@@ -428,7 +427,7 @@ class UpdateStatsCommand extends AppCommand
             );
             $this->progress->increment()->draw();
         }
-        $this->io->overwrite('');
+        $this->io->overwrite('- Done');
     }
 
     /**
