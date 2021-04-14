@@ -162,9 +162,11 @@ class UpdateReleaseDatesCommand extends AppCommand
             ->where([
                 'metric_id' => $metricId,
                 function (QueryExpression $exp) use ($releaseDates, $today) {
-                    return $exp
-                        ->gte('date', $today)
-                        ->notIn('date', $releaseDates);
+                    $exp->gte('date', $today);
+                    if ($releaseDates) {
+                        $exp->notIn('date', $releaseDates);
+                    }
+                    return $exp;
                 },
             ])
             ->all();
