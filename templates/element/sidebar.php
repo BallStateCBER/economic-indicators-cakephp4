@@ -6,24 +6,36 @@
 use App\View\AppView;
 
 $usLinks = [
-    'housing-starts' => 'Housing Starts',
-    'vehicle-sales' => 'Vehicle Sales',
-    'retail-food-services' => 'Retail & Food Services',
-    'gdp' => 'Gross Domestic Product',
-    'manufacturing-employment' => 'Manufacturing Employment by State',
-    'durable-goods' => 'Durable Goods Orders',
-    'personal-income' => 'Personal Income',
-    'industrial-production' => 'Industrial Production',
-    'interest-rates' => 'Interest Rates',
-    'money-supply' => 'Money Supply',
-    'cpi' => 'Consumer Price Index',
-    'csi' => 'Consumer Sentiment Index',
-    'iei' => 'Inflation Expectation Index',
-    'labor-force-statistics' => 'Labor Force Statistics',
-    'unemployment-by-state' => 'Unemployment Rate by State',
-    'gold' => 'Price of Gold',
-    'oil' => 'Price of Oil',
-    'housing-indicators' => 'Housing Indicators',
+    'Consumer & Housing' => [
+        'csi' => 'Consumer Sentiment Index',
+        'housing-starts' => 'Housing Starts',
+        'personal-income' => 'Personal Income',
+        'housing-indicators' => 'Housing Indicators',
+    ],
+    'GDP' => [
+        'gdp' => 'Gross Domestic Product',
+    ],
+    'Industry' => [
+        'durable-goods' => 'Durable Goods Orders',
+        'industrial-production' => 'Industrial Production',
+        'vehicle-sales' => 'Vehicle Sales',
+        'retail-food-services' => 'Retail & Food Services',
+    ],
+    'Labor' => [
+        'manufacturing-employment' => 'Manufacturing Employment by State',
+        'labor-force-statistics' => 'Labor Force Statistics',
+        'unemployment-by-state' => 'Unemployment Rate by State',
+    ],
+    'Money' => [
+        'interest-rates' => 'Interest Rates',
+        'money-supply' => 'Money Supply',
+    ],
+    'Prices' => [
+        'cpi' => 'Consumer Price Index',
+        'iei' => 'Inflation Expectation Index',
+        'gold' => 'Price of Gold',
+        'oil' => 'Price of Oil',
+    ],
 ];
 asort($usLinks);
 
@@ -89,9 +101,19 @@ if (!function_exists('showSidebarLinks')) {
             <h2>
                 United States
             </h2>
-            <ul>
-                <?php showSidebarLinks($this, $usLinks); ?>
-            </ul>
+            <?php foreach ($usLinks as $category => $catLinks): ?>
+                <section class="us-group">
+                    <h3>
+                        <?= $category ?>
+                    </h3>
+                    <ul>
+                        <?php
+                            asort($catLinks);
+                            showSidebarLinks($this, $catLinks);
+                        ?>
+                    </ul>
+                </section>
+            <?php endforeach; ?>
         </section>
 
         <section>

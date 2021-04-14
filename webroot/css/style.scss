@@ -74,6 +74,12 @@ table.observations {
         }
     }
 
+    h3 {
+        font-size: 105%;
+        margin-bottom: 0;
+        text-transform: none;
+    }
+
     ul {
         margin-bottom: 0;
         margin-left: 20px;
@@ -95,6 +101,10 @@ table.observations {
 
     section {
         margin-bottom: 1em;
+    }
+
+    .us-group {
+        padding-left: 10px;
     }
 }
 
