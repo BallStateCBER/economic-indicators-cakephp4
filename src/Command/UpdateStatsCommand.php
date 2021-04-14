@@ -216,7 +216,7 @@ class UpdateStatsCommand extends AppCommand
             $finalAttempt = $attempts == 1;
             try {
                 $response = $api->get($parameters);
-                if (property_exists($response, 'series')) {
+                if ($response && property_exists($response, 'series')) {
                     return (array)($response->series);
                 }
 
