@@ -6,6 +6,7 @@ namespace App\Model\Table;
 use App\Model\Entity\Metric;
 use Cake\Datasource\EntityInterface;
 use Cake\Http\Exception\InternalErrorException;
+use Cake\Http\Exception\NotFoundException;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
@@ -148,14 +149,14 @@ class MetricsTable extends Table
      *
      * @param string $seriesId A FRED API seriesID string
      * @return \App\Model\Entity\Metric
-     * @throws \Cake\Http\Exception\InternalErrorException
+     * @throws \Cake\Http\Exception\NotFoundException
      */
     public function getFromSeriesId(string $seriesId): Metric
     {
         /** @var \App\Model\Entity\Metric|null $metric */
         $metric = $this->find()->where(['series_id' => $seriesId])->first();
         if (!$metric) {
-            throw new InternalErrorException(sprintf('Metric with seriesID %s not found', $seriesId));
+            throw new NotFoundException(sprintf('Metric with seriesID %s not found', $seriesId));
         }
 
         return $metric;

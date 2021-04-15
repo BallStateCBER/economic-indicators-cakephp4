@@ -177,6 +177,7 @@ class StatisticsTable extends Table
      * @param bool $all TRUE to return statistics for all dates
      * @param bool $onlyCache TRUE only cache data and return an empty array (saves memory)
      * @return array
+     * @throws \Cake\Http\Exception\NotFoundException
      */
     public function getGroup(array $endpointGroup, bool $all = false, $onlyCache = false): array
     {

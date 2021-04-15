@@ -24,6 +24,7 @@ class SpreadsheetSingleDate extends Spreadsheet
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws \Exception
+     * @throws \Cake\Http\Exception\NotFoundException
      */
     public function __construct(array $endpointGroup)
     {

@@ -54,6 +54,7 @@ class UpdateReleaseDatesCommand extends AppCommand
      * @param \Cake\Console\ConsoleIo $io The console io
      * @return void
      * @throws \fred_api_exception
+     * @throws \Cake\Http\Exception\NotFoundException
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
