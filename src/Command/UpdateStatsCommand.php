@@ -146,7 +146,7 @@ class UpdateStatsCommand extends AppCommand
      */
     private function updateIsAvailable(string $seriesId): bool
     {
-        $metric = $this->metricsTable->getFromSeriesId($seriesId);
+        $metric = $this->metrics[$seriesId];
         if (!$metric->last_updated) {
             return true;
         }
@@ -492,7 +492,7 @@ class UpdateStatsCommand extends AppCommand
      */
     private function markReleasesImported(string $seriesId)
     {
-        $metric = $this->metricsTable->getFromSeriesId($seriesId);
+        $metric = $this->metrics[$seriesId];
         $releases = $this->releasesTable
             ->find('currentAndPast')
             ->where([
@@ -533,7 +533,7 @@ class UpdateStatsCommand extends AppCommand
             return false;
         }
 
-        $metric = $this->metricsTable->getFromSeriesId($seriesId);
+        $metric = $this->metrics[$seriesId];
 
         return !$this->releasesTable->newDataExpected($metric->id);
     }
