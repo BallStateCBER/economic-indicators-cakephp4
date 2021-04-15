@@ -43,6 +43,11 @@ class UpdateReleaseDatesCommand extends AppCommand
     {
         $parser = parent::buildOptionParser($parser);
         $parser->setDescription('Adds any new releases to the Releases table');
+        $parser->addOption('only-cache', [
+            'short' => 'c',
+            'help' => 'Only refresh the cache',
+            'boolean' => true,
+        ]);
 
         return $parser;
     }
@@ -59,22 +64,26 @@ class UpdateReleaseDatesCommand extends AppCommand
     public function execute(Arguments $args, ConsoleIo $io)
     {
         parent::execute($args, $io);
-        $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $this->releasesTable = TableRegistry::getTableLocator()->get('Releases');
-        $this->seriesApi = $this->api->factory('series');
-        $this->releaseApi = $this->api->factory('release');
-        $endpointGroups = EndpointGroups::getAll();
-        foreach ($endpointGroups as $endpointGroup) {
-            $this->io->info($endpointGroup['title']);
-            foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
-                $releaseId = $this->getReleaseId($seriesId, $name);
-                $releaseDates = $this->getUpcomingReleaseDates($releaseId);
-                $metric = $this->metricsTable->getFromSeriesId($seriesId);
-                $this->removeInvalidReleases($releaseDates, $metric->id);
-                $this->addMissingReleases($releaseDates, $metric->id);
+
+        if (!$args->getOption('only-cache')) {
+            $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+            $this->seriesApi = $this->api->factory('series');
+            $this->releaseApi = $this->api->factory('release');
+            $endpointGroups = EndpointGroups::getAll();
+            foreach ($endpointGroups as $endpointGroup) {
+                $this->io->info($endpointGroup['title']);
+                foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
+                    $releaseId = $this->getReleaseId($seriesId, $name);
+                    $releaseDates = $this->getUpcomingReleaseDates($releaseId);
+                    $metric = $this->metricsTable->getFromSeriesId($seriesId);
+                    $this->removeInvalidReleases($releaseDates, $metric->id);
+                    $this->addMissingReleases($releaseDates, $metric->id);
+                }
+                $this->io->out();
             }
-            $this->io->out();
         }
+
         $this->io->out('Rebuilding cache');
         Cache::clear(ReleasesTable::CACHE_CONFIG);
         $this->releasesTable->getNextReleaseDates();
