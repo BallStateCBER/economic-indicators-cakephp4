@@ -36,6 +36,7 @@ class ReleasesTable extends Table
 {
     private bool $useCache;
     public const CACHE_CONFIG = 'releases';
+    public const CACHE_KEY_CALENDAR = 'next_release_dates';
 
     /**
      * Initialize method
@@ -106,8 +107,7 @@ class ReleasesTable extends Table
      */
     public function getNextReleaseDates(): array
     {
-        $cacheKey = 'next_release_dates';
-        $cachedResult = $this->useCache ? Cache::read($cacheKey, self::CACHE_CONFIG) : false;
+        $cachedResult = $this->useCache ? Cache::read(self::CACHE_KEY_CALENDAR, self::CACHE_CONFIG) : false;
         if ($cachedResult) {
             return $cachedResult;
         }
@@ -137,7 +137,7 @@ class ReleasesTable extends Table
         ksort($dates);
 
         if ($this->useCache) {
-            Cache::write($cacheKey, $dates, self::CACHE_CONFIG);
+            Cache::write(self::CACHE_KEY_CALENDAR, $dates, self::CACHE_CONFIG);
         }
 
         return $dates;
