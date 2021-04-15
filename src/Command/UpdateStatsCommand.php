@@ -422,7 +422,7 @@ class UpdateStatsCommand extends AppCommand
             $updateNeeded = true;
             $data['value'] = $value;
             $statistic = $this->statisticsTable->newEntity($data);
-        } elseif ($statistic->value != $value) {
+        } elseif (!$this->onlyNew && $statistic->value != $value) {
             $updateNeeded = true;
             $this->statisticsTable->patchEntity($statistic, ['value' => $value]);
         }
