@@ -47,7 +47,8 @@ $i = 0;
             Upcoming Data Releases
         </h1>
         <p>
-            Click each category to show details
+            The following are the next dates in which new data is expected to be released for each category.
+            Click a category to see which specific metrics will be included in the anticipated release.
         </p>
         <?php foreach ($releaseDates as $date => $endpoints): ?>
             <div>
