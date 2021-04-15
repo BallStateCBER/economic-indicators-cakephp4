@@ -33,6 +33,11 @@ abstract class AppCommand extends DataCenterCommand
     protected float $rateThrottle = 1;
 
     /**
+     * @var float Seconds to wait after an invalid API response before trying again
+     */
+    protected float $waitAfterError = 5;
+
+    /**
      * UpdateStatsCommand constructor.
      */
     public function __construct()
@@ -71,7 +76,28 @@ abstract class AppCommand extends DataCenterCommand
      */
     protected function throttle()
     {
-        $microseconds = (int)($this->rateThrottle * 1000000);
+        $this->sleep($this->rateThrottle);
+    }
+
+    /**
+     * Pauses execution for $this->waitAfterError seconds
+     *
+     * @return void
+     */
+    protected function waitAfterError()
+    {
+        $this->sleep($this->waitAfterError);
+    }
+
+    /**
+     * Pauses execution for $seconds seconds
+     *
+     * @param float $seconds Number of seconds to sleep
+     * @return void
+     */
+    private function sleep(float $seconds)
+    {
+        $microseconds = (int)($seconds * 1000000);
         usleep($microseconds);
     }
 

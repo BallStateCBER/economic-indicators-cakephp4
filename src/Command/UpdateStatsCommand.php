@@ -231,6 +231,7 @@ class UpdateStatsCommand extends AppCommand
                 }
 
                 $this->io->error('Failed, retrying');
+                $this->waitAfterError();
                 continue;
             }
         }
@@ -257,13 +258,31 @@ class UpdateStatsCommand extends AppCommand
             $parameters['file_type'] = 'json';
 
             $this->throttle();
-            $response = $api->observations($parameters);
+            try {
+                $response = $api->observations($parameters);
+            } catch (\fred_api_exception $e) {
+                if ($finalAttempt) {
+                    throw $e;
+                }
+
+                $this->io->error('Failed, retrying');
+                $this->waitAfterError();
+                continue;
+            }
+
             $responseObj = $this->decodeResponse(
                 response: $response,
                 requiredProperty: 'observations',
                 haltOnError: $finalAttempt,
             );
             if (!$responseObj) {
+                if ($finalAttempt) {
+                    $this->io->error('Invalid response, retry limit reached, aborting');
+                    exit;
+                }
+
+                $this->io->error('Invalid response, retrying');
+                $this->waitAfterError();
                 continue;
             }
 
