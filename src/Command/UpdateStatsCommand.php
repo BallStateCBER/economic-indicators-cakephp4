@@ -105,23 +105,24 @@ class UpdateStatsCommand extends AppCommand
                     continue;
                 }
 
-                if ($this->updateIsAvailable($seriesId)) {
-                    $io->out(sprintf('%s: Update available', $seriesId));
-                    try {
-                        $this->updateEndpoint(
-                            group: $endpointGroup['title'],
-                            seriesId: $seriesId,
-                            name: $name,
-                        );
-                        $groupUpdated = true;
-                    } catch (NotFoundException | fred_api_exception $e) {
-                        $io->error($e->getMessage());
-                        exit;
-                    }
-                    $this->markReleasesImported($seriesId);
-                } else {
+                if (!$this->updateIsAvailable($seriesId)) {
                     $io->out(sprintf('%s: No update available', $seriesId));
+                    continue;
                 }
+
+                $io->out(sprintf('%s: Update available', $seriesId));
+                try {
+                    $this->updateEndpoint(
+                        group: $endpointGroup['title'],
+                        seriesId: $seriesId,
+                        name: $name,
+                    );
+                    $groupUpdated = true;
+                } catch (NotFoundException | fred_api_exception $e) {
+                    $io->error($e->getMessage());
+                    exit;
+                }
+                $this->markReleasesImported($seriesId);
             }
 
             if ($groupUpdated) {
