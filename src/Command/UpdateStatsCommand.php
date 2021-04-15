@@ -257,10 +257,13 @@ class UpdateStatsCommand extends AppCommand
             $parameters += $this->apiParameters;
             $parameters['file_type'] = 'json';
 
+            // Fetch observations
             $this->throttle();
             try {
                 $response = $api->observations($parameters);
-            } catch (\fred_api_exception $e) {
+
+            // Handle error fetching observations
+            } catch (fred_api_exception $e) {
                 if ($finalAttempt) {
                     throw $e;
                 }
@@ -270,11 +273,14 @@ class UpdateStatsCommand extends AppCommand
                 continue;
             }
 
+            // Decode response
             $responseObj = $this->decodeResponse(
                 response: $response,
                 requiredProperty: 'observations',
                 haltOnError: $finalAttempt,
             );
+
+            // Handle invalid response
             if (!$responseObj) {
                 if ($finalAttempt) {
                     $this->io->error('Invalid response, retry limit reached, aborting');
