@@ -79,6 +79,11 @@ class UpdateStatsCommand extends AppCommand
                 . 'and only adds new stats, rather than also updating existing stats',
             'boolean' => true,
         ]);
+        $parser->addOption('ignore-lock', [
+            'help' => 'Allows multiple update processes to take place concurrently (not recommended unless if there\'s '
+                . 'a problem with the process lock',
+            'boolean' => true,
+        ]);
 
         return $parser;
     }
@@ -94,7 +99,9 @@ class UpdateStatsCommand extends AppCommand
     public function execute(Arguments $args, ConsoleIo $io)
     {
         parent::execute($args, $io);
-        $this->avoidConcurrentProcesses();
+        if (!$args->getOption('ignore-lock')) {
+            $this->avoidConcurrentProcesses();
+        }
 
         $cacheUpdater = new UpdateCacheCommand($io);
         $spreadsheetWriter = new MakeSpreadsheetsCommand($io);
@@ -594,6 +601,7 @@ class UpdateStatsCommand extends AppCommand
             'Another update_stats process reported that it was running on %s and hasn\'t completed. Aborting.',
             $running
         ));
+        $this->io->out('Run this command with the option --ignore-lock to run it anyway.');
         exit;
     }
 
