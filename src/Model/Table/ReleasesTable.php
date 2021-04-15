@@ -115,12 +115,23 @@ class ReleasesTable extends Table
         $endpointGroups = EndpointGroups::getAll();
         $dates = [];
         foreach ($endpointGroups as $endpointGroup) {
+            $group = $endpointGroup['title'];
             foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
                 $date = $this->getNextReleaseDate($seriesId);
-                if ($date) {
-                    $group = $endpointGroup['title'];
-                    $dates[$date->format('Y-m-d')][$group][] = $name;
+                if (!$date) {
+                    continue;
                 }
+
+                /** @var \App\Model\Entity\Metric|null $metric */
+                $metric = $this->Metrics
+                    ->find()
+                    ->select(['frequency'])
+                    ->where(['series_id' => $seriesId])
+                    ->first();
+                $dates[$date->format('Y-m-d')][$group][] = [
+                    'name' => $name,
+                    'frequency' => $metric ? $metric->frequency : null,
+                ];
             }
         }
         ksort($dates);

@@ -56,7 +56,7 @@ $i = 0;
                     <?= Formatter::formatReleaseDate(new FrozenDate($date)) ?>
                 </h2>
                 <ul class="list-unstyled">
-                    <?php foreach ($endpoints as $group => $names): ?>
+                    <?php foreach ($endpoints as $group => $metrics): ?>
                         <li>
                             <button class="btn btn-link" data-target="details-<?= $i ?>">
                                 <i class="fas fa-caret-square-right" title="Click to toggle details"></i>
@@ -65,9 +65,14 @@ $i = 0;
                                 </span>
                             </button>
                             <ul id="details-<?= $i ?>" style="display: none;">
-                                <?php foreach ($names as $name): ?>
+                                <?php foreach ($metrics as $metric): ?>
                                     <li>
-                                        <?= $name ?>
+                                        <?= $metric['name'] ?>
+                                        <?php if ($metric['frequency']): ?>
+                                            <span class="frequency">
+                                                <?= $metric['frequency'] ?>
+                                            </span>
+                                        <?php endif; ?>
                                     </li>
                                 <?php endforeach; ?>
                             </ul>

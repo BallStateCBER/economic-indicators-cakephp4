@@ -148,6 +148,11 @@ table.observations {
     h2 {
         margin-bottom: 0;
     }
+
+    .frequency {
+        color: $text-muted;
+        font-size: 80%;
+    }
 }
 
 #twitter-feed {
