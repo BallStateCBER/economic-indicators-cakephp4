@@ -573,6 +573,10 @@ class UpdateStatsCommand extends AppCommand
         $runningObj = new FrozenTime($running);
         if ($this->alertAdminIfDurationExceeds && !$runningObj->wasWithinLast($this->alertAdminIfDurationExceeds)) {
             $this->clearLock();
+            $this->io->warning(
+                "Previous process was running $this->alertAdminIfDurationExceeds ago and never completed. " .
+                'Alerting administrator and clearing lock.'
+            );
             $mailer = new Mailer('default');
             $mailer->setFrom(['noreply@cberdata.org' => 'Economic Indicators'])
                 ->setTo(Configure::read('admin_email'))
