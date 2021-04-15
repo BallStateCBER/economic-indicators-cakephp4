@@ -19,8 +19,15 @@ This is the repository for the [Economic Indicators](https://indicators.cberdata
 
 ## Keeping data updated
 - `bin/cake update_stats` should be run at least daily, and can take several hours to complete
+  - Run with the `--only-new` option to only check endpoints with releases on or before today that have not yet been
+    imported, and only adds new stats, rather than also updating existing stats
+  - Run with the `--ignore-lock` option to either allow multiple update processes to take place concurrently
+    (not recommended) or to fix a process lock that failed to be cleared by the previous process
 - `bin/cake update_release_dates` should be run daily
+  - Run with the `--only-cache` option to only rebuild the cached release calendar
 - `bin/cake make_spreadsheets` can be run manually if there's a problem with the pre-generated spreadsheets, but
   `bin/cake update_stats` also automatically (re)generates spreadsheets if needed
+    - Run with the `--verbose` option to output information about memory usage
 - `bin/cake update_cache` can be run manually to rebuild the cache of query results, though
   `bin/cake update_stats` updates the cache automatically, if appropriate
+    - Run with the `--verbose` option to output information about memory usage
