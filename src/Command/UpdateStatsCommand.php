@@ -213,18 +213,9 @@ class UpdateStatsCommand extends AppCommand
 
         for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts--) {
             $finalAttempt = $attempts == 1;
+
             try {
                 $response = $api->get($parameters);
-                if ($response && property_exists($response, 'series')) {
-                    return (array)($response->series);
-                }
-
-                if ($finalAttempt) {
-                    throw new NotFoundException('Metadata not found');
-                }
-
-                $this->io->error('Failed, retrying');
-                continue;
             } catch (fred_api_exception $e) {
                 if ($finalAttempt) {
                     throw $e;
@@ -234,6 +225,16 @@ class UpdateStatsCommand extends AppCommand
                 $this->waitAfterError();
                 continue;
             }
+
+            if ($response && property_exists($response, 'series')) {
+                return (array)($response->series);
+            }
+
+            if ($finalAttempt) {
+                throw new NotFoundException('Metadata not found');
+            }
+
+            $this->io->error('Failed, retrying');
         }
 
         return null;
