@@ -98,23 +98,23 @@ class UpdateCacheCommand extends Command
     public function refreshGroup(array $endpointGroup): void
     {
         $this->showMemoryUsage();
-        $this->io->out(' - Rebuilding cached date range');
+        $this->io->out('- Rebuilding cached date range');
         $this->statisticsTable->getDateRange($endpointGroup);
 
         $this->showMemoryUsage();
-        $this->io->out(' - Rebuilding cached data for most recent date');
+        $this->io->out('- Rebuilding cached data for most recent date');
         $this->statisticsTable->getGroup(endpointGroup: $endpointGroup, all: true, onlyCache: true);
 
         $this->showMemoryUsage();
-        $this->io->out(' - Rebuilding cached data for all dates');
+        $this->io->out('- Rebuilding cached data for all dates');
         $this->statisticsTable->getGroup(endpointGroup: $endpointGroup, all: true, onlyCache: true);
 
         $this->showMemoryUsage();
-        $this->io->out(' - Rebuilding cached sparkline data');
+        $this->io->out('- Rebuilding cached sparkline data');
         $this->statisticsTable->getStatsForSparklines($endpointGroup);
 
         $this->showMemoryUsage();
-        $this->io->out(' - Rebuilding cached starting dates');
+        $this->io->out('- Rebuilding cached starting dates');
         $this->statisticsTable->getStartingDates($endpointGroup);
     }
 

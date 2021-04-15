@@ -93,7 +93,7 @@ class UpdateReleaseDatesCommand extends AppCommand
     private function getReleaseId(string $seriesId, string $name): int
     {
         $this->io->out($name);
-        $this->io->out(' - Fetching release ID');
+        $this->io->out('- Fetching release ID');
         for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts--) {
             $finalAttempt = $attempts == 1;
             $response = $this->seriesApi->release([
@@ -122,7 +122,7 @@ class UpdateReleaseDatesCommand extends AppCommand
      */
     private function getUpcomingReleaseDates(int $releaseId): array
     {
-        $this->io->out(' - Fetching upcoming release dates');
+        $this->io->out('- Fetching upcoming release dates');
         for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts--) {
             $finalAttempt = $attempts == 1;
             $this->throttle();
@@ -176,7 +176,7 @@ class UpdateReleaseDatesCommand extends AppCommand
             return;
         }
 
-        $this->io->out(' - Removing release dates that are no longer valid');
+        $this->io->out('- Removing release dates that are no longer valid');
         foreach ($invalidReleases as $release) {
             $this->io->out(sprintf(
                 '   Release #%s (%s)',
@@ -213,13 +213,13 @@ class UpdateReleaseDatesCommand extends AppCommand
         }
 
         if (!$newReleases) {
-            $this->io->out(' - No new releases to add');
+            $this->io->out('- No new releases to add');
 
             return;
         }
 
         $this->io->out(sprintf(
-            ' - Adding new release %s',
+            '- Adding new release %s',
             count($newReleases) > 1 ? 'dates' : 'date'
         ));
         foreach ($newReleases as $release) {
