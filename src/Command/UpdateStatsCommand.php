@@ -91,7 +91,7 @@ class UpdateStatsCommand extends AppCommand
         parent::execute($args, $io);
         $cacheUpdater = new UpdateCacheCommand($io);
         $spreadsheetWriter = new MakeSpreadsheetsCommand($io);
-        $this->onlyNew = (bool)$args->getOption('verbose');
+        $this->onlyNew = (bool)$args->getOption('only-new');
 
         $endpointGroups = EndpointGroups::getAll();
         foreach ($endpointGroups as $endpointGroup) {
@@ -100,6 +100,11 @@ class UpdateStatsCommand extends AppCommand
             $groupUpdated = false;
 
             foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
+                if ($this->skipSeries($seriesId)) {
+                    $io->out(sprintf('%s: Skipping; no new release expected', $seriesId));
+                    continue;
+                }
+
                 if ($this->updateIsAvailable($seriesId)) {
                     $io->out(sprintf('%s: Update available', $seriesId));
                     try {
@@ -513,5 +518,22 @@ class UpdateStatsCommand extends AppCommand
                 exit;
             }
         }
+    }
+
+    /**
+     * Returns TRUE if no updates are expected for this series and the user is using the --only-new option
+     *
+     * @param string $seriesId Matching metric->series_id and a seriesID in the FRED API
+     * @return bool
+     */
+    private function skipSeries(string $seriesId): bool
+    {
+        if (!$this->onlyNew) {
+            return false;
+        }
+
+        $metric = $this->metricsTable->getFromSeriesId($seriesId);
+
+        return !$this->releasesTable->newDataExpected($metric->id);
     }
 }

@@ -181,4 +181,23 @@ class ReleasesTable extends Table
                 },
             ]);
     }
+
+    /**
+     * Returns TRUE if there is a release on or before the current date that has not yet been imported
+     *
+     * @param int $metricId Metric ID
+     * @return bool
+     */
+    public function newDataExpected(int $metricId): bool
+    {
+        $count = $this
+            ->find('currentOrPast')
+            ->where([
+                'metric_id' => $metricId,
+                'imported' => false,
+            ])
+            ->count();
+
+        return $count > 0;
+    }
 }
