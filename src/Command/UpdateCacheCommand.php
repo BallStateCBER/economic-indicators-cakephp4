@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Endpoints\EndpointGroups;
+use App\Model\Table\ReleasesTable;
 use App\Model\Table\StatisticsTable;
+use Cake\Cache\Cache;
 use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
@@ -74,6 +76,12 @@ class UpdateCacheCommand extends Command
         $this->io = $io;
         $this->progress = $io->helper('Progress');
         $this->verbose = (bool)$args->getOption('verbose');
+
+        $io->out('Rebuilding release calendar cache');
+        Cache::clear(ReleasesTable::CACHE_CONFIG);
+        $releasesTable = TableRegistry::getTableLocator()->get('Releases');
+        $releasesTable->getNextReleaseDates();
+
         $endpointGroups = EndpointGroups::getAll();
         $count = count($endpointGroups);
         $i = 1;
