@@ -6,6 +6,7 @@ namespace App\Command;
 use App\Endpoints\EndpointGroups;
 use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
+use App\Model\Table\ReleasesTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
@@ -24,20 +25,24 @@ use fred_api_exception;
  * of an update failure, cached values are retained and used instead of forcing new data to be fetched during a user
  * request.
  *
- * @property \App\Model\Table\MetricsTable $metricsTable
- * @property \App\Model\Table\StatisticsTable $statisticsTable
  * @property \App\Model\Entity\Metric[] $metrics
+ * @property \App\Model\Table\MetricsTable $metricsTable
+ * @property \App\Model\Table\ReleasesTable $releasesTable
+ * @property \App\Model\Table\StatisticsTable $statisticsTable
  * @property \Cake\Console\ConsoleIo $io
  * @property \Cake\Shell\Helper\ProgressHelper $progress
+ * @property bool $onlyNew
  */
 class UpdateStatsCommand extends AppCommand
 {
     private array $apiParameters;
     private array $metrics;
+    private bool $onlyNew;
     private const UNITS_CHANGE_FROM_1_YEAR_AGO = 'ch1';
     private const UNITS_PERCENT_CHANGE_FROM_1_YEAR_AGO = 'pc1';
     private const UNITS_VALUE = 'lin';
     private MetricsTable $metricsTable;
+    private ReleasesTable $releasesTable;
     private StatisticsTable $statisticsTable;
 
     /**
@@ -48,6 +53,7 @@ class UpdateStatsCommand extends AppCommand
         parent::__construct();
 
         $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
+        $this->releasesTable = TableRegistry::getTableLocator()->get('Releases');
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
     }
 
@@ -62,6 +68,12 @@ class UpdateStatsCommand extends AppCommand
     {
         $parser = parent::buildOptionParser($parser);
         $parser->setDescription('Updates API-fetched data stored in the database');
+        $parser->addOption('only-new', [
+            'short' => 'n',
+            'help' => 'Only checks endpoints with releases on or before today that have not yet been imported, '
+                . 'and only adds new stats, rather than also updating existing stats',
+            'boolean' => true,
+        ]);
 
         return $parser;
     }
@@ -79,6 +91,7 @@ class UpdateStatsCommand extends AppCommand
         parent::execute($args, $io);
         $cacheUpdater = new UpdateCacheCommand($io);
         $spreadsheetWriter = new MakeSpreadsheetsCommand($io);
+        $this->onlyNew = (bool)$args->getOption('verbose');
 
         $endpointGroups = EndpointGroups::getAll();
         foreach ($endpointGroups as $endpointGroup) {
@@ -100,6 +113,7 @@ class UpdateStatsCommand extends AppCommand
                         $io->error($e->getMessage());
                         exit;
                     }
+                    $this->markReleasesImported($seriesId);
                 } else {
                     $io->out(sprintf('%s: No update available', $seriesId));
                 }
@@ -122,19 +136,11 @@ class UpdateStatsCommand extends AppCommand
      * @param string $seriesId Matching metric->series_id and a seriesID in the FRED API
      * @return bool
      * @throws \fred_api_exception
+     * @throws \Cake\Http\Exception\NotFoundException
      */
     private function updateIsAvailable(string $seriesId): bool
     {
-        /** @var \App\Model\Entity\Metric $metric */
-        $metric = $this->metricsTable
-            ->find()
-            ->where(['series_id' => $seriesId])
-            ->first();
-        if (!$metric) {
-            $this->io->error('No metric record was found for ' . $seriesId);
-            exit;
-        }
-
+        $metric = $this->metricsTable->getFromSeriesId($seriesId);
         if (!$metric->last_updated) {
             return true;
         }
@@ -157,14 +163,13 @@ class UpdateStatsCommand extends AppCommand
     {
         foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
             // Find existing metric
-            $metric = $this->metricsTable
-                ->find()
-                ->where(['series_id' => $seriesId])
-                ->first();
-            if ($metric) {
-                $this->metrics[$seriesId] = $metric;
-                continue;
-            }
+            try {
+                $metric = $this->metricsTable->getFromSeriesId($seriesId);
+                if ($metric) {
+                    $this->metrics[$seriesId] = $metric;
+                    continue;
+                }
+            } catch (NotFoundException $e) {}
 
             // Create missing metric
             $this->io->out('Adding ' . $seriesId . ' to metrics table');
@@ -471,5 +476,42 @@ class UpdateStatsCommand extends AppCommand
         $hours = substr($timeOffset, 1, 2);
 
         return $operator . $hours . '00';
+    }
+
+    /**
+     * Marks all releases on or before today for the specified series as having been imported
+     *
+     * @param string $seriesId Matching metric->series_id and a seriesID in the FRED API
+     * @return void
+     */
+    private function markReleasesImported(string $seriesId)
+    {
+        $metric = $this->metricsTable->getFromSeriesId($seriesId);
+        $releases = $this->releasesTable
+            ->find('currentAndPast')
+            ->where([
+                'metric_id' => $metric->id,
+                'imported' => false,
+            ])
+            ->all();
+        if (!$releases) {
+            $this->io->out('- No releases to mark imported');
+
+            return;
+        }
+
+        $count = count($releases);
+        $this->io->out(sprintf(
+            '- Recording %s as having been imported',
+            $count == 1 ? 'last release' : "$count releases",
+        ));
+        foreach ($releases as $release) {
+            $release = $this->releasesTable->patchEntity($release, ['imported' => true]);
+            if (!$this->releasesTable->save($release)) {
+                $this->io->error('There was an error marking that release as having been imported. Details:');
+                $this->io->out(print_r($release->getErrors(), true));
+                exit;
+            }
+        }
     }
 }

@@ -8,6 +8,7 @@ use App\Model\Entity\Metric;
 use Cake\Cache\Cache;
 use Cake\Database\Expression\QueryExpression;
 use Cake\I18n\FrozenDate;
+use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -163,5 +164,21 @@ class ReleasesTable extends Table
         }
 
         return $nextReleaseDate;
+    }
+
+    /**
+     * Modifies a query to fetch all releases on or before the current date
+     *
+     * @param \Cake\ORM\Query $query Query object
+     * @return \Cake\ORM\Query
+     */
+    protected function findCurrentAndPast(Query $query): Query
+    {
+        return $query
+            ->where([
+                function (QueryExpression $exp) {
+                    return $exp->lte('date', (new FrozenDate())->format('Y-m-d'));
+                },
+            ]);
     }
 }
