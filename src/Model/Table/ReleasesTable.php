@@ -191,7 +191,7 @@ class ReleasesTable extends Table
     public function newDataExpected(int $metricId): bool
     {
         $count = $this
-            ->find('currentOrPast')
+            ->find('currentAndPast')
             ->where([
                 'metric_id' => $metricId,
                 'imported' => false,
