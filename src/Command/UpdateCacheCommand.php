@@ -76,14 +76,16 @@ class UpdateCacheCommand extends Command
         $this->verbose = (bool)$args->getOption('verbose');
         $endpointGroups = EndpointGroups::getAll();
         $count = count($endpointGroups);
-        foreach ($endpointGroups as $i => $endpointGroup) {
+        $i = 1;
+        foreach ($endpointGroups as $endpointGroup) {
             $io->out(sprintf(
                 'Processing %s (%s/%s)',
                 $endpointGroup['title'],
-                $i + 1,
+                $i,
                 $count,
             ));
             $this->refreshGroup($endpointGroup);
+            $i++;
         }
 
         $io->success('Finished');
