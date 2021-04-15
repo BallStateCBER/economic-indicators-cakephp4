@@ -34,6 +34,16 @@ table.observations {
         td:not(:first-child) {
             text-align: right;
         }
+        td:nth-child(3),
+        td:nth-child(4)
+        {
+            white-space: nowrap;
+        }
+    }
+
+    .footnote {
+        color: $text-muted;
+        font-size: 80%;
     }
 }
 
@@ -194,12 +204,6 @@ div.sparkline {
     height: 30px;
     margin-top: 5px;
     width: 100px;
-}
-
-.date-footnote,
-.sparkline-footnote {
-    color: $text-muted;
-    font-size: 80%;
 }
 
 #series-graph {

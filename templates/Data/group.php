@@ -67,9 +67,11 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                         <?= $this->Html->link(
                             sprintf(
                                 '<span class="metric-name">%s</span>' .
+                                '<br /><span class="footnote">%s</span>' .
                                 '<div id="sparkline-%d" class="sparkline"></div>' .
-                                '<span class="sparkline-footnote">%s data since %s</span>',
+                                '<span class="footnote">%s data since %s</span>',
                                 $seriesData['name'],
+                                $metrics[$seriesId]->units,
                                 $i,
                                 $metrics[$seriesId]->frequency,
                                 $startingDates[$seriesId]->format('F Y'),
@@ -92,9 +94,7 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                             Formatter::getPrepend($metrics[$seriesId]->units),
                         ) ?>
                         <br />
-                        <span class="date-footnote">
-                            <?= $metrics[$seriesId]->units ?>
-                            <br />
+                        <span class="footnote">
                             <?= Formatter::getFormattedDate(
                                 $seriesData['statistics'][StatisticsTable::DATA_TYPE_VALUE]['date'],
                                 $metrics[$seriesId]->frequency,
@@ -105,14 +105,16 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                         <?= Formatter::formatValue(
                             $seriesData['statistics'][StatisticsTable::DATA_TYPE_CHANGE]['value'],
                             Formatter::getPrepend($metrics[$seriesId]->units),
-                        ) ?>&nbsp;<?= Formatter::getArrow(
+                        ) ?>
+                        <?= Formatter::getArrow(
                             $seriesData['statistics'][StatisticsTable::DATA_TYPE_CHANGE]['value']
                         ) ?>
                     </td>
                     <td>
                         <?= Formatter::formatValue(
                             $seriesData['statistics'][StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
-                        ) ?>%&nbsp;<?= Formatter::getArrow(
+                        ) ?>%
+                        <?= Formatter::getArrow(
                             $seriesData['statistics'][StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
                         ) ?>
                     </td>
