@@ -408,6 +408,11 @@ class UpdateStatsCommand extends AppCommand
             'data_type_id' => $dataTypeId,
             'date' => $date,
         ];
+
+        if ($this->onlyNew && $this->statisticsTable->exists([$data])) {
+            return;
+        }
+
         /** @var \App\Model\Entity\Statistic|null $statistic */
         $statistic = $this->statisticsTable
             ->find()
@@ -422,7 +427,7 @@ class UpdateStatsCommand extends AppCommand
             $updateNeeded = true;
             $data['value'] = $value;
             $statistic = $this->statisticsTable->newEntity($data);
-        } elseif (!$this->onlyNew && $statistic->value != $value) {
+        } elseif ($statistic->value != $value) {
             $updateNeeded = true;
             $this->statisticsTable->patchEntity($statistic, ['value' => $value]);
         }
