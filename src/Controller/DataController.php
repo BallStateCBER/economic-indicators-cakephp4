@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Endpoints\EndpointGroups;
-use App\Formatter\Formatter;
 use App\Model\Table\SpreadsheetsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Core\Configure;
@@ -54,20 +53,23 @@ class DataController extends AppController
         $endpointGroup = EndpointGroups::get($groupId);
         $this->loadModel('Releases');
         $metrics = $this->Metrics->getAllForEndpointGroup($endpointGroup);
-        /** @var \App\Model\Entity\Metric $firstMetric */
-        $firstMetric = $metrics[0];
+        $lastUpdated = null;
+        foreach ($metrics as $metric) {
+            if (!$lastUpdated || $metric->last_updated > $lastUpdated) {
+                $lastUpdated = $metric->last_updated;
+            }
+        }
+
         $this->set([
             'dateRange' => $this->Statistics->getDateRange($endpointGroup),
-            'frequency' => $firstMetric->frequency,
             'groupId' => $groupId,
-            'lastUpdated' => $firstMetric->last_updated->format('F j, Y'),
+            'lastUpdated' => $lastUpdated ? $lastUpdated->format('F j, Y') : 'N/A',
+            'metrics' => $metrics,
             'nextRelease' => $this->Releases->getNextReleaseDate(...$metrics),
             'pageTitle' => $endpointGroup['title'],
-            'prepend' => Formatter::getPrepend($firstMetric->units),
             'startingDates' => $this->Statistics->getStartingDates($endpointGroup),
             'statistics' => $this->Statistics->getGroup($endpointGroup),
             'statsForSparklines' => $this->Statistics->getStatsForSparklines($endpointGroup),
-            'unit' => $firstMetric->units,
         ]);
     }
 

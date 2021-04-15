@@ -33,7 +33,7 @@ class SpreadsheetSingleDate extends Spreadsheet
 
         $columnTitles = [
             'Category',
-            $this->firstMetric->units,
+            'Most Recent Value',
             'Change from One Year Prior',
             'Percent Change from One Year Prior',
             'Date',
@@ -65,24 +65,24 @@ class SpreadsheetSingleDate extends Spreadsheet
                     withCache: true
                 );
             }
-            unset($metric);
 
             $this
                 ->writeRow([
-                    $name,
+                    "$name ($metric->units)",
                     Formatter::formatValue(
                         $rowData['statistics'][StatisticsTable::DATA_TYPE_VALUE]['value'],
-                        $this->prepend
+                        Formatter::getPrepend($metric->units),
                     ),
                     Formatter::formatValue(
                         $rowData['statistics'][StatisticsTable::DATA_TYPE_CHANGE]['value'],
-                        $this->prepend
+                        Formatter::getPrepend($metric->units),
                     ),
                     Formatter::formatValue(
                         $rowData['statistics'][StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
                     ) . '%',
                 ])
                 ->alignHorizontal('right', 2);
+            unset($metric);
 
             // Write date explicitly as a string so it doesn't get reformatted into a different date format by Excel
             $date = Formatter::getFormattedDate(

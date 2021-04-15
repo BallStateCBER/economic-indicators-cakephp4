@@ -138,7 +138,7 @@ class MetricsTable extends Table
                 throw new InternalErrorException("Metric \"$name\" with seriesID $seriesId not found");
             }
 
-            $metrics[] = $metric;
+            $metrics[$seriesId] = $metric;
         }
 
         return $metrics;

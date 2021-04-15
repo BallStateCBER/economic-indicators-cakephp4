@@ -1,16 +1,14 @@
 <?php
 /**
+ * @var \App\Model\Entity\Metric[] $metrics
  * @var \App\View\AppView $this
  * @var \Cake\I18n\FrozenDate $nextRelease
  * @var array $dateRange
  * @var array $startingDates
  * @var array $statsForSparklines
  * @var array|bool $statistics
- * @var string $frequency
  * @var string $groupId
  * @var string $lastUpdated
- * @var string $prepend
- * @var string $unit
  */
 
 use App\Formatter\Formatter;
@@ -30,7 +28,6 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
 
     <div class="row">
         <p class="col-lg">
-            <?= ucfirst($frequency) ?> data -
             Last updated <?= $lastUpdated ?>
         </p>
         <?php if ($nextRelease): ?>
@@ -45,10 +42,6 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
             <tr>
                 <th colspan="2">
                     Latest Value
-                    <br />
-                    <small>
-                        <?= $unit ?>
-                    </small>
                 </th>
                 <th>
                     Change
@@ -75,9 +68,10 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                             sprintf(
                                 '<span class="metric-name">%s</span>' .
                                 '<div id="sparkline-%d" class="sparkline"></div>' .
-                                '<span class="sparkline-footnote">Since %s</span>',
+                                '<span class="sparkline-footnote">%s data since %s</span>',
                                 $seriesData['name'],
                                 $i,
+                                $metrics[$seriesId]->frequency,
                                 $startingDates[$seriesId]->format('F Y'),
                             ),
                             [
@@ -95,20 +89,22 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                     <td>
                         <?= Formatter::formatValue(
                             $seriesData['statistics'][StatisticsTable::DATA_TYPE_VALUE]['value'],
-                            $prepend
+                            Formatter::getPrepend($metrics[$seriesId]->units),
                         ) ?>
                         <br />
                         <span class="date-footnote">
+                            <?= $metrics[$seriesId]->units ?>
+                            <br />
                             <?= Formatter::getFormattedDate(
                                 $seriesData['statistics'][StatisticsTable::DATA_TYPE_VALUE]['date'],
-                                $frequency
+                                $metrics[$seriesId]->frequency,
                             ) ?>
                         </span>
                     </td>
                     <td>
                         <?= Formatter::formatValue(
                             $seriesData['statistics'][StatisticsTable::DATA_TYPE_CHANGE]['value'],
-                            $prepend
+                            Formatter::getPrepend($metrics[$seriesId]->units),
                         ) ?>&nbsp;<?= Formatter::getArrow(
                             $seriesData['statistics'][StatisticsTable::DATA_TYPE_CHANGE]['value']
                         ) ?>

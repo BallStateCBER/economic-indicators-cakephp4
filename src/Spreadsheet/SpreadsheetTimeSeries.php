@@ -37,10 +37,8 @@ class SpreadsheetTimeSeries extends Spreadsheet
         $this
             ->setUpMetaAndHeaders(
                 title: $endpointGroup['title'],
-                columnTitles: array_merge(['Metric'], $dates),
+                columnTitles: array_merge(['Category'], $dates),
             )
-            ->writeRow(['Values are in ' . strtolower($this->firstMetric->units)])
-            ->nextRow()
             ->nextRow()
             ->writeRow(['Metric']);
 
@@ -84,9 +82,12 @@ class SpreadsheetTimeSeries extends Spreadsheet
                 all: $this->isTimeSeries,
                 withCache: true
             );
-            $row = [$name];
+            $row = ["$name ($metric->units)"];
             foreach ($statistics as $statistic) {
-                $row[] = Formatter::formatValue($statistic['value'], $this->prepend);
+                $row[] = Formatter::formatValue(
+                    $statistic['value'],
+                    Formatter::getPrepend($metric->units),
+                );
             }
             unset($statistics);
             $this

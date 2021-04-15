@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Spreadsheet;
 
-use App\Formatter\Formatter;
 use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\StatisticsTable;
@@ -24,13 +23,11 @@ use Redis;
  * @property \App\Model\Table\StatisticsTable $statisticsTable
  * @property bool $isTimeSeries
  * @property string $frequency
- * @property string|null $prepend
  */
 class Spreadsheet extends DataCenterSpreadsheet
 {
     protected MetricsTable $metricsTable;
     protected StatisticsTable $statisticsTable;
-    protected ?string $prepend;
     protected array $endpointGroup;
     protected bool $isTimeSeries;
     protected Metric $firstMetric;
@@ -52,7 +49,6 @@ class Spreadsheet extends DataCenterSpreadsheet
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
         $this->firstMetric = $this->metricsTable->getFirstForEndpointGroup($endpointGroup);
         $this->frequency = $this->metricsTable->getFrequency($endpointGroup);
-        $this->prepend = Formatter::getPrepend($this->firstMetric->units);
     }
 
     /**
@@ -87,8 +83,7 @@ class Spreadsheet extends DataCenterSpreadsheet
         );
         $this->objPHPExcel->getActiveSheet()->mergeCells($span);
 
-        $this
-            ->nextRow();
+        $this->nextRow();
 
         return $this;
     }
