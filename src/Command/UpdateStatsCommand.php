@@ -8,12 +8,15 @@ use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\ReleasesTable;
 use App\Model\Table\StatisticsTable;
+use Cake\Cache\Cache;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Core\Configure;
 use Cake\Http\Exception\NotFoundException;
 use Cake\I18n\FrozenDate;
 use Cake\I18n\FrozenTime;
+use Cake\Mailer\Mailer;
 use Cake\ORM\TableRegistry;
 use fred_api_exception;
 
@@ -44,6 +47,8 @@ class UpdateStatsCommand extends AppCommand
     private MetricsTable $metricsTable;
     private ReleasesTable $releasesTable;
     private StatisticsTable $statisticsTable;
+    private string|null $alertAdminIfDurationExceeds = '24 hours';
+    public const CACHE_CONFIG = 'update_stats';
 
     /**
      * UpdateStatsCommand constructor.
@@ -89,6 +94,8 @@ class UpdateStatsCommand extends AppCommand
     public function execute(Arguments $args, ConsoleIo $io)
     {
         parent::execute($args, $io);
+        $this->avoidConcurrentProcesses();
+
         $cacheUpdater = new UpdateCacheCommand($io);
         $spreadsheetWriter = new MakeSpreadsheetsCommand($io);
         $this->onlyNew = (bool)$args->getOption('only-new');
@@ -100,6 +107,8 @@ class UpdateStatsCommand extends AppCommand
             $groupUpdated = false;
 
             foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
+                $this->updateLock();
+
                 if ($this->skipSeries($seriesId)) {
                     $io->out(sprintf('%s: Skipping; no new release expected', $seriesId));
                     continue;
@@ -120,6 +129,7 @@ class UpdateStatsCommand extends AppCommand
                     $groupUpdated = true;
                 } catch (NotFoundException | fred_api_exception $e) {
                     $io->error($e->getMessage());
+                    $this->shutdown();
                     exit;
                 }
                 $this->markReleasesImported($seriesId);
@@ -134,6 +144,7 @@ class UpdateStatsCommand extends AppCommand
         }
 
         $io->success('Finished');
+        $this->shutdown();
     }
 
     /**
@@ -190,6 +201,7 @@ class UpdateStatsCommand extends AppCommand
             if (!$this->metricsTable->save($metric)) {
                 $this->io->error('There was an error saving that metric. Details:');
                 $this->io->out(print_r($metric->getErrors(), true));
+                $this->shutdown();
                 exit;
             }
             $this->metrics[$seriesId] = $metric;
@@ -296,6 +308,7 @@ class UpdateStatsCommand extends AppCommand
             if (!$responseObj) {
                 if ($finalAttempt) {
                     $this->io->error('Invalid response, retry limit reached, aborting');
+                    $this->shutdown();
                     exit;
                 }
 
@@ -418,6 +431,7 @@ class UpdateStatsCommand extends AppCommand
             $this->io->out(print_r($statistic->getErrors(), true));
             $this->io->out('Data:');
             $this->io->out(print_r($data, true));
+            $this->shutdown();
             exit;
         }
     }
@@ -436,6 +450,7 @@ class UpdateStatsCommand extends AppCommand
         if (!$this->metricsTable->save($metric)) {
             $this->io->error('There was an error updating that metric. Details:');
             $this->io->out(print_r($metric->getErrors(), true));
+            $this->shutdown();
             exit;
         }
     }
@@ -516,6 +531,7 @@ class UpdateStatsCommand extends AppCommand
             if (!$this->releasesTable->save($release)) {
                 $this->io->error('There was an error marking that release as having been imported. Details:');
                 $this->io->out(print_r($release->getErrors(), true));
+                $this->shutdown();
                 exit;
             }
         }
@@ -536,5 +552,78 @@ class UpdateStatsCommand extends AppCommand
         $metric = $this->metrics[$seriesId];
 
         return !$this->releasesTable->newDataExpected($metric->id);
+    }
+
+    /**
+     * Halts execution if it appears that another update process is currently underway
+     *
+     * If it looks like the previous process aborted and left a lingering lock, the lock is cleared and an admin is
+     * alerted
+     *
+     * @return void
+     */
+    private function avoidConcurrentProcesses(): void
+    {
+        $running = Cache::read('last_running', self::CACHE_CONFIG);
+        if (!$running) {
+            return;
+        }
+
+        // Allow this script to proceed if it appears that the last process stalled, but email the administrator
+        $runningObj = new FrozenTime($running);
+        if ($this->alertAdminIfDurationExceeds && !$runningObj->wasWithinLast($this->alertAdminIfDurationExceeds)) {
+            $this->clearLock();
+            $mailer = new Mailer('default');
+            $mailer->setFrom(['noreply@cberdata.org' => 'Economic Indicators'])
+                ->setTo(Configure::read('admin_email'))
+                ->setSubject('Script update_stats stalled')
+                ->deliver(
+                    "The update_stats script was running over $this->alertAdminIfDurationExceeds ago and has " .
+                    'not finished or reported progress since then. It may have been aborted due to an error or ' .
+                    'manually terminated. The process lock has been cleared and a new update process has started.'
+                );
+
+            return;
+        }
+
+        $this->io->out(sprintf(
+            'Another update_stats process reported that it was running on %s and hasn\'t completed. Aborting.',
+            $running
+        ));
+        exit;
+    }
+
+    /**
+     * Updates this script's lock file with the current time
+     *
+     * @return void
+     */
+    private function updateLock(): void
+    {
+        Cache::write(
+            'last_running',
+            (new FrozenTime())->toIso8601String(),
+            self::CACHE_CONFIG,
+        );
+    }
+
+    /**
+     * Clears this script's lock that prevents it from being run concurrently
+     *
+     * @return void
+     */
+    private function clearLock(): void
+    {
+        Cache::delete('last_running', self::CACHE_CONFIG);
+    }
+
+    /**
+     * Performs end-of-script cleanup operations
+     *
+     * @return void
+     */
+    private function shutdown(): void
+    {
+        $this->clearLock();
     }
 }
