@@ -87,15 +87,17 @@ class MakeSpreadsheetsCommand extends Command
         $endpointGroups = EndpointGroups::getAll();
         $count = count($endpointGroups);
         $this->showMemoryUsage();
-        foreach ($endpointGroups as $i => $endpointGroup) {
+        $i = 1;
+        foreach ($endpointGroups as $endpointGroup) {
             $io->info(sprintf(
                 '%s (%s/%s)',
                 $endpointGroup['title'],
-                $i + 1,
+                $i,
                 $count,
             ));
             $this->makeSpreadsheetsForGroup($endpointGroup);
             $this->showMemoryUsage();
+            $i++;
         }
 
         $io->success('Finished');
