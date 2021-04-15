@@ -17,6 +17,7 @@ use Cake\Http\Exception\NotFoundException;
 use Cake\I18n\FrozenDate;
 use Cake\I18n\FrozenTime;
 use Cake\Mailer\Mailer;
+use Cake\Mailer\Transport\DebugTransport;
 use Cake\ORM\TableRegistry;
 use fred_api_exception;
 
@@ -585,6 +586,9 @@ class UpdateStatsCommand extends AppCommand
                 'Alerting administrator and clearing lock.'
             );
             $mailer = new Mailer('default');
+            if (Configure::read('debug')) {
+                $mailer->setTransport(new DebugTransport());
+            }
             $mailer->setFrom(['noreply@cberdata.org' => 'Economic Indicators'])
                 ->setTo(Configure::read('admin_email'))
                 ->setSubject('Script update_stats stalled')
