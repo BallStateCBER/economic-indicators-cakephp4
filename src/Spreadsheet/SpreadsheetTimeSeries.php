@@ -5,7 +5,7 @@ namespace App\Spreadsheet;
 
 use App\Formatter\Formatter;
 use App\Model\Table\StatisticsTable;
-use Cake\Http\Exception\NotFoundException;
+use Cake\Database\Expression\QueryExpression;
 use Cake\Utility\Hash;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -32,98 +32,139 @@ class SpreadsheetTimeSeries extends Spreadsheet
     {
         parent::__construct($endpointGroup);
         $this->isTimeSeries = true;
+        $dateKeyFormat = 'n/j/Y';
 
-        $dates = $this->getDates();
-        $this
-            ->setUpMetaAndHeaders(
-                title: $endpointGroup['title'],
-                columnTitles: array_merge(['Category'], $dates),
-            )
-            ->nextRow()
-            ->writeRow(['Metric']);
-
-        // Write dates explicitly as strings so they don't get reformatted into a different date format by Excel
-        foreach ($dates as $i => $date) {
-            $date = Formatter::getFormattedDate($date, $this->frequency);
-            $colNum = $i + 2;
-            $cell = $this->getColumnKey($colNum) . $this->currentRow;
-            $this->objPHPExcel
-                ->getActiveSheet()
-                ->getCell($cell)
-                ->setValueExplicit($date, DataType::TYPE_STRING);
-        }
-        unset(
-            $cell,
-            $colNum,
-            $date,
-            $dates,
-            $i,
-        );
-
-        $this
-            ->styleRow([
-                'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER,
-                ],
-                'borders' => [
-                    'outline' => ['style' => Border::BORDER_THIN],
-                ],
-                'font' => ['bold' => true],
-            ])
-            ->nextRow();
-
+        $endpointsByFrequency = [];
         foreach ($this->endpointGroup['endpoints'] as $seriesId => $name) {
             $metric = $this->metricsTable->getFromSeriesId($seriesId);
-            $dataTypeId = StatisticsTable::DATA_TYPE_VALUE;
-            $statistics = $this->statisticsTable->getByMetricAndType(
-                metricId: $metric->id,
-                dataTypeId: $dataTypeId,
-                all: $this->isTimeSeries,
-                withCache: true
-            );
-            $row = ["$name ($metric->units)"];
-            foreach ($statistics as $statistic) {
-                $row[] = Formatter::formatValue(
-                    $statistic['value'],
-                    Formatter::getPrepend($metric->units),
-                );
-            }
-            unset($statistics);
-            $this
-                ->writeRow($row)
-                ->alignHorizontal('right', 2)
-                ->nextRow();
-            unset($row);
+            $endpointsByFrequency[$metric->frequency][] = [
+                'name' => $name,
+                'metric' => $metric,
+            ];
         }
 
-        unset($metric);
+        $firstSheet = true;
+        foreach ($endpointsByFrequency as $frequency => $endpoints) {
+            $sheetTitle = ucwords($frequency) . ' Data';
+            if (!$firstSheet) {
+                $this->newSheet($sheetTitle);
+            }
 
-        $this->setCellWidth();
+            // Set headers and metadata
+            $dates = $this->getDates($endpoints);
+            $this
+                ->setUpMetaAndHeaders(
+                    title: $endpointGroup['title'],
+                    columnTitles: array_merge(['Category'], $dates),
+                )
+                ->nextRow()
+                ->writeRow(['Category']);
+
+            // Write dates explicitly as strings so they don't get reformatted into a different date format by Excel
+            foreach ($dates as $i => $date) {
+                $date = Formatter::getFormattedDate($date, $frequency);
+                $colNum = $i + 2;
+                $cell = $this->getColumnKey($colNum) . $this->currentRow;
+                $this->objPHPExcel
+                    ->getActiveSheet()
+                    ->getCell($cell)
+                    ->setValueExplicit($date, DataType::TYPE_STRING);
+            }
+            unset(
+                $cell,
+                $colNum,
+                $date,
+                $i,
+            );
+
+            // Style headers
+            $this
+                ->styleRow([
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                    ],
+                    'borders' => [
+                        'outline' => ['style' => Border::BORDER_THIN],
+                    ],
+                    'font' => ['bold' => true],
+                ])
+                ->nextRow();
+
+            // Write each data row
+            foreach ($endpoints as $endpoint) {
+                $metric = $endpoint['metric'];
+
+                // Key each statistic by its date so that it can be placed in the correct column
+                $statistics = $this->statisticsTable->getByMetricAndType(
+                    metricId: $metric->id,
+                    dataTypeId: StatisticsTable::DATA_TYPE_VALUE,
+                    all: $this->isTimeSeries,
+                    withCache: true
+                );
+                $statisticsKeyed = [];
+                foreach ($statistics as $statistic) {
+                    $dateKey = $statistic['date']->format($dateKeyFormat);
+                    $statisticsKeyed[$dateKey] = $statistic['value'];
+                }
+                unset($statistics);
+
+                // Write row
+                $row = ["{$endpoint['name']} ($metric->units)"];
+                foreach ($dates as $date) {
+                    $dateKey = $date->format($dateKeyFormat);
+                    $row[] = isset($statisticsKeyed[$dateKey])
+                        ? Formatter::formatValue($statisticsKeyed[$dateKey], Formatter::getPrepend($metric->units))
+                        : null;
+                }
+                $this
+                    ->writeRow($row)
+                    ->alignHorizontal('right', 2)
+                    ->nextRow();
+                unset(
+                    $metric,
+                    $row,
+                    $statisticsKeyed,
+                );
+            }
+
+            $this
+                ->setCellWidth()
+                ->setActiveSheetTitle($sheetTitle);
+            $firstSheet = false;
+        }
+        $this->selectFirstSheet();
     }
 
     /**
-     * Returns an array of dates
+     * Returns an array of dates for the specified metrics
      *
+     * @param array $endpoints Array of endpoint data
      * @return array
      */
-    private function getDates(): array
+    private function getDates(array $endpoints): array
     {
+        $metricIds = [];
+        foreach ($endpoints as $endpoint) {
+            $metricIds[] = $endpoint['metric']->id;
+        }
+
         $dates = $this->statisticsTable
             ->find()
             ->select(['date'])
             ->distinct(['date'])
             ->where([
-                'metric_id' => $this->firstMetric->id,
+                function (QueryExpression $exp) use ($metricIds) {
+                    return $exp->in('metric_id', $metricIds);
+                },
                 'data_type_id' => StatisticsTable::DATA_TYPE_VALUE,
+                function (QueryExpression $exp) {
+                    return $exp->isNotNull('value');
+                },
             ])
             ->orderAsc('date')
             ->enableHydration(false)
             ->toArray();
-
-        if (!$dates) {
-            throw new NotFoundException('No statistics found for metric #' . $this->firstMetric->id);
-        }
 
         return Hash::extract($dates, '{n}.date');
     }
