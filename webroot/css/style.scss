@@ -34,9 +34,7 @@ table.observations {
         td:not(:first-child) {
             text-align: right;
         }
-        td:nth-child(3),
-        td:nth-child(4)
-        {
+        td:nth-child(3) {
             white-space: nowrap;
         }
     }

@@ -50,13 +50,6 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                         from One Year Ago
                     </small>
                 </th>
-                <th>
-                    %&nbsp;Change
-                    <br />
-                    <small>
-                        from One Year Ago
-                    </small>
-                </th>
             </tr>
         </thead>
         <tbody>
@@ -106,16 +99,11 @@ $this->Html->css('/fontawesome/css/all.min.css', ['block' => true]);
                             $seriesData['statistics'][StatisticsTable::DATA_TYPE_CHANGE]['value'],
                             Formatter::getPrepend($metrics[$seriesId]->units),
                         ) ?>
+                        (<?= Formatter::formatValue(
+                            $seriesData['statistics'][StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
+                        ) ?>%)
                         <?= Formatter::getArrow(
                             $seriesData['statistics'][StatisticsTable::DATA_TYPE_CHANGE]['value']
-                        ) ?>
-                    </td>
-                    <td>
-                        <?= Formatter::formatValue(
-                            $seriesData['statistics'][StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
-                        ) ?>%
-                        <?= Formatter::getArrow(
-                            $seriesData['statistics'][StatisticsTable::DATA_TYPE_PERCENT_CHANGE]['value']
                         ) ?>
                     </td>
                 </tr>
