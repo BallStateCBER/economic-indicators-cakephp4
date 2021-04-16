@@ -227,6 +227,8 @@ class StatisticsTable extends Table
     /**
      * Returns an array describing the date range of known statistics, using the cache if appropriate
      *
+     * This ignores the frequencies of data releases in this endpoint group and returns a date range described in months
+     *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return array
      * @throws \Cake\Http\Exception\NotFoundException
@@ -243,7 +245,7 @@ class StatisticsTable extends Table
 
         $seriesIds = array_keys($endpointGroup['endpoints']);
         $metric = $this->Metrics->getFromSeriesId($seriesIds[0]);
-        $frequency = $this->Metrics->getFrequency($endpointGroup);
+        $frequency = 'monthly';
         $dateRange = [
             Formatter::getFormattedDate($this->getDateBoundaryForMetric($metric), $frequency),
             Formatter::getFormattedDate($this->getDateBoundaryForMetric($metric, 'last'), $frequency),
