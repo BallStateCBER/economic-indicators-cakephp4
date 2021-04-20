@@ -130,7 +130,7 @@ class UpdateStatsCommand extends AppCommand
                 }
 
                 if (!$this->updateIsAvailable($seriesId)) {
-                    $this->toConsoleAndSlack("$seriesId: No update available");
+                    $this->io->out("$seriesId: No update available");
                     continue;
                 }
 
