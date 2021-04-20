@@ -7,9 +7,9 @@ use App\Endpoints\EndpointGroups;
 use App\Model\Entity\Spreadsheet;
 use App\Model\Table\SpreadsheetsTable;
 use App\Model\Table\StatisticsTable;
+use App\Slack\Slack;
 use App\Spreadsheet\SpreadsheetSingleDate;
 use App\Spreadsheet\SpreadsheetTimeSeries;
-use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
@@ -28,7 +28,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Exception as PhpOfficeException;
  * @property \Cake\Console\ConsoleIo $io
  * @property \Cake\Shell\Helper\ProgressHelper $progress
  */
-class MakeSpreadsheetsCommand extends Command
+class MakeSpreadsheetsCommand extends AppCommand
 {
     private bool $verbose = false;
     private ConsoleIo $io;
@@ -88,6 +88,7 @@ class MakeSpreadsheetsCommand extends Command
         $count = count($endpointGroups);
         $this->showMemoryUsage();
         $i = 1;
+        Slack::sendMessage('Regenerating spreadsheets');
         foreach ($endpointGroups as $endpointGroup) {
             $io->info(sprintf(
                 '%s (%s/%s)',
@@ -100,7 +101,7 @@ class MakeSpreadsheetsCommand extends Command
             $i++;
         }
 
-        $io->success('Finished');
+        $this->toConsoleAndSlack('Finished', 'success');
     }
 
     /**
@@ -111,13 +112,14 @@ class MakeSpreadsheetsCommand extends Command
      */
     public function makeSpreadsheetsForGroup(array $endpointGroup): void
     {
+        Slack::sendMessage('- Creating spreadsheets for ' . $endpointGroup['title']);
         foreach ([false, true] as $isTimeSeries) {
             try {
                 $newFilename = $this->statisticsTable->getFilename($endpointGroup, $isTimeSeries);
                 $spreadsheetRecord = $this->getSpreadsheetRecord($endpointGroup['title'], $isTimeSeries);
                 $oldFilename = $spreadsheetRecord ? $spreadsheetRecord->filename : null;
 
-                $this->io->out(sprintf(
+                $this->toConsoleAndSlack(sprintf(
                     '- Creating %s spreadsheet',
                     $isTimeSeries ? 'time-series' : 'single-date'
                 ));
@@ -125,23 +127,23 @@ class MakeSpreadsheetsCommand extends Command
                     ? new SpreadsheetTimeSeries($endpointGroup)
                     : new SpreadsheetSingleDate($endpointGroup);
 
-                $this->io->out('- Saving file: ' . $newFilename);
+                $this->toConsoleAndSlack('- Saving file: ' . $newFilename);
                 $spreadsheetWriter = IOFactory::createWriter($spreadsheet->get(), 'Xlsx');
                 $spreadsheetWriter->save(SpreadsheetsTable::FILE_PATH . $newFilename);
                 unset($spreadsheet, $spreadsheetWriter);
 
-                $this->io->out('- Updating spreadsheet database record');
+                $this->toConsoleAndSlack('- Updating spreadsheet database record');
                 $this->updateSpreadsheetDbRecord($endpointGroup, $isTimeSeries, $newFilename);
 
                 $oldFileNeedsDeleted = $oldFilename && $oldFilename != $newFilename;
                 $oldFilePath = SpreadsheetsTable::FILE_PATH . $oldFilename;
                 if ($oldFileNeedsDeleted && file_exists($oldFilePath)) {
-                    $this->io->out('- Removing old file: ' . $oldFilename);
+                    $this->toConsoleAndSlack('- Removing old file: ' . $oldFilename);
                     unlink($oldFilePath);
                 }
             } catch (Exception | PhpOfficeException $e) {
-                $this->io->error('There was an error generating that spreadsheet. Details:');
-                $this->io->out($e->getMessage());
+                $this->toConsoleAndSlack('There was an error generating that spreadsheet. Details:', 'error');
+                $this->toConsoleAndSlack($e->getMessage());
                 exit;
             }
         }
@@ -179,8 +181,11 @@ class MakeSpreadsheetsCommand extends Command
         if ($spreadsheetRecord) {
             $spreadsheetRecord = $this->spreadsheetsTable->patchEntity($spreadsheetRecord, compact('filename'));
             if (!$this->spreadsheetsTable->save($spreadsheetRecord)) {
-                $this->io->error('There was an error updating that spreadsheet\'s DB record. Details:');
-                $this->io->out(print_r($spreadsheetRecord->getErrors(), true));
+                $this->toConsoleAndSlack(
+                    'There was an error updating that spreadsheet\'s database record. Details:',
+                    'error',
+                );
+                $this->toConsoleAndSlack(print_r($spreadsheetRecord->getErrors(), true));
                 exit;
             }
 
@@ -194,8 +199,11 @@ class MakeSpreadsheetsCommand extends Command
             'is_time_series' => $isTimeSeries,
         ]);
         if (!$this->spreadsheetsTable->save($spreadsheetRecord)) {
-            $this->io->error('There was an error saving that spreadsheet\'s record to the database. Details:');
-            $this->io->out(print_r($spreadsheetRecord->getErrors(), true));
+            $this->toConsoleAndSlack(
+                'There was an error saving that spreadsheet\'s record to the database. Details:',
+                'error',
+            );
+            $this->toConsoleAndSlack(print_r($spreadsheetRecord->getErrors(), true));
             exit;
         }
     }
