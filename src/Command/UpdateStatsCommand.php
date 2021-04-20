@@ -8,6 +8,7 @@ use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\ReleasesTable;
 use App\Model\Table\StatisticsTable;
+use App\Slack\Slack;
 use Cake\Cache\Cache;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
@@ -107,10 +108,16 @@ class UpdateStatsCommand extends AppCommand
         $cacheUpdater = new UpdateCacheCommand($io);
         $spreadsheetWriter = new MakeSpreadsheetsCommand($io);
         $this->onlyNew = (bool)$args->getOption('only-new');
+        Slack::sendMessage(
+            'Running update_stats' .
+            ($this->onlyNew ? ' --only-new' : null) .
+            ($args->getOption('ignore-lock') ? ' --ignore-lock' : null)
+        );
 
         $endpointGroups = EndpointGroups::getAll();
         foreach ($endpointGroups as $endpointGroup) {
             $io->info($endpointGroup['title']);
+            Slack::sendMessage('Processing ' . $endpointGroup['title']);
             $this->loadMetrics($endpointGroup);
             $groupUpdated = false;
 
@@ -118,16 +125,16 @@ class UpdateStatsCommand extends AppCommand
                 $this->updateLock();
 
                 if ($this->skipSeries($seriesId)) {
-                    $io->out(sprintf('%s: Skipping; no new release expected', $seriesId));
+                    $this->toConsoleAndSlack("$seriesId: Skipping; no new release expected");
                     continue;
                 }
 
                 if (!$this->updateIsAvailable($seriesId)) {
-                    $io->out(sprintf('%s: No update available', $seriesId));
+                    $this->toConsoleAndSlack("$seriesId: No update available");
                     continue;
                 }
 
-                $io->out(sprintf('%s: Update available', $seriesId));
+                $this->toConsoleAndSlack("$seriesId: Update available");
                 try {
                     $this->updateEndpoint(
                         group: $endpointGroup['title'],
@@ -136,7 +143,7 @@ class UpdateStatsCommand extends AppCommand
                     );
                     $groupUpdated = true;
                 } catch (NotFoundException | fred_api_exception $e) {
-                    $io->error($e->getMessage());
+                    $this->toConsoleAndSlack('Error: ' . $e->getMessage(), 'error');
                     $this->shutdown();
                     exit;
                 }
@@ -151,7 +158,7 @@ class UpdateStatsCommand extends AppCommand
             $io->out();
         }
 
-        $io->success('Finished');
+        $this->toConsoleAndSlack('Finished', 'success');
         $this->shutdown();
     }
 
@@ -207,8 +214,11 @@ class UpdateStatsCommand extends AppCommand
             ];
             $metric = $this->metricsTable->newEntity($data);
             if (!$this->metricsTable->save($metric)) {
-                $this->io->error('There was an error saving that metric. Details:');
-                $this->io->out(print_r($metric->getErrors(), true));
+                $this->toConsoleAndSlack(
+                    "There was an error saving a new metric record for series $seriesId. Details:",
+                    'error',
+                );
+                $this->toConsoleAndSlack(print_r($metric->getErrors(), true));
                 $this->shutdown();
                 exit;
             }
@@ -249,6 +259,8 @@ class UpdateStatsCommand extends AppCommand
                 $response = $api->get($parameters);
             } catch (fred_api_exception $e) {
                 if ($finalAttempt) {
+                    Slack::sendMessage('Exception encountered on final re-attempt to get endpoint metadata:');
+                    Slack::sendMessage($e->getMessage());
                     throw $e;
                 }
 
@@ -262,7 +274,9 @@ class UpdateStatsCommand extends AppCommand
             }
 
             if ($finalAttempt) {
-                throw new NotFoundException('Metadata not found');
+                $msg = 'Metadata could not be retrieved for series ' . $this->apiParameters['series_id'];
+                Slack::sendMessage($msg);
+                throw new NotFoundException($msg);
             }
 
             $this->io->error('Failed, retrying');
@@ -297,6 +311,8 @@ class UpdateStatsCommand extends AppCommand
             // Handle error fetching observations
             } catch (fred_api_exception $e) {
                 if ($finalAttempt) {
+                    Slack::sendMessage('Exception encountered on final re-attempt to fetch observations:');
+                    Slack::sendMessage($e->getMessage());
                     throw $e;
                 }
 
@@ -315,7 +331,10 @@ class UpdateStatsCommand extends AppCommand
             // Handle invalid response
             if (!$responseObj) {
                 if ($finalAttempt) {
-                    $this->io->error('Invalid response, retry limit reached, aborting');
+                    $this->toConsoleAndSlack(
+                        'Invalid response received on final re-attempt to fetch observations',
+                        'error',
+                    );
                     $this->shutdown();
                     exit;
                 }
@@ -358,28 +377,28 @@ class UpdateStatsCommand extends AppCommand
     private function updateEndpoint(string $group, string $seriesId, string $name): void
     {
         // Fetch from API
-        $this->io->out('- Retrieving from API...');
+        $this->toConsoleAndSlack('- Retrieving from API...');
         $this->setEndpoint($seriesId);
-        $this->io->out(sprintf('- %s: %s metadata', $group, $name));
+        $this->toConsoleAndSlack("- $group: $name metadata");
         $endpointMeta = $this->getEndpointMetadata();
         $metric = $this->metrics[$seriesId];
         $this->apiParameters['sort_order'] = 'asc';
 
-        $this->io->out('- Values');
+        $this->toConsoleAndSlack('- Values');
         $this->saveAllStatistics(
             observations: $this->getObservations(['units' => self::UNITS_VALUE]),
             metricId: $metric->id,
             dataTypeId: StatisticsTable::DATA_TYPE_VALUE,
         );
 
-        $this->io->out('- Changes');
+        $this->toConsoleAndSlack('- Changes');
         $this->saveAllStatistics(
             observations: $this->getObservations(['units' => self::UNITS_CHANGE_FROM_1_YEAR_AGO]),
             metricId: $metric->id,
             dataTypeId: StatisticsTable::DATA_TYPE_CHANGE,
         );
 
-        $this->io->out('- Percent changes');
+        $this->toConsoleAndSlack('- Percent changes');
         $this->saveAllStatistics(
             observations: $this->getObservations(['units' => self::UNITS_PERCENT_CHANGE_FROM_1_YEAR_AGO]),
             metricId: $metric->id,
@@ -437,13 +456,18 @@ class UpdateStatsCommand extends AppCommand
         }
 
         if (!$this->statisticsTable->save($statistic)) {
-            $this->io->error(sprintf(
-                'There was an error %s that statistic. Details:',
-                $isNewStat ? 'adding' : 'updating'
-            ));
-            $this->io->out(print_r($statistic->getErrors(), true));
-            $this->io->out('Data:');
-            $this->io->out(print_r($data, true));
+            $this->toConsoleAndSlack(
+                sprintf(
+                    'There was an error %s that statistic. Details:',
+                    $isNewStat ? 'adding' : 'updating'
+                ),
+                'error',
+            );
+            $this->toConsoleAndSlack(
+                print_r($statistic->getErrors(), true) .
+                "\nData:\n" .
+                print_r($data, true)
+            );
             $this->shutdown();
             exit;
         }
@@ -461,8 +485,8 @@ class UpdateStatsCommand extends AppCommand
         $dateObj = new FrozenTime($lastUpdated, $this->getApiTimezone($lastUpdated));
         $this->metricsTable->patchEntity($metric, ['last_updated' => $dateObj]);
         if (!$this->metricsTable->save($metric)) {
-            $this->io->error('There was an error updating that metric. Details:');
-            $this->io->out(print_r($metric->getErrors(), true));
+            $this->toConsoleAndSlack('There was an error updating that metric. Details:', 'error');
+            $this->toConsoleAndSlack(print_r($metric->getErrors(), true));
             $this->shutdown();
             exit;
         }
@@ -535,15 +559,18 @@ class UpdateStatsCommand extends AppCommand
         }
 
         $count = count($releases);
-        $this->io->out(sprintf(
+        $this->toConsoleAndSlack(sprintf(
             '- Recording %s as having been imported',
             $count == 1 ? 'last release' : "$count releases",
         ));
         foreach ($releases as $release) {
             $release = $this->releasesTable->patchEntity($release, ['imported' => true]);
             if (!$this->releasesTable->save($release)) {
-                $this->io->error('There was an error marking that release as having been imported. Details:');
-                $this->io->out(print_r($release->getErrors(), true));
+                $this->toConsoleAndSlack(
+                    'There was an error marking that release as having been imported. Details:',
+                    'error'
+                );
+                $this->toConsoleAndSlack(print_r($release->getErrors(), true));
                 $this->shutdown();
                 exit;
             }
@@ -586,9 +613,10 @@ class UpdateStatsCommand extends AppCommand
         $runningObj = new FrozenTime($running);
         if ($this->alertAdminIfDurationExceeds && !$runningObj->wasWithinLast($this->alertAdminIfDurationExceeds)) {
             $this->clearLock();
-            $this->io->warning(
+            $this->toConsoleAndSlack(
                 "Previous process was running $this->alertAdminIfDurationExceeds ago and never completed. " .
-                'Alerting administrator and clearing lock.'
+                'Alerting administrator and clearing lock.',
+                'warning',
             );
             $mailer = new Mailer('default');
             if (Configure::read('debug')) {
@@ -606,11 +634,11 @@ class UpdateStatsCommand extends AppCommand
             return;
         }
 
-        $this->io->out(sprintf(
+        $this->toConsoleAndSlack(sprintf(
             'Another update_stats process reported that it was running %s and hasn\'t completed. Aborting.',
             $runningObj->timeAgoInWords()
         ));
-        $this->io->out('Run this command with the option --ignore-lock to run it anyway.');
+        $this->toConsoleAndSlack('Run this command with the option --ignore-lock to run it anyway.');
         exit;
     }
 
@@ -646,5 +674,31 @@ class UpdateStatsCommand extends AppCommand
     private function shutdown(): void
     {
         $this->clearLock();
+    }
+
+    /**
+     * Sends a message to the console and to Slack
+     *
+     * @param string $text Message to send
+     * @param string $mode 'success', 'error', or 'out' (default)
+     * @return void
+     * @throws \Cake\Http\Exception\InternalErrorException
+     */
+    private function toConsoleAndSlack(string $text, string $mode = 'out'): void
+    {
+        switch ($mode) {
+            case 'success':
+                $this->io->success($text);
+                break;
+            case 'error':
+                $this->io->error($text);
+                break;
+            case 'warning':
+                $this->io->warning($text);
+                break;
+            default:
+                $this->io->out($text);
+        }
+        Slack::sendMessage($text);
     }
 }

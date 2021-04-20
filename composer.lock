@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ee9e774b1bef4ea189681b710c483210",
+    "content-hash": "670d3a1c2b991c09c3d1485b7bfdfb99",
     "packages": [
         {
             "name": "ballstatecber/datacenter-plugin-cakephp4",
@@ -6523,8 +6523,9 @@
     "platform": {
         "php": ">=8.0",
         "ext-json": "*",
+        "ext-redis": "*",
         "ext-simplexml": "*",
-        "ext-redis": "*"
+        "ext-curl": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.0.0"

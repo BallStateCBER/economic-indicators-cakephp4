@@ -148,10 +148,10 @@ class MetricsTable extends Table
      * Returns a metric associated with the specified seriesId or throws an exception
      *
      * @param string $seriesId A FRED API seriesID string
-     * @return \App\Model\Entity\Metric
+     * @return \App\Model\Entity\Metric|null
      * @throws \Cake\Http\Exception\NotFoundException
      */
-    public function getFromSeriesId(string $seriesId): Metric
+    public function getFromSeriesId(string $seriesId): ?Metric
     {
         /** @var \App\Model\Entity\Metric|null $metric */
         $metric = $this->find()->where(['series_id' => $seriesId])->first();
