@@ -36,6 +36,6 @@ This is the repository for the [Economic Indicators](https://indicators.cberdata
   update script is invoked.
 - The [FRED API request rate limit](https://fred.stlouisfed.org/docs/api/terms_of_use.html) is nonspecific, but
   [suspected to be 120 requests per minute](https://cran.r-project.org/web/packages/fredr/news/news.html), there is a
-  one-second delay between every request and a five-second delay after any error, so it is not anticipated that errors
+  delay between every request and a longer delay after any error, so it is not anticipated that errors
   caused by exceeding the allowed rate will take place as long as only one instance of any update script is running at
   a time.

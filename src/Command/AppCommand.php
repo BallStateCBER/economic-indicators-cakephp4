@@ -26,17 +26,17 @@ abstract class AppCommand extends DataCenterCommand
     /**
      * @var int The number of times to retry a failing API call after the first attempt
      */
-    protected int $apiRetryCount = 2;
+    protected int $apiRetryCount = 5;
 
     /**
      * @var float Seconds to wait between each API call
      */
-    protected float $rateThrottle = 1;
+    protected float $rateThrottle = 2;
 
     /**
      * @var float Seconds to wait after an invalid API response before trying again
      */
-    protected float $waitAfterError = 5;
+    protected float $waitAfterError = 10;
 
     /**
      * UpdateStatsCommand constructor.
