@@ -168,10 +168,12 @@ class StatisticsTable extends Table
     }
 
     /**
-     * Returns values, changes since last year, and percent changes for all metrics in the provided group
+     * Returns statistics for all metrics in the provided group, using the cache
      *
      * If $all is TRUE, returns statistics for all dates. Otherwise, only returns the most recent statistic.
-     * Reads from and writes to the cache if not in a test context
+     * If $onlyCache is TRUE, saves memory by returning only an empty array
+     * If the OVERWRITE_CACHE constant is TRUE, overwrites any existing cached values
+     * If the RUNNING_TEST constant is TRUE and/or $this->useCache is FALSE, ignores the cache
      *
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @param bool $all TRUE to return statistics for all dates
@@ -183,16 +185,22 @@ class StatisticsTable extends Table
     {
         $retval = [];
         $generateNewResults = !$this->useCache || $this->overwriteCache;
+
         foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
             if (!$onlyCache) {
                 $retval[$seriesId]['name'] = $name;
             }
             $metric = $this->Metrics->getFromSeriesId($seriesId);
+
             foreach (self::DATA_TYPES as $dataTypeId) {
-                // Use cached value if possible
                 $cacheKey = self::getStatsCacheKey($seriesId, $dataTypeId, $all);
-                $cachedResult = $generateNewResults ? false : Cache::read($cacheKey, self::CACHE_CONFIG);
-                if ($cachedResult) {
+
+                // Use cached value if possible and appropriate
+                if (!$generateNewResults && !$this->overwriteCache) {
+                    $cachedResult = Cache::read($cacheKey, self::CACHE_CONFIG);
+                    if (!$cachedResult) {
+                        continue;
+                    }
                     if (!$onlyCache) {
                         $retval[$seriesId]['statistics'][$dataTypeId] = $cachedResult;
                     }

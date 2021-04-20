@@ -113,7 +113,7 @@ class UpdateCacheCommand extends Command
 
         $this->showMemoryUsage();
         $this->io->out('- Rebuilding cached data for most recent date');
-        $this->statisticsTable->getGroup(endpointGroup: $endpointGroup, all: true, onlyCache: true);
+        $this->statisticsTable->getGroup(endpointGroup: $endpointGroup, all: false, onlyCache: true);
 
         $this->showMemoryUsage();
         $this->io->out('- Rebuilding cached data for all dates');
