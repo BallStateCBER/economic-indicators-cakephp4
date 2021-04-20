@@ -30,7 +30,7 @@ $i = 0;
         </p>
 
         <p>
-            If you have any questions or comments, please email project manager
+            If you have any questions or comments, please email
             <a href="mailto:sdevaraj@bsu.edu">Srikant Devaraj</a>.
         </p>
     </section>
