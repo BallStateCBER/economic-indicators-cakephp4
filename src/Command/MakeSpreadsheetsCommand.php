@@ -31,8 +31,6 @@ use PhpOffice\PhpSpreadsheet\Writer\Exception as PhpOfficeException;
 class MakeSpreadsheetsCommand extends AppCommand
 {
     private bool $verbose = false;
-    private ConsoleIo $io;
-    private Helper $progress;
     private SpreadsheetsTable $spreadsheetsTable;
     private StatisticsTable $statisticsTable;
 

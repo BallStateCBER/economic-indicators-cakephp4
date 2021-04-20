@@ -10,7 +10,6 @@ use Cake\Cache\Cache;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Cake\Console\Helper;
 use Cake\ORM\TableRegistry;
 
 /**
@@ -23,8 +22,6 @@ use Cake\ORM\TableRegistry;
 class UpdateCacheCommand extends AppCommand
 {
     private bool $verbose = false;
-    private ConsoleIo $io;
-    private Helper $progress;
     private StatisticsTable $statisticsTable;
 
     /**
