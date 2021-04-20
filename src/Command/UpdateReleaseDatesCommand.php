@@ -6,6 +6,7 @@ namespace App\Command;
 use App\Endpoints\EndpointGroups;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\ReleasesTable;
+use App\Slack\Slack;
 use Cake\Cache\Cache;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
@@ -65,6 +66,7 @@ class UpdateReleaseDatesCommand extends AppCommand
     {
         parent::execute($args, $io);
         $this->releasesTable = TableRegistry::getTableLocator()->get('Releases');
+        Slack::sendMessage('Updating release dates');
 
         if (!$args->getOption('only-cache')) {
             $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
@@ -72,7 +74,7 @@ class UpdateReleaseDatesCommand extends AppCommand
             $this->releaseApi = $this->api->factory('release');
             $endpointGroups = EndpointGroups::getAll();
             foreach ($endpointGroups as $endpointGroup) {
-                $this->io->info($endpointGroup['title']);
+                $this->toConsoleAndSlack($endpointGroup['title']);
                 foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
                     $releaseId = $this->getReleaseId($seriesId, $name);
                     $releaseDates = $this->getUpcomingReleaseDates($releaseId);
@@ -84,10 +86,10 @@ class UpdateReleaseDatesCommand extends AppCommand
             }
         }
 
-        $this->io->out('Rebuilding cache');
+        $this->toConsoleAndSlack('Rebuilding cached release calendar');
         Cache::clear(ReleasesTable::CACHE_CONFIG);
         $this->releasesTable->getNextReleaseDates();
-        $this->io->success('Done');
+        $this->toConsoleAndSlack('Finished', 'success');
     }
 
     /**
@@ -103,7 +105,7 @@ class UpdateReleaseDatesCommand extends AppCommand
     private function getReleaseId(string $seriesId, string $name): int
     {
         $this->io->out($name);
-        $this->io->out('- Fetching release ID');
+        $this->toConsoleAndSlack('- Fetching release ID');
         for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts--) {
             $finalAttempt = $attempts == 1;
             $response = $this->seriesApi->release([
@@ -132,7 +134,7 @@ class UpdateReleaseDatesCommand extends AppCommand
      */
     private function getUpcomingReleaseDates(int $releaseId): array
     {
-        $this->io->out('- Fetching upcoming release dates');
+        $this->toConsoleAndSlack('- Fetching upcoming release dates');
         for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts--) {
             $finalAttempt = $attempts == 1;
             $this->throttle();
@@ -186,16 +188,16 @@ class UpdateReleaseDatesCommand extends AppCommand
             return;
         }
 
-        $this->io->out('- Removing release dates that are no longer valid');
+        $this->toConsoleAndSlack('- Removing release dates that are no longer valid');
         foreach ($invalidReleases as $release) {
-            $this->io->out(sprintf(
+            $this->toConsoleAndSlack(sprintf(
                 '   Release #%s (%s)',
                 $release->id,
                 $release->date,
             ));
             if (!$this->releasesTable->delete($release)) {
-                $this->io->error('There was an error removing that release. Details:');
-                $this->io->out(print_r($release->getErrors(), true));
+                $this->toConsoleAndSlack('There was an error removing that release. Details:', 'error');
+                $this->toConsoleAndSlack(print_r($release->getErrors(), true));
             }
         }
     }
@@ -223,20 +225,20 @@ class UpdateReleaseDatesCommand extends AppCommand
         }
 
         if (!$newReleases) {
-            $this->io->out('- No new releases to add');
+            $this->toConsoleAndSlack('- No new releases to add');
 
             return;
         }
 
-        $this->io->out(sprintf(
+        $this->toConsoleAndSlack(sprintf(
             '- Adding new release %s',
             count($newReleases) > 1 ? 'dates' : 'date'
         ));
         foreach ($newReleases as $release) {
-            $this->io->out('   ' . $release->date->format('Y-m-d'));
+            $this->toConsoleAndSlack('   ' . $release->date->format('Y-m-d'));
             if (!$this->releasesTable->save($release)) {
-                $this->io->error('There was an error saving that release. Details:');
-                $this->io->out(print_r($release->getErrors(), true));
+                $this->toConsoleAndSlack('There was an error saving that release. Details:', 'error');
+                $this->toConsoleAndSlack(print_r($release->getErrors(), true));
             }
         }
     }
