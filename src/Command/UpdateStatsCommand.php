@@ -376,29 +376,32 @@ class UpdateStatsCommand extends AppCommand
      */
     private function updateEndpoint(string $group, string $seriesId, string $name): void
     {
-        // Fetch from API
-        $this->toConsoleAndSlack('- Retrieving from API...');
+        Slack::sendMessage("- Updating stats for $group: $name");
+        $this->io->out('- Retrieving from API...');
+        $this->io->out("- $group: $name metadata");
+
+        // Fetch metadata from API
         $this->setEndpoint($seriesId);
-        $this->toConsoleAndSlack("- $group: $name metadata");
         $endpointMeta = $this->getEndpointMetadata();
+
+        // Pull in new statistics from the three data types
+        $this->io->out('- Values');
         $metric = $this->metrics[$seriesId];
         $this->apiParameters['sort_order'] = 'asc';
-
-        $this->toConsoleAndSlack('- Values');
         $this->saveAllStatistics(
             observations: $this->getObservations(['units' => self::UNITS_VALUE]),
             metricId: $metric->id,
             dataTypeId: StatisticsTable::DATA_TYPE_VALUE,
         );
 
-        $this->toConsoleAndSlack('- Changes');
+        $this->io->out('- Changes');
         $this->saveAllStatistics(
             observations: $this->getObservations(['units' => self::UNITS_CHANGE_FROM_1_YEAR_AGO]),
             metricId: $metric->id,
             dataTypeId: StatisticsTable::DATA_TYPE_CHANGE,
         );
 
-        $this->toConsoleAndSlack('- Percent changes');
+        $this->io->out('- Percent changes');
         $this->saveAllStatistics(
             observations: $this->getObservations(['units' => self::UNITS_PERCENT_CHANGE_FROM_1_YEAR_AGO]),
             metricId: $metric->id,
