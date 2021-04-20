@@ -252,12 +252,26 @@ class StatisticsTable extends Table
             return $cachedResult;
         }
 
+        // Loop through all metrics to find the absolute first and last date for the entire group
         $seriesIds = array_keys($endpointGroup['endpoints']);
-        $metric = $this->Metrics->getFromSeriesId($seriesIds[0]);
+        $earliestDate = null;
+        $latestDate = null;
+        foreach ($seriesIds as $seriesId) {
+            $metric = $this->Metrics->getFromSeriesId($seriesId);
+            $firstDateForMetric = $this->getDateBoundaryForMetric($metric);
+            if (!$earliestDate || $firstDateForMetric->lessThan($earliestDate)) {
+                $earliestDate = $firstDateForMetric;
+            }
+            $lastDateForMetric = $this->getDateBoundaryForMetric($metric, 'last');
+            if (!$latestDate || $lastDateForMetric->greaterThan($latestDate)) {
+                $latestDate = $lastDateForMetric;
+            }
+        }
+
         $frequency = 'monthly';
         $dateRange = [
-            Formatter::getFormattedDate($this->getDateBoundaryForMetric($metric), $frequency),
-            Formatter::getFormattedDate($this->getDateBoundaryForMetric($metric, 'last'), $frequency),
+            Formatter::getFormattedDate($earliestDate, $frequency),
+            Formatter::getFormattedDate($latestDate, $frequency),
         ];
 
         if ($this->useCache) {
