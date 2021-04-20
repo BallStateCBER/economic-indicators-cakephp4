@@ -97,11 +97,6 @@ class Formatter
      */
     public static function formatReleaseDate(FrozenDate $date): string
     {
-        return sprintf(
-            '%s<sup>%s</sup>%s',
-            $date->format('F j'),
-            $date->format('S'),
-            $date->format(', Y'),
-        );
+        return $date->format('F j, Y');
     }
 }
