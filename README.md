@@ -31,6 +31,7 @@ This is the repository for the [Economic Indicators](https://indicators.cberdata
 - `bin/cake update_cache` can be run manually to rebuild the cache of query results, though
   `bin/cake update_stats` updates the cache automatically, if appropriate
     - Run with the `--verbose` option to output information about memory usage
+- On the production server, `bin/cake` may need to be run as `php bin/cake.php`
 - Note that the FRED API occasionally fails to return a valid response, in which case these scripts will re-try the same
   request a limited number of times before giving up. Those requests will then be attempted again the next time an
   update script is invoked.
