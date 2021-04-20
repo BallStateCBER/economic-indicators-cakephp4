@@ -6,6 +6,7 @@ namespace App\Model\Table;
 use App\Formatter\Formatter;
 use App\Model\Entity\Metric;
 use Cake\Cache\Cache;
+use Cake\Database\Expression\QueryExpression;
 use Cake\Datasource\ResultSetInterface;
 use Cake\Http\Exception\InternalErrorException;
 use Cake\Http\Exception\NotFoundException;
@@ -292,7 +293,12 @@ class StatisticsTable extends Table
         $stat = $this
             ->find()
             ->select(['id', 'date'])
-            ->where(['metric_id' => $metric->id])
+            ->where([
+                'metric_id' => $metric->id,
+                function (QueryExpression $exp) {
+                    return $exp->isNotNull('value');
+                },
+            ])
             ->order([
                 'date' => $boundary == 'first' ? 'ASC' : 'DESC',
             ])
