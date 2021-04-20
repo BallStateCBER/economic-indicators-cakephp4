@@ -31,3 +31,10 @@ This is the repository for the [Economic Indicators](https://indicators.cberdata
 - `bin/cake update_cache` can be run manually to rebuild the cache of query results, though
   `bin/cake update_stats` updates the cache automatically, if appropriate
     - Run with the `--verbose` option to output information about memory usage
+- Note that the FRED API occasionally fails to return a valid response, in which case these scripts will re-try the same
+  request a limited number of times before giving up. Those requests will then be attempted again the next time an
+  update script is invoked.
+- The [FRED API request rate limit](https://fred.stlouisfed.org/docs/api/terms_of_use.html) is nonspecific, so there is
+  currently no way to guarantee that it is not exceeded. However, there is a one-second delay between every request
+  and a five-second delay after any error, so it is not anticipated that errors caused by exceeding the allowed rate
+  will take place as long as only one instance of any update script is running at a time.
