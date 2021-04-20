@@ -607,8 +607,8 @@ class UpdateStatsCommand extends AppCommand
         }
 
         $this->io->out(sprintf(
-            'Another update_stats process reported that it was running on %s and hasn\'t completed. Aborting.',
-            $running
+            'Another update_stats process reported that it was running %s and hasn\'t completed. Aborting.',
+            $runningObj->timeAgoInWords()
         ));
         $this->io->out('Run this command with the option --ignore-lock to run it anyway.');
         exit;
