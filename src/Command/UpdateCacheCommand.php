@@ -7,7 +7,6 @@ use App\Endpoints\EndpointGroups;
 use App\Model\Table\ReleasesTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Cache\Cache;
-use Cake\Command\Command;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
@@ -21,7 +20,7 @@ use Cake\ORM\TableRegistry;
  * @property \Cake\Console\ConsoleIo $io
  * @property \Cake\Shell\Helper\ProgressHelper $progress
  */
-class UpdateCacheCommand extends Command
+class UpdateCacheCommand extends AppCommand
 {
     private bool $verbose = false;
     private ConsoleIo $io;
@@ -77,7 +76,7 @@ class UpdateCacheCommand extends Command
         $this->progress = $io->helper('Progress');
         $this->verbose = (bool)$args->getOption('verbose');
 
-        $io->out('Rebuilding release calendar cache');
+        $this->toConsoleAndSlack('Rebuilding release calendar cache');
         Cache::clear(ReleasesTable::CACHE_CONFIG);
         $releasesTable = TableRegistry::getTableLocator()->get('Releases');
         $releasesTable->getNextReleaseDates();
@@ -86,7 +85,7 @@ class UpdateCacheCommand extends Command
         $count = count($endpointGroups);
         $i = 1;
         foreach ($endpointGroups as $endpointGroup) {
-            $io->out(sprintf(
+            $this->toConsoleAndSlack(sprintf(
                 'Processing %s (%s/%s)',
                 $endpointGroup['title'],
                 $i,
@@ -96,7 +95,7 @@ class UpdateCacheCommand extends Command
             $i++;
         }
 
-        $io->success('Finished');
+        $this->toConsoleAndSlack('Finished', 'success');
     }
 
     /**
@@ -108,23 +107,23 @@ class UpdateCacheCommand extends Command
     public function refreshGroup(array $endpointGroup): void
     {
         $this->showMemoryUsage();
-        $this->io->out('- Rebuilding cached date range');
+        $this->toConsoleAndSlack('- Rebuilding cached date range');
         $this->statisticsTable->getDateRange($endpointGroup);
 
         $this->showMemoryUsage();
-        $this->io->out('- Rebuilding cached data for most recent date');
+        $this->toConsoleAndSlack('- Rebuilding cached data for most recent date');
         $this->statisticsTable->getGroup(endpointGroup: $endpointGroup, all: false, onlyCache: true);
 
         $this->showMemoryUsage();
-        $this->io->out('- Rebuilding cached data for all dates');
+        $this->toConsoleAndSlack('- Rebuilding cached data for all dates');
         $this->statisticsTable->getGroup(endpointGroup: $endpointGroup, all: true, onlyCache: true);
 
         $this->showMemoryUsage();
-        $this->io->out('- Rebuilding cached sparkline data');
+        $this->toConsoleAndSlack('- Rebuilding cached sparkline data');
         $this->statisticsTable->getStatsForSparklines($endpointGroup);
 
         $this->showMemoryUsage();
-        $this->io->out('- Rebuilding cached starting dates');
+        $this->toConsoleAndSlack('- Rebuilding cached starting dates');
         $this->statisticsTable->getStartingDates($endpointGroup);
     }
 

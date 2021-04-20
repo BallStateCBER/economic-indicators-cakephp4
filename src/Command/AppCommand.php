@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Slack\Slack;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Core\Configure;
@@ -147,5 +148,31 @@ abstract class AppCommand extends DataCenterCommand
         $this->io->error('Failed, retrying');
 
         return false;
+    }
+
+    /**
+     * Sends a message to the console and to Slack
+     *
+     * @param string $text Message to send
+     * @param string $mode 'success', 'error', or 'out' (default)
+     * @return void
+     * @throws \Cake\Http\Exception\InternalErrorException
+     */
+    protected function toConsoleAndSlack(string $text, string $mode = 'out'): void
+    {
+        switch ($mode) {
+            case 'success':
+                $this->io->success($text);
+                break;
+            case 'error':
+                $this->io->error($text);
+                break;
+            case 'warning':
+                $this->io->warning($text);
+                break;
+            default:
+                $this->io->out($text);
+        }
+        Slack::sendMessage($text);
     }
 }

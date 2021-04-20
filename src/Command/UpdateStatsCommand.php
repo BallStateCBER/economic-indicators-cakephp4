@@ -675,30 +675,4 @@ class UpdateStatsCommand extends AppCommand
     {
         $this->clearLock();
     }
-
-    /**
-     * Sends a message to the console and to Slack
-     *
-     * @param string $text Message to send
-     * @param string $mode 'success', 'error', or 'out' (default)
-     * @return void
-     * @throws \Cake\Http\Exception\InternalErrorException
-     */
-    private function toConsoleAndSlack(string $text, string $mode = 'out'): void
-    {
-        switch ($mode) {
-            case 'success':
-                $this->io->success($text);
-                break;
-            case 'error':
-                $this->io->error($text);
-                break;
-            case 'warning':
-                $this->io->warning($text);
-                break;
-            default:
-                $this->io->out($text);
-        }
-        Slack::sendMessage($text);
-    }
 }
