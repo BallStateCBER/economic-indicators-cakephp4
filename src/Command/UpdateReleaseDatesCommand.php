@@ -74,8 +74,9 @@ class UpdateReleaseDatesCommand extends AppCommand
             $this->releaseApi = $this->api->factory('release');
             $endpointGroups = EndpointGroups::getAll();
             foreach ($endpointGroups as $endpointGroup) {
-                $this->toConsoleAndSlack($endpointGroup['title']);
+                $this->io->out($endpointGroup['title']);
                 foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
+                    Slack::sendMessage($endpointGroup['title'] . ': ' . $name);
                     $releaseId = $this->getReleaseId($seriesId, $name);
                     $releaseDates = $this->getUpcomingReleaseDates($releaseId);
                     $metric = $this->metricsTable->getFromSeriesId($seriesId);
@@ -105,7 +106,7 @@ class UpdateReleaseDatesCommand extends AppCommand
     private function getReleaseId(string $seriesId, string $name): int
     {
         $this->io->out($name);
-        $this->toConsoleAndSlack('- Fetching release ID');
+        $this->io->out('- Fetching release ID');
         for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts--) {
             $finalAttempt = $attempts == 1;
             $response = $this->seriesApi->release([
@@ -134,7 +135,7 @@ class UpdateReleaseDatesCommand extends AppCommand
      */
     private function getUpcomingReleaseDates(int $releaseId): array
     {
-        $this->toConsoleAndSlack('- Fetching upcoming release dates');
+        $this->io->out('- Fetching upcoming release dates');
         for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts--) {
             $finalAttempt = $attempts == 1;
             $this->throttle();
@@ -225,7 +226,7 @@ class UpdateReleaseDatesCommand extends AppCommand
         }
 
         if (!$newReleases) {
-            $this->toConsoleAndSlack('- No new releases to add');
+            $this->io->out('- No new releases to add');
 
             return;
         }
