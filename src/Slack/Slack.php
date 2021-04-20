@@ -30,7 +30,7 @@ class Slack
         curl_setopt($curlHandle, CURLOPT_HTTPHEADER, ['Content-Type:application/json']);
         curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
         if (!curl_exec($curlHandle)) {
-            throw new InternalErrorException('Error sending message to Slack: ' . $text);
+            throw new InternalErrorException('Error sending message to Slack. Details: ' . curl_error($curlHandle));
         }
         curl_close($curlHandle);
     }
