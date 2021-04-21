@@ -49,7 +49,7 @@ class UpdateStatsCommand extends AppCommand
     private MetricsTable $metricsTable;
     private ReleasesTable $releasesTable;
     private StatisticsTable $statisticsTable;
-    private string|null $alertAdminIfDurationExceeds = '24 hours';
+    private string|null $alertAdminIfDurationExceeds = '2 hours';
     public const CACHE_CONFIG = 'update_stats';
 
     /**
