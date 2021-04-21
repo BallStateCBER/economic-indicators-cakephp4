@@ -125,7 +125,7 @@ class UpdateStatsCommand extends AppCommand
                 $this->updateLock();
 
                 if ($this->skipSeries($seriesId)) {
-                    $this->toConsoleAndSlack("$seriesId: Skipping; no new release expected");
+                    $this->io->out("$seriesId: Skipping; no new release expected");
                     continue;
                 }
 
