@@ -388,6 +388,7 @@ class UpdateStatsCommand extends AppCommand
         $this->io->out('- Values');
         $metric = $this->metrics[$seriesId];
         $this->apiParameters['sort_order'] = 'asc';
+        $this->setStartDate($metric);
         $this->saveAllStatistics(
             observations: $this->getObservations(['units' => self::UNITS_VALUE]),
             metricId: $metric->id,
@@ -677,5 +678,37 @@ class UpdateStatsCommand extends AppCommand
     private function shutdown(): void
     {
         $this->clearLock();
+    }
+
+    /**
+     * Sets the 'observation_start' API parameter
+     *
+     * This will be NULL unless if the --only-new option is in use and there's a "most recent statistic" to use to
+     * determine the earliest date to request statistics for.
+     *
+     * @param \App\Model\Entity\Metric $metric
+     * @return void
+     */
+    private function setStartDate(Metric $metric): void
+    {
+        // Clear this parameter to avoid its value carrying over between loop iterations
+        $this->apiParameters['observation_start'] = null;
+
+        if (!$this->onlyNew) {
+            return;
+        }
+        /** @var \App\Model\Entity\Statistic|null $mostRecentStatistic */
+        $mostRecentStatistic = $this->statisticsTable
+            ->find()
+            ->select(['date'])
+            ->where(['metric_id' => $metric->id])
+            ->orderDesc('date')
+            ->first();
+
+        if (!$mostRecentStatistic) {
+            return;
+        }
+
+        $this->apiParameters['observation_start'] = $mostRecentStatistic->date->format('Y-m-d');
     }
 }
