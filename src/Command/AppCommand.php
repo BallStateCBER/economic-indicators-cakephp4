@@ -8,6 +8,7 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Core\Configure;
 use Cake\Http\Exception\InternalErrorException;
+use Cake\Log\Log;
 use DataCenter\Command\AppCommand as DataCenterCommand;
 use fred_api;
 use fred_api_exception;
@@ -156,7 +157,6 @@ abstract class AppCommand extends DataCenterCommand
      * @param string $text Message to send
      * @param string $mode 'success', 'error', or 'out' (default)
      * @return void
-     * @throws \Cake\Http\Exception\InternalErrorException
      */
     protected function toConsoleAndSlack(string $text, string $mode = 'out'): void
     {
@@ -173,6 +173,13 @@ abstract class AppCommand extends DataCenterCommand
             default:
                 $this->io->out($text);
         }
-        Slack::sendMessage($text);
+
+        // Try to send a message to Slack and log any exceptions instead of letting them halt execution
+        try {
+            Slack::sendMessage($text);
+        } catch (InternalErrorException $e) {
+            Log::error($e->getMessage());
+            $this->io->error($e->getMessage());
+        }
     }
 }
