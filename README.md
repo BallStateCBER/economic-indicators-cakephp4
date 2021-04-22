@@ -18,20 +18,24 @@ This is the repository for the [Economic Indicators](https://indicators.cberdata
   release new data (which then becomes available to FRED, and then gets pulled into the Economic Indicators database)
 
 ## Keeping data updated
-- `bin/cake update_stats` should be run at least daily, and can take several hours to complete
+- `bin/cake update_stats`
   - Run with the `--only-new` option to only check endpoints with releases on or before today that have not yet been
-    imported, and only adds new stats, rather than also updating existing stats
+    imported. This only adds new stats, rather than also updating existing stats, and doesn't take very much time, so
+    it can be safely automated to run **every three hours**.
+  - Run *without* the `--only-new` option to pull all available statistics from FRED and to check for any updates to
+    already-imported data. This may take many hours, so it's recommended that it be automated to run **monthly**.
   - Run with the `--ignore-lock` option to either allow multiple update processes to take place concurrently
     (not recommended) or to fix a process lock that failed to be cleared by the previous process
-- `bin/cake update_release_dates` should be run daily
-  - Run with the `--only-cache` option to only rebuild the cached release calendar
+- `bin/cake update_release_dates` should be automated to run **daily**
+  - Run with the `--only-cache` option to only rebuild the cached release calendar instead of pulling new release
+    information from FRED
 - `bin/cake make_spreadsheets` can be run manually if there's a problem with the pre-generated spreadsheets, but
   `bin/cake update_stats` also automatically (re)generates spreadsheets if needed
     - Run with the `--verbose` option to output information about memory usage
 - `bin/cake update_cache` can be run manually to rebuild the cache of query results, though
   `bin/cake update_stats` updates the cache automatically, if appropriate
     - Run with the `--verbose` option to output information about memory usage
-- On the production server, `bin/cake` may need to be run as `php bin/cake.php`
+- On the production server, replace `bin/cake` with `php bin/cake.php`
 - Note that the FRED API occasionally fails to return a valid response, in which case these scripts will re-try the same
   request a limited number of times before giving up. Those requests will then be attempted again the next time an
   update script is invoked.
