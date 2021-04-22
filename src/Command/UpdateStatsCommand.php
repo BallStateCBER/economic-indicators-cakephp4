@@ -101,6 +101,7 @@ class UpdateStatsCommand extends AppCommand
     public function execute(Arguments $args, ConsoleIo $io)
     {
         parent::execute($args, $io);
+        $start = new FrozenTime();
         if (!$args->getOption('ignore-lock')) {
             $this->avoidConcurrentProcesses();
         }
@@ -158,7 +159,8 @@ class UpdateStatsCommand extends AppCommand
             $io->out();
         }
 
-        $this->toConsoleAndSlack('Finished', 'success');
+        $timeAgo = $start->timeAgoInWords();
+        $this->toConsoleAndSlack("Finished (started $timeAgo)", 'success');
         $this->shutdown();
     }
 

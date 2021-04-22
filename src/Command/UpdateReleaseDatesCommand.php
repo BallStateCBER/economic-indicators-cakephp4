@@ -13,6 +13,7 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Database\Expression\QueryExpression;
 use Cake\I18n\FrozenDate;
+use Cake\I18n\FrozenTime;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
 use fred_api_release;
@@ -64,6 +65,7 @@ class UpdateReleaseDatesCommand extends AppCommand
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
+        $start = new FrozenTime();
         parent::execute($args, $io);
         $this->releasesTable = TableRegistry::getTableLocator()->get('Releases');
         Slack::sendMessage('Updating release dates');
@@ -90,7 +92,9 @@ class UpdateReleaseDatesCommand extends AppCommand
         $this->toConsoleAndSlack('Rebuilding cached release calendar');
         Cache::clear(ReleasesTable::CACHE_CONFIG);
         $this->releasesTable->getNextReleaseDates();
-        $this->toConsoleAndSlack('Finished', 'success');
+
+        $timeAgo = $start->timeAgoInWords();
+        $this->toConsoleAndSlack("Finished (started $timeAgo)", 'success');
     }
 
     /**

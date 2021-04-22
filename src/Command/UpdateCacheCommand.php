@@ -10,6 +10,7 @@ use Cake\Cache\Cache;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\I18n\FrozenTime;
 use Cake\ORM\TableRegistry;
 
 /**
@@ -69,6 +70,7 @@ class UpdateCacheCommand extends AppCommand
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
+        $start = new FrozenTime();
         $this->io = $io;
         $this->progress = $io->helper('Progress');
         $this->verbose = (bool)$args->getOption('verbose');
@@ -92,7 +94,8 @@ class UpdateCacheCommand extends AppCommand
             $i++;
         }
 
-        $this->toConsoleAndSlack('Finished', 'success');
+        $timeAgo = $start->timeAgoInWords();
+        $this->toConsoleAndSlack("Finished (started $timeAgo)", 'success');
     }
 
     /**
