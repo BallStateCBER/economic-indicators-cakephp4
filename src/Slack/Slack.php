@@ -10,7 +10,6 @@ use Cake\Log\Log;
  * Used to interface with another Slack API library
  *
  * @package App\Slack
- * @property \Maknz\Slack\Client $client
  */
 class Slack
 {
