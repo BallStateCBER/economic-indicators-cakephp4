@@ -174,12 +174,6 @@ abstract class AppCommand extends DataCenterCommand
                 $this->io->out($text);
         }
 
-        // Try to send a message to Slack and log any exceptions instead of letting them halt execution
-        try {
-            Slack::sendMessage($text);
-        } catch (InternalErrorException $e) {
-            Log::error($e->getMessage());
-            $this->io->error($e->getMessage());
-        }
+        Slack::sendMessage($text);
     }
 }

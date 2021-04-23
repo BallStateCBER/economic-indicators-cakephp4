@@ -2,7 +2,7 @@
 namespace App\Slack;
 
 use Cake\Core\Configure;
-use Cake\Http\Exception\InternalErrorException;
+use Cake\Log\Log;
 
 /**
  * Class Slack
@@ -15,11 +15,10 @@ use Cake\Http\Exception\InternalErrorException;
 class Slack
 {
     /**
-     * Sends a message
+     * Sends a message to Slack and logs an error if the attempt fails
      *
      * @param string $text Message to send
      * @return void
-     * @throws \Cake\Http\Exception\InternalErrorException
      */
     public static function sendMessage(string $text)
     {
@@ -30,7 +29,7 @@ class Slack
         curl_setopt($curlHandle, CURLOPT_HTTPHEADER, ['Content-Type:application/json']);
         curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
         if (!curl_exec($curlHandle)) {
-            throw new InternalErrorException('Error sending message to Slack. Details: ' . curl_error($curlHandle));
+            Log::error('Error sending message to Slack. Details: ' . curl_error($curlHandle));
         }
         curl_close($curlHandle);
     }
