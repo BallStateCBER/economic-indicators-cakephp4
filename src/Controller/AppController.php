@@ -37,6 +37,7 @@ class AppController extends DataCenterController
      * e.g. `$this->loadComponent('FormProtection');`
      *
      * @return void
+     * @throws \Exception
      */
     public function initialize(): void
     {

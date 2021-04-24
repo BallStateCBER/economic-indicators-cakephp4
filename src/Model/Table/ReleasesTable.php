@@ -156,7 +156,7 @@ class ReleasesTable extends Table
         foreach ($metricNames as $metricName) {
             $metric = is_string($metricName) ? $this->Metrics->getFromSeriesId($metricName) : $metricName;
 
-            /** @var \App\Model\Entity\Release $release */
+            /** @var \App\Model\Entity\Release|null $release */
             $release = $this
                 ->find()
                 ->select(['date'])

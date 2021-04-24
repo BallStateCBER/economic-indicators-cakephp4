@@ -34,6 +34,7 @@ class PagesController extends AppController
      */
     public function home(): void
     {
+        /** @var \App\Model\Table\ReleasesTable $releasesTable */
         $releasesTable = TableRegistry::getTableLocator()->get('Releases');
         $releaseDates = $releasesTable->getNextReleaseDates();
 

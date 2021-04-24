@@ -112,6 +112,7 @@ class Installer
      * @param string $dir The application's root directory.
      * @param \Composer\IO\IOInterface $io IO interface to write to console.
      * @return void
+     * @throws \Exception
      */
     public static function setFolderPermissions($dir, $io)
     {

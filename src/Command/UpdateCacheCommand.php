@@ -77,6 +77,7 @@ class UpdateCacheCommand extends AppCommand
 
         $this->toConsoleAndSlack('Rebuilding release calendar cache');
         Cache::clear(ReleasesTable::CACHE_CONFIG);
+        /** @var \App\Model\Table\ReleasesTable $releasesTable */
         $releasesTable = TableRegistry::getTableLocator()->get('Releases');
         $releasesTable->getNextReleaseDates();
 

@@ -49,7 +49,7 @@ class UpdateStatsCommand extends AppCommand
     private MetricsTable $metricsTable;
     private ReleasesTable $releasesTable;
     private StatisticsTable $statisticsTable;
-    private string|null $alertAdminIfDurationExceeds = '2 hours';
+    private string | null $alertAdminIfDurationExceeds = '2 hours';
     public const CACHE_CONFIG = 'update_stats';
 
     /**
@@ -203,7 +203,8 @@ class UpdateStatsCommand extends AppCommand
                     $this->metrics[$seriesId] = $metric;
                     continue;
                 }
-            } catch (NotFoundException $e) {}
+            } catch (NotFoundException $e) {
+            }
 
             // Create missing metric
             $this->io->out('Adding ' . $seriesId . ' to metrics table');
@@ -551,6 +552,7 @@ class UpdateStatsCommand extends AppCommand
     private function markReleasesImported(string $seriesId)
     {
         $metric = $this->metrics[$seriesId];
+        /** @var \Cake\ORM\ResultSet|array $releases */
         $releases = $this->releasesTable
             ->find('currentAndPast')
             ->where([
@@ -688,7 +690,7 @@ class UpdateStatsCommand extends AppCommand
      * This will be NULL unless if the --only-new option is in use and there's a "most recent statistic" to use to
      * determine the earliest date to request statistics for.
      *
-     * @param \App\Model\Entity\Metric $metric
+     * @param \App\Model\Entity\Metric $metric Metric entity to find associated an statistic date for
      * @return void
      */
     private function setStartDate(Metric $metric): void

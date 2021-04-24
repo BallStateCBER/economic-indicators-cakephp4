@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use Cake\Event\EventInterface;
+use Cake\Http\Response;
 
 /**
  * Error Handling Controller
@@ -29,6 +30,7 @@ class ErrorController extends AppController
      * Initialization hook method.
      *
      * @return void
+     * @throws \Exception
      */
     public function initialize(): void
     {
@@ -41,7 +43,7 @@ class ErrorController extends AppController
      * @param \Cake\Event\EventInterface $event Event.
      * @return \Cake\Http\Response|null|void
      */
-    public function beforeFilter(EventInterface $event): ?\Cake\Http\Response
+    public function beforeFilter(EventInterface $event): ?Response
     {
     }
 
@@ -51,7 +53,7 @@ class ErrorController extends AppController
      * @param \Cake\Event\EventInterface $event Event.
      * @return \Cake\Http\Response|null|void
      */
-    public function beforeRender(EventInterface $event): ?\Cake\Http\Response
+    public function beforeRender(EventInterface $event): ?Response
     {
         parent::beforeRender($event);
 
@@ -64,7 +66,7 @@ class ErrorController extends AppController
      * @param \Cake\Event\EventInterface $event Event.
      * @return \Cake\Http\Response|null|void
      */
-    public function afterFilter(EventInterface $event): ?\Cake\Http\Response
+    public function afterFilter(EventInterface $event): ?Response
     {
     }
 }

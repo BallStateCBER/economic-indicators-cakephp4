@@ -117,7 +117,7 @@ class MetricsTable extends Table
         $seriesIds = array_keys($endpointGroup['endpoints']);
         $metric = $this->findBySeriesId($seriesIds[0])->first();
         if (!$metric) {
-            throw new InternalErrorException("Metric with seriesID {$seriesIds[0]} not found");
+            throw new InternalErrorException("Metric with seriesID $seriesIds[0] not found");
         }
 
         return $metric;
