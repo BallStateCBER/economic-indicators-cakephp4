@@ -115,8 +115,7 @@ class UpdateStatsCommand extends AppCommand
             ($args->getOption('ignore-lock') ? ' --ignore-lock' : null)
         );
 
-        $endpointGroups = EndpointGroups::getAll();
-        foreach ($endpointGroups as $endpointGroup) {
+        foreach (EndpointGroups::getAll() as $endpointGroup) {
             $io->info($endpointGroup['title']);
             Slack::sendMessage('Processing ' . $endpointGroup['title']);
             $this->loadMetrics($endpointGroup);
