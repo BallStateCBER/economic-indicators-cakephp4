@@ -744,6 +744,12 @@ class EndpointGroups
         ],
     ];
 
+    public const INDIANA_GDP = [
+        'title' => 'Indiana GDP',
+        'cacheKey' => 'indiana_gdp',
+        'endpoints' => ['INNGSP' => 'Total Gross Domestic Product for Indiana'],
+    ];
+
     /**
      * Returns an array of all endpoint groups
      *
@@ -752,6 +758,7 @@ class EndpointGroups
     public static function getAll(): array
     {
         return [
+            'indiana-gdp' => self::INDIANA_GDP,
             'housing-starts' => self::HOUSING_STARTS,
             'vehicle-sales' => self::VEHICLE_SALES,
             'retail-food-services' => self::RETAIL_FOOD_SERVICES,
