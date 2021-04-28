@@ -83,7 +83,7 @@ class MetricsTable extends Table
 
         $validator
             ->scalar('frequency')
-            ->maxLength('frequency', 20)
+            ->maxLength('frequency', 100)
             ->requirePresence('frequency', 'create')
             ->notEmptyString('frequency');
 
