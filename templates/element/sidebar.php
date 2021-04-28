@@ -44,6 +44,9 @@ $inLinks = [
     'employment-by-sector' => 'Employment by Sector',
     'earnings' => 'Weekly Earnings',
     'indiana-gdp' => 'State GDP',
+    'indiana-house-prices' => 'House Prices',
+    'indiana-labor-force' => 'Labor Force',
+    'indiana-unemployment-claims' => 'Unemployment Claims',
 ];
 asort($inLinks);
 

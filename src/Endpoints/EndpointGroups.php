@@ -747,7 +747,49 @@ class EndpointGroups
     public const INDIANA_GDP = [
         'title' => 'Indiana GDP',
         'cacheKey' => 'indiana_gdp',
-        'endpoints' => ['INNGSP' => 'Total Gross Domestic Product for Indiana'],
+        'endpoints' => [
+            'INNGSP' => 'Nominal GDP',
+            'INRGSP' => 'Real GDP',
+            'INAGRRQGSP' => 'Real GDP Agriculture, Forestry, Fishing and Hunting',
+            'INMINRQGSP' => 'Real GDP Mining',
+            'INCONSTRQGSP' => 'Real GDP Construction',
+            'INMANRQGSP' => 'Real GDP Manufacturing',
+            'INWHOLERQGSP' => 'Real GDP Wholesale trade',
+            'INRETAILRQGSP' => 'Real GDP Retail trade',
+            'INHLTHSOCASSRQGSP' => 'Real GDP Educational services, health care and social assistance',
+            'INARTENTRECRQGSP' => 'Real GDP Arts, entertainment, and recreation',
+            'INACCOMDRQGSP' => 'Real GDP Accommodation, and food services',
+            'ININFORQGSP' => 'Real GDP Information services',
+            'INTRANSWARERQGSP' => 'Real GDP Transportation and warehousing',
+            'INUTILRQGSP' => 'Real GDP Utilities',
+            'INFININSRQGSP' => 'Real GDP Finance and insurance',
+            'INRERENTLEARQGSP' => 'Real GDP Real estate and rental and leasing',
+            'INPROBUSRQGSP' => 'Real GDP Professional, scientific, and technical services',
+            'INMNGCOENTPRRQGSP' => 'Real GDP Management of companies and enterprises',
+            'INADMINWASTRQGSP' => 'Real GDP Administrative and waste management services',
+            'INOTHSERVERQGSP' => 'Real GDP Other services',
+        ],
+    ];
+
+    public const INDIANA_HOUSE_PRICE = [
+        'title' => 'Indiana House Price Index',
+        'cacheKey' => 'indiana_house_price',
+        'endpoints' => ['INSTHPI' => 'House price index'],
+    ];
+
+    public const INDIANA_LABOR_FORCE = [
+        'title' => 'Indiana Labor Force Participation Rate',
+        'cacheKey' => 'indiana_labor_force',
+        'endpoints' => ['LBSSA18' => 'Labor force participation rate'],
+    ];
+
+    public const INDIANA_UNEMPLOYMENT_CLAIMS = [
+        'title' => 'Indiana Unemployment Claims',
+        'cacheKey' => 'indiana_unemployment_claims',
+        'endpoints' => [
+            'INICLAIMS' => 'Unemployment claims - Initial claims',
+            'INCCLAIMS' => 'Unemployment claims - Continued claims',
+        ],
     ];
 
     /**
@@ -783,6 +825,9 @@ class EndpointGroups
             'housing-indicators' => self::HOUSING_INDICATORS,
             'income-by-county' => self::PERSONAL_INCOME_BY_COUNTY,
             'population-by-county' => self::POPULATION_BY_COUNTY,
+            'indiana-house-prices' => self::INDIANA_HOUSE_PRICE,
+            'indiana-labor-force' => self::INDIANA_LABOR_FORCE,
+            'indiana-unemployment-claims' => self::INDIANA_UNEMPLOYMENT_CLAIMS,
         ];
     }
 
