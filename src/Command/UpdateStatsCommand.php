@@ -119,6 +119,7 @@ class UpdateStatsCommand extends AppCommand
         $i = 1;
         foreach ($endpointGroups as $endpointGroup) {
             $this->toConsoleAndSlack("{$endpointGroup['title']} ($i/$groupsCount)", 'info');
+            $i++;
             $this->loadMetrics($endpointGroup);
             $groupUpdated = false;
 
