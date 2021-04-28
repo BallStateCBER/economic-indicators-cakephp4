@@ -12,6 +12,7 @@ use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Database\Expression\QueryExpression;
+use Cake\Datasource\ResultSetInterface;
 use Cake\I18n\FrozenDate;
 use Cake\I18n\FrozenTime;
 use Cake\ORM\TableRegistry;
@@ -80,12 +81,16 @@ class UpdateReleaseDatesCommand extends AppCommand
                 $progress = sprintf('(%s/%s)', $k + 1, $groupsCount);
                 $this->io->info(sprintf('%s %s', $endpointGroup['title'], $progress));
                 foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
-                    Slack::sendMessage($endpointGroup['title'] . ': ' . $name);
                     $releaseId = $this->getReleaseId($seriesId, $name);
                     $releaseDates = $this->getUpcomingReleaseDates($releaseId);
                     $metric = $this->metricsTable->getFromSeriesId($seriesId);
-                    $this->removeInvalidReleases($releaseDates, $metric->id);
-                    $this->addMissingReleases($releaseDates, $metric->id);
+                    $invalidReleases = $this->getInvalidReleases($releaseDates, $metric->id);
+                    $missingReleases = $this->getMissingReleaseDates($releaseDates, $metric->id);
+                    if ($invalidReleases || $missingReleases) {
+                        $this->toConsoleAndSlack($endpointGroup['title'] . ': ' . $name);
+                        $this->removeInvalidReleases($invalidReleases);
+                        $this->addMissingReleases($missingReleases);
+                    }
                 }
                 $this->io->out();
             }
@@ -165,18 +170,17 @@ class UpdateReleaseDatesCommand extends AppCommand
     }
 
     /**
-     * Removes any of this metric's upcoming releases that aren't included in $releaseDates
+     * Returns any of this metric's upcoming releases that aren't included in $releaseDates
      *
-     * This is meant to prevent invalid dates from lingering in the database after data sources change a release date
-     *
-     * @param string[] $releaseDates An array of YYYY-MM-DD date strings
+     * @param string[] $releaseDates An array of YYYY-MM-DD date strings representing valid release dates
      * @param int $metricId Metric ID
-     * @return void
+     * @return \Cake\Datasource\ResultSetInterface|\App\Model\Entity\Release[]
      */
-    private function removeInvalidReleases(array $releaseDates, int $metricId)
+    private function getInvalidReleases(array $releaseDates, int $metricId)
     {
         $today = new FrozenDate();
-        $invalidReleases = $this->releasesTable
+
+        return $this->releasesTable
             ->find()
             ->where([
                 'metric_id' => $metricId,
@@ -190,7 +194,18 @@ class UpdateReleaseDatesCommand extends AppCommand
                 },
             ])
             ->all();
+    }
 
+    /**
+     * Removes the specified release dates from the metric
+     *
+     * This is meant to prevent invalid dates from lingering in the database after data sources change a release date
+     *
+     * @param \Cake\Datasource\ResultSetInterface|\App\Model\Entity\Release[] $invalidReleases A set of releases
+     * @return void
+     */
+    private function removeInvalidReleases(ResultSetInterface $invalidReleases)
+    {
         if (!$invalidReleases->count()) {
             return;
         }
@@ -198,25 +213,25 @@ class UpdateReleaseDatesCommand extends AppCommand
         $this->toConsoleAndSlack('- Removing release dates that are no longer valid');
         foreach ($invalidReleases as $release) {
             $this->toConsoleAndSlack(sprintf(
-                '   Release #%s (%s)',
+                '  Release #%s (%s)',
                 $release->id,
                 $release->date,
             ));
             if (!$this->releasesTable->delete($release)) {
-                $this->toConsoleAndSlack('There was an error removing that release. Details:', 'error');
+                $this->toConsoleAndSlack('  There was an error removing that release. Details:', 'error');
                 $this->toConsoleAndSlack(print_r($release->getErrors(), true));
             }
         }
     }
 
     /**
-     * Adds records to the releases table if they aren't already present
+     * Returns an array of Release entities that should be added to the database
      *
      * @param string[] $releaseDates An array of YYYY-MM-DD date strings
      * @param int $metricId Metric ID
-     * @return void
+     * @return \App\Model\Entity\Release[]
      */
-    private function addMissingReleases(array $releaseDates, int $metricId)
+    private function getMissingReleaseDates(array $releaseDates, int $metricId)
     {
         $newReleases = [];
         foreach ($releaseDates as $date) {
@@ -231,20 +246,29 @@ class UpdateReleaseDatesCommand extends AppCommand
             $newReleases[] = $this->releasesTable->newEntity($data);
         }
 
-        if (!$newReleases) {
-            $this->io->out('- No new releases to add');
+        return $newReleases;
+    }
 
+    /**
+     * Adds records to the releases table if they aren't already present
+     *
+     * @param \Cake\Datasource\ResultSetInterface|\App\Model\Entity\Release[] $releases A set of releases
+     * @return void
+     */
+    private function addMissingReleases(ResultSetInterface | array $releases)
+    {
+        if (!$releases) {
             return;
         }
 
         $this->toConsoleAndSlack(sprintf(
             '- Adding new release %s',
-            count($newReleases) > 1 ? 'dates' : 'date'
+            count($releases) > 1 ? 'dates' : 'date'
         ));
-        foreach ($newReleases as $release) {
-            $this->toConsoleAndSlack('   ' . $release->date->format('Y-m-d'));
+        foreach ($releases as $release) {
+            $this->toConsoleAndSlack('  ' . $release->date->format('Y-m-d'));
             if (!$this->releasesTable->save($release)) {
-                $this->toConsoleAndSlack('There was an error saving that release. Details:', 'error');
+                $this->toConsoleAndSlack('  There was an error saving that release. Details:', 'error');
                 $this->toConsoleAndSlack(print_r($release->getErrors(), true));
             }
         }
