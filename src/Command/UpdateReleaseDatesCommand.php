@@ -6,7 +6,6 @@ namespace App\Command;
 use App\Endpoints\EndpointGroups;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\ReleasesTable;
-use App\Slack\Slack;
 use Cake\Cache\Cache;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;

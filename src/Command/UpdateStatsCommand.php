@@ -8,7 +8,6 @@ use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\ReleasesTable;
 use App\Model\Table\StatisticsTable;
-use App\Slack\Slack;
 use Cake\Cache\Cache;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;

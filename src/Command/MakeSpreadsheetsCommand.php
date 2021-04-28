@@ -7,7 +7,6 @@ use App\Endpoints\EndpointGroups;
 use App\Model\Entity\Spreadsheet;
 use App\Model\Table\SpreadsheetsTable;
 use App\Model\Table\StatisticsTable;
-use App\Slack\Slack;
 use App\Spreadsheet\SpreadsheetSingleDate;
 use App\Spreadsheet\SpreadsheetTimeSeries;
 use Cake\Console\Arguments;
