@@ -117,10 +117,9 @@ class UpdateStatsCommand extends AppCommand
 
         $endpointGroups = EndpointGroups::getAll();
         $groupsCount = count($endpointGroups);
-        foreach ($endpointGroups as $k => $endpointGroup) {
-            $progress = sprintf('(%s/%s)', $k + 1, $groupsCount);
-            $io->info(sprintf('%s %s', $endpointGroup['title'], $progress));
-            $this->toSlack(sprintf('Processing %s %s', $endpointGroup['title'], $progress));
+        $i = 1;
+        foreach ($endpointGroups as $endpointGroup) {
+            $this->toConsoleAndSlack("{$endpointGroup['title']} ($i/$groupsCount)", 'info');
             $this->loadMetrics($endpointGroup);
             $groupUpdated = false;
 

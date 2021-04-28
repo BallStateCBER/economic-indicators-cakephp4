@@ -82,8 +82,9 @@ class UpdateReleaseDatesCommand extends AppCommand
             $this->releaseApi = $this->api->factory('release');
             $endpointGroups = EndpointGroups::getAll();
             $groupsCount = count($endpointGroups);
-            foreach ($endpointGroups as $k => $endpointGroup) {
-                $progress = sprintf('(%s/%s)', $k + 1, $groupsCount);
+            $i = 1;
+            foreach ($endpointGroups as $endpointGroup) {
+                $progress = sprintf('(%s/%s)', $i, $groupsCount);
                 $this->io->info(sprintf('%s %s', $endpointGroup['title'], $progress));
                 foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
                     $releaseId = $this->getReleaseId($seriesId, $name);
@@ -97,6 +98,7 @@ class UpdateReleaseDatesCommand extends AppCommand
                         $this->addMissingReleases($missingReleases);
                     }
                 }
+                $i++;
                 $this->io->out();
             }
         }
