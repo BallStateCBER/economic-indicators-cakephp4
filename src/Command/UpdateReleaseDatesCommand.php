@@ -87,12 +87,13 @@ class UpdateReleaseDatesCommand extends AppCommand
                 $progress = sprintf('(%s/%s)', $i, $groupsCount);
                 $this->io->info(sprintf('%s %s', $endpointGroup['title'], $progress));
                 foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
+                    $this->io->out($name);
                     $releaseId = $this->getReleaseId($seriesId, $name);
                     $releaseDates = $this->getUpcomingReleaseDates($releaseId);
                     $metric = $this->metricsTable->getFromSeriesId($seriesId);
                     $invalidReleases = $this->getInvalidReleases($releaseDates, $metric->id);
                     $missingReleases = $this->getMissingReleaseDates($releaseDates, $metric->id);
-                    if ($invalidReleases || $missingReleases) {
+                    if ($invalidReleases->count() || $missingReleases) {
                         $this->toConsoleAndSlack($endpointGroup['title'] . ': ' . $name);
                         $this->removeInvalidReleases($invalidReleases);
                         $this->addMissingReleases($missingReleases);
@@ -123,7 +124,6 @@ class UpdateReleaseDatesCommand extends AppCommand
      */
     private function getReleaseId(string $seriesId, string $name): int
     {
-        $this->io->out($name);
         $this->io->out('- Fetching release ID');
         for ($attempts = 1 + $this->apiRetryCount; $attempts > 0; $attempts--) {
             $finalAttempt = $attempts == 1;
