@@ -109,7 +109,7 @@ class UpdateStatsCommand extends AppCommand
         $cacheUpdater = new UpdateCacheCommand($io);
         $spreadsheetWriter = new MakeSpreadsheetsCommand($io);
         $this->onlyNew = (bool)$args->getOption('only-new');
-        Slack::sendMessage(
+        $this->toSlack(
             'Running update_stats' .
             ($this->onlyNew ? ' --only-new' : null) .
             ($args->getOption('ignore-lock') ? ' --ignore-lock' : null)
@@ -120,7 +120,7 @@ class UpdateStatsCommand extends AppCommand
         foreach ($endpointGroups as $k => $endpointGroup) {
             $progress = sprintf('(%s/%s)', $k + 1, $groupsCount);
             $io->info(sprintf('%s %s', $endpointGroup['title'], $progress));
-            Slack::sendMessage(sprintf('Processing %s %s', $endpointGroup['title'], $progress));
+            $this->toSlack(sprintf('Processing %s %s', $endpointGroup['title'], $progress));
             $this->loadMetrics($endpointGroup);
             $groupUpdated = false;
 
@@ -264,8 +264,8 @@ class UpdateStatsCommand extends AppCommand
                 $response = $api->get($parameters);
             } catch (fred_api_exception $e) {
                 if ($finalAttempt) {
-                    Slack::sendMessage('Exception encountered on final re-attempt to get endpoint metadata:');
-                    Slack::sendMessage($e->getMessage());
+                    $this->toSlack('Exception encountered on final re-attempt to get endpoint metadata:');
+                    $this->toSlack($e->getMessage());
                     throw $e;
                 }
 
@@ -280,7 +280,7 @@ class UpdateStatsCommand extends AppCommand
 
             if ($finalAttempt) {
                 $msg = 'Metadata could not be retrieved for series ' . $this->apiParameters['series_id'];
-                Slack::sendMessage($msg);
+                $this->toSlack($msg);
                 throw new NotFoundException($msg);
             }
 
@@ -316,8 +316,8 @@ class UpdateStatsCommand extends AppCommand
             // Handle error fetching observations
             } catch (fred_api_exception $e) {
                 if ($finalAttempt) {
-                    Slack::sendMessage('Exception encountered on final re-attempt to fetch observations:');
-                    Slack::sendMessage($e->getMessage());
+                    $this->toSlack('Exception encountered on final re-attempt to fetch observations:');
+                    $this->toSlack($e->getMessage());
                     throw $e;
                 }
 
@@ -381,7 +381,7 @@ class UpdateStatsCommand extends AppCommand
      */
     private function updateEndpoint(string $group, string $seriesId, string $name): void
     {
-        Slack::sendMessage("- Updating stats for $group: $name");
+        $this->toSlack("- Updating stats for $group: $name");
         $this->io->out('- Retrieving from API...');
         $this->io->out("- $group: $name metadata");
 

@@ -51,6 +51,11 @@ class UpdateReleaseDatesCommand extends AppCommand
             'help' => 'Only refresh the cache',
             'boolean' => true,
         ]);
+        $parser->addOption('mute-slack', [
+            'short' => 'm',
+            'help' => 'Don\'t send any messages to Slack',
+            'boolean' => true,
+        ]);
 
         return $parser;
     }
@@ -69,7 +74,7 @@ class UpdateReleaseDatesCommand extends AppCommand
         $start = new FrozenTime();
         parent::execute($args, $io);
         $this->releasesTable = TableRegistry::getTableLocator()->get('Releases');
-        Slack::sendMessage('Updating release dates');
+        $this->toSlack('Updating release dates');
 
         if (!$args->getOption('only-cache')) {
             $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');

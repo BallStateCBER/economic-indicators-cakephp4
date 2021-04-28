@@ -6,6 +6,7 @@ namespace App\Command;
 use App\Slack\Slack;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Cake\Http\Exception\InternalErrorException;
 use DataCenter\Command\AppCommand as DataCenterCommand;
@@ -39,6 +40,11 @@ abstract class AppCommand extends DataCenterCommand
     protected float $waitAfterError = 10;
 
     /**
+     * @var bool If TRUE (set by --mute-slack option), prevents sending any messages to Slack
+     */
+    protected bool $muteSlack = false;
+
+    /**
      * UpdateStatsCommand constructor.
      */
     public function __construct()
@@ -59,6 +65,25 @@ abstract class AppCommand extends DataCenterCommand
     }
 
     /**
+     * Hook method for defining this command's option parser.
+     *
+     * @see https://book.cakephp.org/4/en/console-commands/commands.html#defining-arguments-and-options
+     * @param \Cake\Console\ConsoleOptionParser $parser The parser to be defined
+     * @return \Cake\Console\ConsoleOptionParser The built parser.
+     */
+    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    {
+        $parser = parent::buildOptionParser($parser);
+        $parser->addOption('mute-slack', [
+            'short' => 'm',
+            'help' => 'Don\'t send any messages to Slack',
+            'boolean' => true,
+        ]);
+
+        return $parser;
+    }
+
+    /**
      * Implement this method with your command's logic.
      *
      * @param \Cake\Console\Arguments $args The command arguments.
@@ -68,6 +93,7 @@ abstract class AppCommand extends DataCenterCommand
     public function execute(Arguments $args, ConsoleIo $io)
     {
         parent::execute($args, $io);
+        $this->muteSlack = (bool)$args->getOption('mute-slack');
     }
 
     /**
@@ -173,6 +199,19 @@ abstract class AppCommand extends DataCenterCommand
                 $this->io->out($text);
         }
 
-        Slack::sendMessage($text);
+        $this->toSlack($text);
+    }
+
+    /**
+     * Sends a message to Slack if the --mute-slack option is not in use
+     *
+     * @param string $text Message to send
+     * @return void
+     */
+    protected function toSlack(string $text)
+    {
+        if (!$this->muteSlack) {
+            Slack::sendMessage($text);
+        }
     }
 }

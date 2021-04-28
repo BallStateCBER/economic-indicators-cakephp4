@@ -18,6 +18,7 @@ This is the repository for the [Economic Indicators](https://indicators.cberdata
   release new data (which then becomes available to FRED, and then gets pulled into the Economic Indicators database)
 
 ## Keeping data updated
+### Commands
 - `bin/cake update_stats`
   - Run with the `--only-new` option to only check endpoints with releases on or before today that have not yet been
     imported. This only adds new stats, rather than also updating existing stats, and doesn't take very much time, so
@@ -35,6 +36,10 @@ This is the repository for the [Economic Indicators](https://indicators.cberdata
 - `bin/cake update_cache` can be run manually to rebuild the cache of query results, though
   `bin/cake update_stats` updates the cache automatically, if appropriate
     - Run with the `--verbose` option to output information about memory usage
+- All of the above commands additionally have the `--mute-slack` option, which if used prevents messages from being sent
+  to Slack. This is useful when executing these commands on your own development machine rather than on the production
+  server.
+### Notes
 - On the production server, replace `bin/cake` with `php bin/cake.php`
 - Note that the FRED API occasionally fails to return a valid response, in which case these scripts will re-try the same
   request a limited number of times before giving up. Those requests will then be attempted again the next time an

@@ -87,7 +87,7 @@ class MakeSpreadsheetsCommand extends AppCommand
         $count = count($endpointGroups);
         $this->showMemoryUsage();
         $i = 1;
-        Slack::sendMessage('Regenerating spreadsheets');
+        $this->toSlack('Regenerating spreadsheets');
         foreach ($endpointGroups as $endpointGroup) {
             $io->info(sprintf(
                 '%s (%s/%s)',
@@ -112,7 +112,7 @@ class MakeSpreadsheetsCommand extends AppCommand
      */
     public function makeSpreadsheetsForGroup(array $endpointGroup): void
     {
-        Slack::sendMessage('- Creating spreadsheets for ' . $endpointGroup['title']);
+        $this->toSlack('- Creating spreadsheets for ' . $endpointGroup['title']);
         foreach ([false, true] as $isTimeSeries) {
             try {
                 $newFilename = $this->statisticsTable->getFilename($endpointGroup, $isTimeSeries);
