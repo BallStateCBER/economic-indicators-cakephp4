@@ -75,8 +75,10 @@ class UpdateReleaseDatesCommand extends AppCommand
             $this->seriesApi = $this->api->factory('series');
             $this->releaseApi = $this->api->factory('release');
             $endpointGroups = EndpointGroups::getAll();
-            foreach ($endpointGroups as $endpointGroup) {
-                $this->io->info($endpointGroup['title']);
+            $groupsCount = count($endpointGroups);
+            foreach ($endpointGroups as $k => $endpointGroup) {
+                $progress = sprintf('(%s/%s)', $k + 1, $groupsCount);
+                $this->io->info(sprintf('%s %s', $endpointGroup['title'], $progress));
                 foreach ($endpointGroup['endpoints'] as $seriesId => $name) {
                     Slack::sendMessage($endpointGroup['title'] . ': ' . $name);
                     $releaseId = $this->getReleaseId($seriesId, $name);
