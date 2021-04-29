@@ -140,6 +140,6 @@ class UpdateCacheCommand extends AppCommand
         }
         $peakMemoryKb = number_format(round(memory_get_peak_usage() / 1024));
         $currentMemoryKb = number_format(round(memory_get_usage() / 1024));
-        $this->io->info(" - Current and peak memory usage: {$currentMemoryKb}KB, {$peakMemoryKb}KB");
+        $this->io->info("- Current and peak memory usage: {$currentMemoryKb}KB, {$peakMemoryKb}KB");
     }
 }
