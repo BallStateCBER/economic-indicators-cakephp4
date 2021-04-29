@@ -542,6 +542,7 @@ class UpdateStatsCommand extends AppCommand
         $this->lastSlackMsgTime = null;
         $i = 1;
         foreach ($observations as $observation) {
+            $this->updateLock();
             $percentDone = round($i / $observationCount);
             $this->sendStatLoopSlackMsg("- Saving stats ($percentDone% completed)");
             $this->saveStatistic(
