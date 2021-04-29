@@ -522,7 +522,7 @@ class EndpointGroups
     public const GOLD = [
         'title' => 'Price of Gold',
         'cacheKey' => 'gold',
-        'endpoints' => ['WTISPLC' => 'Price of Gold'],
+        'endpoints' => ['GOLDPMGBD228NLBM' => 'Price of Gold'],
     ];
 
     public const OIL = [
