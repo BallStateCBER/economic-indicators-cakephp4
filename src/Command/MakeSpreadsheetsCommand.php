@@ -78,6 +78,7 @@ class MakeSpreadsheetsCommand extends AppCommand
      */
     public function execute(Arguments $args, ConsoleIo $io)
     {
+        parent::execute($args, $io);
         $start = new FrozenTime();
         $this->io = $io;
         $this->progress = $io->helper('Progress');
