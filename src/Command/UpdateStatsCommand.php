@@ -42,6 +42,7 @@ class UpdateStatsCommand extends AppCommand
     private ?FrozenTime $lastSlackMsgTime;
     private array $apiParameters;
     private array $metrics;
+    private bool $alertAdminOnStall = false;
     private bool $auto = false;
     private bool $onlyNew;
     private const UNITS_CHANGE_FROM_1_YEAR_AGO = 'ch1';
@@ -52,7 +53,7 @@ class UpdateStatsCommand extends AppCommand
     private ReleasesTable $releasesTable;
     private StatisticsTable $statisticsTable;
     private string $timeBetweenAutoFullUpdates = '1 day';
-    private string | null $alertAdminIfDurationExceeds = '2 hours';
+    private string | null $clearLockIfDurationExceeds = '30 minutes';
     public const CACHE_CONFIG = 'update_stats';
 
     /**
@@ -677,13 +678,18 @@ class UpdateStatsCommand extends AppCommand
 
         // Allow this script to proceed if it appears that the last process stalled, but email the administrator
         $runningObj = new FrozenTime($running);
-        if ($this->alertAdminIfDurationExceeds && !$runningObj->wasWithinLast($this->alertAdminIfDurationExceeds)) {
+        if ($this->clearLockIfDurationExceeds && !$runningObj->wasWithinLast($this->clearLockIfDurationExceeds)) {
             $this->clearLock();
             $this->toConsoleAndSlack(
-                "Previous process was running $this->alertAdminIfDurationExceeds ago and never completed. " .
-                'Alerting administrator and clearing lock.',
+                "Previous process was running $this->clearLockIfDurationExceeds ago and never completed. " .
+                ($this->alertAdminOnStall ? 'Alerting administrator and clearing lock.' : 'Clearing lock.') .
                 'warning',
             );
+
+            if (!$this->alertAdminOnStall) {
+                return;
+            }
+
             $mailer = new Mailer('default');
             if (Configure::read('debug')) {
                 $mailer->setTransport(new DebugTransport());
@@ -692,7 +698,7 @@ class UpdateStatsCommand extends AppCommand
                 ->setTo(Configure::read('admin_email'))
                 ->setSubject('Script update_stats stalled')
                 ->deliver(
-                    "The update_stats script was running over $this->alertAdminIfDurationExceeds ago and has " .
+                    "The update_stats script was running over $this->clearLockIfDurationExceeds ago and has " .
                     'not finished or reported progress since then. It may have been aborted due to an error or ' .
                     'manually terminated. The process lock has been cleared and a new update process has started.'
                 );
