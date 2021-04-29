@@ -790,7 +790,11 @@ class UpdateStatsCommand extends AppCommand
     {
         $this->auto = (bool)$args->getOption('auto');
 
-        if ($this->auto && $args->getOption('only-new')) {
+        if (!$this->auto) {
+            return;
+        }
+
+        if ($args->getOption('only-new')) {
             $this->toConsoleAndSlack('Cannot run update_stats with both --auto and --only-new modes active', 'error');
             exit;
         }
