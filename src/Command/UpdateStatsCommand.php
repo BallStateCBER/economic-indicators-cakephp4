@@ -568,20 +568,22 @@ class UpdateStatsCommand extends AppCommand
         }
 
         $count = count($releases);
-        $this->toConsoleAndSlack(sprintf(
-            '- Recording %s as having been imported',
-            $count == 1 ? 'last release' : "$count releases",
-        ));
-        foreach ($releases as $release) {
-            $release = $this->releasesTable->patchEntity($release, ['imported' => true]);
-            if (!$this->releasesTable->save($release)) {
-                $this->toConsoleAndSlack(
-                    'There was an error marking that release as having been imported. Details:',
-                    'error'
-                );
-                $this->toConsoleAndSlack(print_r($release->getErrors(), true));
-                $this->shutdown();
-                exit;
+        if ($count) {
+            $this->toConsoleAndSlack(sprintf(
+                '- Recording %s as having been imported',
+                $count == 1 ? 'last release' : "$count releases",
+            ));
+            foreach ($releases as $release) {
+                $release = $this->releasesTable->patchEntity($release, ['imported' => true]);
+                if (!$this->releasesTable->save($release)) {
+                    $this->toConsoleAndSlack(
+                        'There was an error marking that release as having been imported. Details:',
+                        'error'
+                    );
+                    $this->toConsoleAndSlack(print_r($release->getErrors(), true));
+                    $this->shutdown();
+                    exit;
+                }
             }
         }
     }
