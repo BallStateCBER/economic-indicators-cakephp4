@@ -519,12 +519,6 @@ class EndpointGroups
         ],
     ];
 
-    public const GOLD = [
-        'title' => 'Price of Gold',
-        'cacheKey' => 'gold',
-        'endpoints' => ['GOLDPMGBD228NLBM' => 'Price of Gold'],
-    ];
-
     public const OIL = [
         'title' => 'Price of Oil',
         'cacheKey' => 'oil',
@@ -807,7 +801,6 @@ class EndpointGroups
             'earnings' => self::EARNINGS,
             'employment-by-sector' => self::EMP_BY_SECTOR,
             'gdp' => self::GDP,
-            'gold' => self::GOLD,
             'housing-indicators' => self::HOUSING_INDICATORS,
             'housing-starts' => self::HOUSING_STARTS,
             'iei' => self::INFLATION_EXPECTATION_INDEX,

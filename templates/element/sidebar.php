@@ -33,7 +33,6 @@ $usLinks = [
     'Prices' => [
         'cpi' => 'Consumer Price Index',
         'iei' => 'Inflation Expectation Index',
-        'gold' => 'Price of Gold',
         'oil' => 'Price of Oil',
     ],
 ];
