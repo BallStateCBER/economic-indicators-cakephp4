@@ -130,8 +130,8 @@ class UpdateStatsCommand extends AppCommand
 
         $this->toSlack(
             'Running update_stats' .
-            ($this->onlyNew ? ' --only-new' : null) .
             ($this->auto ? ' --auto' : null) .
+            (!$this->auto && $this->onlyNew ? ' --only-new' : null) .
             ($args->getOption('ignore-lock') ? ' --ignore-lock' : null)
         );
 
