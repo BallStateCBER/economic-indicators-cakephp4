@@ -23,8 +23,10 @@ This is the repository for the [Economic Indicators](https://indicators.cberdata
   - Run with the `--only-new` option to only check endpoints with releases on or before today that have not yet been
     imported. This only adds new stats, rather than also updating existing stats, and doesn't take very much time, so
     it can be safely automated to run **every three hours**.
-  - Run *without* the `--only-new` option to pull all available statistics from FRED and to check for any updates to
-    already-imported data. This may take many hours, so it's recommended that it be automated to run **monthly**.
+  - Run *without* the `--only-new` option to run a "full" update, which pulls all available statistics from FRED and
+    checks for any updates to already-imported data.
+  - Run with the `--auto` option to have the script choose between an `--only-new` update and a full update based on how
+    long ago the last full update took place.
   - Run with the `--ignore-lock` option to either allow multiple update processes to take place concurrently
     (not recommended) or to fix a process lock that failed to be cleared by the previous process
 - `bin/cake update_release_dates` should be automated to run **daily**

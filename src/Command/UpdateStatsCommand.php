@@ -42,6 +42,7 @@ class UpdateStatsCommand extends AppCommand
     private ?FrozenTime $lastSlackMsgTime;
     private array $apiParameters;
     private array $metrics;
+    private bool $auto = false;
     private bool $onlyNew;
     private const UNITS_CHANGE_FROM_1_YEAR_AGO = 'ch1';
     private const UNITS_PERCENT_CHANGE_FROM_1_YEAR_AGO = 'pc1';
@@ -50,6 +51,7 @@ class UpdateStatsCommand extends AppCommand
     private MetricsTable $metricsTable;
     private ReleasesTable $releasesTable;
     private StatisticsTable $statisticsTable;
+    private string $timeBetweenAutoFullUpdates = '1 day';
     private string | null $alertAdminIfDurationExceeds = '2 hours';
     public const CACHE_CONFIG = 'update_stats';
 
@@ -95,6 +97,11 @@ class UpdateStatsCommand extends AppCommand
                 . 'a problem with the process lock',
             'boolean' => true,
         ]);
+        $parser->addOption('auto', [
+            'short' => 'a',
+            'help' => 'Activates the --only-new option if the last full update was > 1 day ago',
+            'boolean' => true,
+        ]);
 
         return $parser;
     }
@@ -118,9 +125,12 @@ class UpdateStatsCommand extends AppCommand
         $cacheUpdater = new UpdateCacheCommand($io);
         $spreadsheetWriter = new MakeSpreadsheetsCommand($io);
         $this->onlyNew = (bool)$args->getOption('only-new');
+        $this->initAutoMode($args);
+
         $this->toSlack(
             'Running update_stats' .
             ($this->onlyNew ? ' --only-new' : null) .
+            ($this->auto ? ' --auto' : null) .
             ($args->getOption('ignore-lock') ? ' --ignore-lock' : null)
         );
 
@@ -172,6 +182,7 @@ class UpdateStatsCommand extends AppCommand
 
         $timeAgo = $start->timeAgoInWords();
         $this->toConsoleAndSlack("Finished (started $timeAgo)", 'success');
+        $this->setLastFullUpdateTime();
         $this->shutdown();
     }
 
@@ -760,5 +771,59 @@ class UpdateStatsCommand extends AppCommand
         }
 
         $this->apiParameters['observation_start'] = $mostRecentStatistic->date->format('Y-m-d');
+    }
+
+    /**
+     * Sets $this->auto and, if in auto mode, also sets $this->onlyNew
+     *
+     * @param \Cake\Console\Arguments $args Command arguments
+     * @return void
+     */
+    private function initAutoMode(Arguments $args): void
+    {
+        $this->auto = (bool)$args->getOption('auto');
+
+        if ($this->auto && $args->getOption('only-new')) {
+            $this->toConsoleAndSlack('Cannot run update_stats with both --auto and --only-new modes active', 'error');
+            exit;
+        }
+
+        $lastFullUpdate = $this->getLastFullUpdateTime();
+        $msg = $lastFullUpdate
+            ? sprintf('Last full update completed %s.', $lastFullUpdate->timeAgoInWords())
+            : 'Last full update time not recorded.';
+        if ($lastFullUpdate && $lastFullUpdate->wasWithinLast($this->timeBetweenAutoFullUpdates)) {
+            $this->toConsoleAndSlack($msg . ' Running in --only-new mode.');
+            $this->onlyNew = true;
+
+            return;
+        }
+
+
+        $this->toConsoleAndSlack($msg . ' Running full update.');
+        $this->onlyNew = false;
+    }
+
+    /**
+     * Sets the cached last_full_update time to now
+     *
+     * @return void
+     */
+    private function setLastFullUpdateTime(): void
+    {
+        if ($this->onlyNew) {
+            return;
+        }
+        Cache::write('last_full_update', new FrozenTime(), self::CACHE_CONFIG);
+    }
+
+    /**
+     * Returns the cached last_full_update time
+     *
+     * @return \Cake\I18n\FrozenTime|null
+     */
+    private function getLastFullUpdateTime()
+    {
+        return Cache::read('last_full_update', self::CACHE_CONFIG);
     }
 }
