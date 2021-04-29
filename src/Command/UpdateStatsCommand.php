@@ -682,7 +682,7 @@ class UpdateStatsCommand extends AppCommand
             $this->clearLock();
             $this->toConsoleAndSlack(
                 "Previous process was running $this->clearLockIfDurationExceeds ago and never completed. " .
-                ($this->alertAdminOnStall ? 'Alerting administrator and clearing lock.' : 'Clearing lock.') .
+                ($this->alertAdminOnStall ? 'Alerting administrator and clearing lock.' : 'Clearing lock.'),
                 'warning',
             );
 
