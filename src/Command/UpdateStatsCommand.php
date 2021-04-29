@@ -90,6 +90,7 @@ class UpdateStatsCommand extends AppCommand
             'boolean' => true,
         ]);
         $parser->addOption('ignore-lock', [
+            'short' => 'i',
             'help' => 'Allows multiple update processes to take place concurrently (not recommended unless if there\'s '
                 . 'a problem with the process lock',
             'boolean' => true,
