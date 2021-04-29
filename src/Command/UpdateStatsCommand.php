@@ -39,17 +39,26 @@ use fred_api_exception;
  */
 class UpdateStatsCommand extends AppCommand
 {
+    private ?FrozenTime $lastSlackMsgTime;
     private array $apiParameters;
     private array $metrics;
     private bool $onlyNew;
     private const UNITS_CHANGE_FROM_1_YEAR_AGO = 'ch1';
     private const UNITS_PERCENT_CHANGE_FROM_1_YEAR_AGO = 'pc1';
     private const UNITS_VALUE = 'lin';
+    private FrozenTime $timeStartedStatLoop;
     private MetricsTable $metricsTable;
     private ReleasesTable $releasesTable;
     private StatisticsTable $statisticsTable;
     private string | null $alertAdminIfDurationExceeds = '2 hours';
     public const CACHE_CONFIG = 'update_stats';
+
+    /**
+     * The frequency of updates sent to Slack while in a statistic adding/updating loop for a single endpoint
+     *
+     * @var string
+     */
+    private string $slackUpdatesEvery = '5 minutes';
 
     /**
      * UpdateStatsCommand constructor.
@@ -510,12 +519,19 @@ class UpdateStatsCommand extends AppCommand
      */
     private function saveAllStatistics(array $observations, int $metricId, int $dataTypeId)
     {
+        $observationCount = count($observations);
         $this->progress->init([
-            'total' => count($observations),
+            'total' => $observationCount,
             'width' => 40,
         ]);
         $this->progress->draw();
+
+        $this->timeStartedStatLoop = new FrozenTime();
+        $this->lastSlackMsgTime = null;
+        $i = 1;
         foreach ($observations as $observation) {
+            $percentDone = round($i / $observationCount);
+            $this->sendStatLoopSlackMsg("- Saving stats ($percentDone% completed)");
             $this->saveStatistic(
                 metricId: $metricId,
                 dataTypeId: $dataTypeId,
@@ -523,8 +539,34 @@ class UpdateStatsCommand extends AppCommand
                 value: $observation['value'],
             );
             $this->progress->increment()->draw();
+            $i++;
         }
         $this->io->overwrite('- Done');
+    }
+
+    /**
+     * Sends a message to Slack in five-minute intervals
+     *
+     * Meant to reassure anyone monitoring these messages that a long stats-updating loop is still running and has not
+     * silently crashed
+     *
+     * @param string $msg Message to send
+     * @return void
+     */
+    private function sendStatLoopSlackMsg(string $msg)
+    {
+        if ($this->muteSlack) {
+            return;
+        }
+        if ($this->timeStartedStatLoop->wasWithinLast($this->slackUpdatesEvery)) {
+            return;
+        }
+        if ($this->lastSlackMsgTime && $this->lastSlackMsgTime->wasWithinLast($this->slackUpdatesEvery)) {
+            return;
+        }
+
+        $this->toSlack($msg);
+        $this->lastSlackMsgTime = new FrozenTime();
     }
 
     /**
