@@ -15,6 +15,7 @@ use Cake\Console\ConsoleOptionParser;
 use Cake\Datasource\EntityInterface;
 use Cake\I18n\FrozenTime;
 use Cake\ORM\TableRegistry;
+use Cake\Utility\Hash;
 use Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as PhpOfficeException;
@@ -65,6 +66,11 @@ class MakeSpreadsheetsCommand extends AppCommand
             'help' => 'Output information about memory usage',
             'boolean' => true,
         ]);
+        $parser->addOption('choose', [
+            'short' => 'c',
+            'help' => 'Choose a specific endpoint group instead of cycling through all',
+            'boolean' => true,
+        ]);
 
         return $parser;
     }
@@ -83,12 +89,12 @@ class MakeSpreadsheetsCommand extends AppCommand
         $this->io = $io;
         $this->progress = $io->helper('Progress');
         $this->verbose = (bool)$args->getOption('verbose');
-        $endpointGroups = EndpointGroups::getAll();
-        $count = count($endpointGroups);
+        $selectedEndpointGroups = $this->getSelectedEndpointGroups($args);
+        $count = count($selectedEndpointGroups);
         $this->showMemoryUsage();
         $i = 1;
         $this->toSlack('Regenerating spreadsheets');
-        foreach ($endpointGroups as $endpointGroup) {
+        foreach ($selectedEndpointGroups as $endpointGroup) {
             $io->info(sprintf(
                 '%s (%s/%s)',
                 $endpointGroup['title'],
@@ -224,5 +230,33 @@ class MakeSpreadsheetsCommand extends AppCommand
                 'is_time_series' => $isTimeSeries,
             ])
             ->first();
+    }
+
+    /**
+     * Returns all endpoint groups OR an array containing the user's selection
+     *
+     * @param \Cake\Console\Arguments $args Console arguments
+     * @return array
+     */
+    private function getSelectedEndpointGroups(Arguments $args): array
+    {
+        $choose = (bool)$args->getOption('choose');
+        $allEndpointGroups = array_values(EndpointGroups::getAll());
+        $allEndpointGroups = Hash::combine($allEndpointGroups, '{n}.title', '{n}');
+        ksort($allEndpointGroups);
+        $allEndpointGroups = array_values($allEndpointGroups);
+        if (!$choose) {
+            return $allEndpointGroups;
+        }
+
+        foreach ($allEndpointGroups as $k => $endpointGroup) {
+            $this->io->out(($k + 1) . ") {$endpointGroup['title']}");
+        }
+        $count = count($allEndpointGroups);
+        do {
+            $choice = (int)$this->io->ask("Select an endpoint group: (1-$count)");
+        } while (!($choice >= 1 && $choice <= $count));
+
+        return [$allEndpointGroups[$choice - 1]];
     }
 }
