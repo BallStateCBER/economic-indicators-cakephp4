@@ -43,6 +43,8 @@ This is the repository for the [Economic Indicators](https://indicators.cberdata
 - `bin/cake update_cache` can be run manually to rebuild the cache of query results, though
   `bin/cake update_stats` updates the cache automatically, if appropriate
     - Run with the `--verbose` option to output information about memory usage
+    - Run with the `--choose` option to add/update statistics for a specific endpoint group instead of looping through
+      all endpoint groups.
 - All of the above commands additionally have the `--mute-slack` option, which if used prevents messages from being sent
   to Slack. This is useful when executing these commands on your own development machine rather than on the production
   server.

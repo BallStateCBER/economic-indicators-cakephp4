@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Endpoints\EndpointGroups;
 use App\Model\Table\ReleasesTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Cache\Cache;
@@ -57,6 +56,11 @@ class UpdateCacheCommand extends AppCommand
             'help' => 'Output information about memory usage',
             'boolean' => true,
         ]);
+        $parser->addOption('choose', [
+            'short' => 'c',
+            'help' => 'Choose a specific endpoint group instead of cycling through all',
+            'boolean' => true,
+        ]);
 
         return $parser;
     }
@@ -74,17 +78,20 @@ class UpdateCacheCommand extends AppCommand
         $this->io = $io;
         $this->progress = $io->helper('Progress');
         $this->verbose = (bool)$args->getOption('verbose');
+        $choose = (bool)$args->getOption('choose');
 
-        $this->toConsoleAndSlack('Rebuilding release calendar cache');
-        Cache::clear(ReleasesTable::CACHE_CONFIG);
-        /** @var \App\Model\Table\ReleasesTable $releasesTable */
-        $releasesTable = TableRegistry::getTableLocator()->get('Releases');
-        $releasesTable->getNextReleaseDates();
+        if (!$choose) {
+            $this->toConsoleAndSlack('Rebuilding release calendar cache');
+            Cache::clear(ReleasesTable::CACHE_CONFIG);
+            /** @var \App\Model\Table\ReleasesTable $releasesTable */
+            $releasesTable = TableRegistry::getTableLocator()->get('Releases');
+            $releasesTable->getNextReleaseDates();
+        }
 
-        $endpointGroups = EndpointGroups::getAll();
-        $count = count($endpointGroups);
+        $selectedEndpointGroups = $this->getSelectedEndpointGroups($args);
+        $count = count($selectedEndpointGroups);
         $i = 1;
-        foreach ($endpointGroups as $endpointGroup) {
+        foreach ($selectedEndpointGroups as $endpointGroup) {
             $this->toConsoleAndSlack(sprintf(
                 'Processing %s (%s/%s)',
                 $endpointGroup['title'],
