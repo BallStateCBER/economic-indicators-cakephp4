@@ -209,9 +209,10 @@ class UpdateStatsCommand extends AppCommand
 
         $this->setEndpoint($seriesId);
         $endpointMeta = $this->getEndpointMetadata();
-        $responseUpdated = $endpointMeta['@attributes']['last_updated'];
+        $seriesUpdated = new FrozenTime($endpointMeta['@attributes']['last_updated']);
+        $realtimeEnd = new FrozenTime($endpointMeta['@attributes']['realtime_end']);
 
-        return (new FrozenTime($responseUpdated))->gt($metric->last_updated);
+        return $seriesUpdated->gt($metric->last_updated) || $realtimeEnd->gt($metric->last_updated);
     }
 
     /**
@@ -440,7 +441,12 @@ class UpdateStatsCommand extends AppCommand
             dataTypeId: StatisticsTable::DATA_TYPE_PERCENT_CHANGE,
         );
 
-        $this->updateMetricUpdatedDate($metric, $endpointMeta['@attributes']['last_updated']);
+        $lastUpdated = $endpointMeta['@attributes']['last_updated'];
+        $lastUpdatedObj = new FrozenTime($lastUpdated, $this->getApiTimezone($lastUpdated));
+        $realtimeEnd = $endpointMeta['@attributes']['realtime_end'];
+        $realtimeEndObj = new FrozenTime($realtimeEnd, $this->getApiTimezone($realtimeEnd));
+        $latestDate = $lastUpdatedObj->gte($realtimeEndObj) ? $lastUpdatedObj : $realtimeEndObj;
+        $this->updateMetricUpdatedDate($metric, $latestDate);
     }
 
     /**
@@ -512,13 +518,12 @@ class UpdateStatsCommand extends AppCommand
      * Updates the last_updated value for the provided metric
      *
      * @param \App\Model\Entity\Metric $metric Metric entity
-     * @param string $lastUpdated A string representing the last_updated date
+     * @param FrozenTime $lastUpdated A time object representing when this metric's stats were last updated
      * @return void
      */
-    private function updateMetricUpdatedDate(Metric $metric, string $lastUpdated): void
+    private function updateMetricUpdatedDate(Metric $metric, FrozenTime $lastUpdated): void
     {
-        $dateObj = new FrozenTime($lastUpdated, $this->getApiTimezone($lastUpdated));
-        $this->metricsTable->patchEntity($metric, ['last_updated' => $dateObj]);
+        $this->metricsTable->patchEntity($metric, ['last_updated' => $lastUpdated]);
         if (!$this->metricsTable->save($metric)) {
             $this->toConsoleAndSlack('There was an error updating that metric. Details:', 'error');
             $this->toConsoleAndSlack(print_r($metric->getErrors(), true));
