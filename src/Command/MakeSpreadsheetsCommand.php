@@ -99,11 +99,16 @@ class MakeSpreadsheetsCommand extends AppCommand
         $this->io = $io;
         $this->progress = $io->helper('Progress');
         $this->verbose = (bool)$args->getOption('verbose');
+        $this->toSlack(
+            'Running make_spreadsheets' .
+            ($args->getOption('auto') ? ' --auto' : null) .
+            ($args->getOption('verbose') ? ' --verbose' : null) .
+            ($args->getOption('choose') ? ' --choose' : null)
+        );
         $selectedSpreadsheets = $this->getSelectedSpreadsheets($args);
         $count = count($selectedSpreadsheets);
         $this->showMemoryUsage();
         $i = 1;
-        $this->toSlack('Regenerating spreadsheets');
         foreach ($selectedSpreadsheets as $spreadsheetData) {
             $endpointGroup = $spreadsheetData['endpointGroup'];
             $spreadsheetEntity = $spreadsheetData['entity'];
@@ -119,7 +124,7 @@ class MakeSpreadsheetsCommand extends AppCommand
         }
 
         $timeAgo = $start->timeAgoInWords();
-        $this->toConsoleAndSlack("Finished (started $timeAgo)", 'success');
+        $this->toConsoleAndSlack("Finished make_spreadsheets (started $timeAgo)", 'success');
     }
 
     /**
@@ -302,8 +307,6 @@ class MakeSpreadsheetsCommand extends AppCommand
 
             return $retval;
         }
-
-        $this->toConsoleAndSlack('Running in --auto mode');
 
         // Get one spreadsheet marked as having failed file generation
         $query = $this->spreadsheetsTable->find('failedGeneration', ['wait' => $this->waitUntilRetryingGeneration]);

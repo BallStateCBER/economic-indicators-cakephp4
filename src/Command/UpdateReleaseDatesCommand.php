@@ -108,7 +108,7 @@ class UpdateReleaseDatesCommand extends AppCommand
         $this->releasesTable->getNextReleaseDates();
 
         $timeAgo = $start->timeAgoInWords();
-        $this->toConsoleAndSlack("Finished (started $timeAgo)", 'success');
+        $this->toConsoleAndSlack("Finished update_release_dates (started $timeAgo)", 'success');
     }
 
     /**

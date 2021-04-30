@@ -103,7 +103,7 @@ class UpdateCacheCommand extends AppCommand
         }
 
         $timeAgo = $start->timeAgoInWords();
-        $this->toConsoleAndSlack("Finished (started $timeAgo)", 'success');
+        $this->toConsoleAndSlack("Finished update_cache (started $timeAgo)", 'success');
     }
 
     /**
