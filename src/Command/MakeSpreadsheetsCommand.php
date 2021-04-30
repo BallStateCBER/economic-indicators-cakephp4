@@ -232,31 +232,5 @@ class MakeSpreadsheetsCommand extends AppCommand
             ->first();
     }
 
-    /**
-     * Returns all endpoint groups OR an array containing the user's selection
-     *
-     * @param \Cake\Console\Arguments $args Console arguments
-     * @return array
-     */
-    private function getSelectedEndpointGroups(Arguments $args): array
-    {
-        $choose = (bool)$args->getOption('choose');
-        $allEndpointGroups = array_values(EndpointGroups::getAll());
-        $allEndpointGroups = Hash::combine($allEndpointGroups, '{n}.title', '{n}');
-        ksort($allEndpointGroups);
-        $allEndpointGroups = array_values($allEndpointGroups);
-        if (!$choose) {
-            return $allEndpointGroups;
-        }
 
-        foreach ($allEndpointGroups as $k => $endpointGroup) {
-            $this->io->out(($k + 1) . ") {$endpointGroup['title']}");
-        }
-        $count = count($allEndpointGroups);
-        do {
-            $choice = (int)$this->io->ask("Select an endpoint group: (1-$count)");
-        } while (!($choice >= 1 && $choice <= $count));
-
-        return [$allEndpointGroups[$choice - 1]];
-    }
 }

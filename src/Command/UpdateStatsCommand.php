@@ -103,6 +103,11 @@ class UpdateStatsCommand extends AppCommand
             'help' => 'Activates the --only-new option if the last full update was > 1 day ago',
             'boolean' => true,
         ]);
+        $parser->addOption('choose', [
+            'short' => 'c',
+            'help' => 'Choose a specific endpoint group instead of cycling through all',
+            'boolean' => true,
+        ]);
 
         return $parser;
     }
@@ -132,13 +137,14 @@ class UpdateStatsCommand extends AppCommand
             'Running update_stats' .
             ($this->auto ? ' --auto' : null) .
             (!$this->auto && $this->onlyNew ? ' --only-new' : null) .
+            ($args->getOption('choose') ? ' --choose' : null) .
             ($args->getOption('ignore-lock') ? ' --ignore-lock' : null)
         );
 
-        $endpointGroups = EndpointGroups::getAll();
-        $groupsCount = count($endpointGroups);
+        $selectedEndpointGroups = $this->getSelectedEndpointGroups($args);
+        $groupsCount = count($selectedEndpointGroups);
         $i = 1;
-        foreach ($endpointGroups as $endpointGroup) {
+        foreach ($selectedEndpointGroups as $endpointGroup) {
             $this->toConsoleAndSlack("{$endpointGroup['title']} ($i/$groupsCount)", 'info');
             $i++;
             $this->loadMetrics($endpointGroup);

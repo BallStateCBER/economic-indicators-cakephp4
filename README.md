@@ -29,6 +29,8 @@ This is the repository for the [Economic Indicators](https://indicators.cberdata
     long ago the last full update took place.
   - Run with the `--ignore-lock` option to either allow multiple update processes to take place concurrently
     (not recommended) or to fix a process lock that failed to be cleared by the previous process
+  - Run with the `--choose` option to add/update statistics for a specific endpoint group instead of looping through
+    all endpoint groups.
 - `bin/cake update_release_dates` should be automated to run **daily**
   - Run with the `--only-cache` option to only rebuild the cached release calendar instead of pulling new release
     information from FRED
