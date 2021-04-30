@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Endpoints\EndpointGroups;
 use App\Model\Entity\Spreadsheet;
 use App\Model\Table\SpreadsheetsTable;
 use App\Model\Table\StatisticsTable;
@@ -15,7 +14,6 @@ use Cake\Console\ConsoleOptionParser;
 use Cake\Datasource\EntityInterface;
 use Cake\I18n\FrozenTime;
 use Cake\ORM\TableRegistry;
-use Cake\Utility\Hash;
 use Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as PhpOfficeException;
