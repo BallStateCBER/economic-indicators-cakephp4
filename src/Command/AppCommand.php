@@ -10,6 +10,7 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Cake\Http\Exception\InternalErrorException;
+use Cake\ORM\TableRegistry;
 use Cake\Utility\Hash;
 use DataCenter\Command\AppCommand as DataCenterCommand;
 use fred_api;
@@ -226,10 +227,7 @@ abstract class AppCommand extends DataCenterCommand
     protected function getSelectedEndpointGroups(Arguments $args): array
     {
         $choose = (bool)$args->getOption('choose');
-        $allEndpointGroups = array_values(EndpointGroups::getAll());
-        $allEndpointGroups = Hash::combine($allEndpointGroups, '{n}.title', '{n}');
-        ksort($allEndpointGroups);
-        $allEndpointGroups = array_values($allEndpointGroups);
+        $allEndpointGroups = $this->getAllEndpointGroups();
         if (!$choose) {
             return $allEndpointGroups;
         }
@@ -243,5 +241,46 @@ abstract class AppCommand extends DataCenterCommand
         } while (!($choice >= 1 && $choice <= $count));
 
         return [$allEndpointGroups[$choice - 1]];
+    }
+
+    /**
+     * Creates an returns a new spreadsheet record with a blank filename, or FALSE on error
+     *
+     * @param string $groupName Endpoint group name
+     * @param bool $isTimeSeries TRUE if this is a time-series spreadsheet
+     * @return \App\Model\Entity\Spreadsheet|\Cake\Datasource\EntityInterface|bool
+     */
+    protected function createSpreadsheet(string $groupName, bool $isTimeSeries)
+    {
+        $spreadsheetsTable = TableRegistry::getTableLocator()->get('Spreadsheets');
+        $spreadsheet = $spreadsheetsTable->newEntity([
+            'file_generation_started' => null,
+            'filename' => '',
+            'group_name' => $groupName,
+            'is_time_series' => $isTimeSeries,
+            'needs_update' => true,
+        ]);
+        if (!$spreadsheetsTable->save($spreadsheet)) {
+            $this->toConsoleAndSlack('Error creating new empty spreadsheet record. Details:', 'error');
+            $this->toConsoleAndSlack(print_r($spreadsheet->getErrors(), true));
+
+            return false;
+        }
+
+        return $spreadsheet;
+    }
+
+    /**
+     * Returns all endpoint groups, alphabetized by title, and numerically-indexed
+     *
+     * @return array
+     */
+    protected function getAllEndpointGroups(): array
+    {
+        $allEndpointGroups = array_values(EndpointGroups::getAll());
+        $allEndpointGroups = Hash::combine($allEndpointGroups, '{n}.title', '{n}');
+        ksort($allEndpointGroups);
+
+        return array_values($allEndpointGroups);
     }
 }

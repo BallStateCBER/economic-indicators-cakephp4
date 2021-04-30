@@ -6,6 +6,7 @@ namespace App\Command;
 use App\Model\Entity\Metric;
 use App\Model\Table\MetricsTable;
 use App\Model\Table\ReleasesTable;
+use App\Model\Table\SpreadsheetsTable;
 use App\Model\Table\StatisticsTable;
 use Cake\Cache\Cache;
 use Cake\Console\Arguments;
@@ -31,6 +32,7 @@ use fred_api_exception;
  * @property \App\Model\Entity\Metric[] $metrics
  * @property \App\Model\Table\MetricsTable $metricsTable
  * @property \App\Model\Table\ReleasesTable $releasesTable
+ * @property \App\Model\Table\SpreadsheetsTable $spreadsheetsTable
  * @property \App\Model\Table\StatisticsTable $statisticsTable
  * @property \Cake\Console\ConsoleIo $io
  * @property \Cake\Shell\Helper\ProgressHelper $progress
@@ -50,6 +52,7 @@ class UpdateStatsCommand extends AppCommand
     private FrozenTime $timeStartedStatLoop;
     private MetricsTable $metricsTable;
     private ReleasesTable $releasesTable;
+    private SpreadsheetsTable $spreadsheetsTable;
     private StatisticsTable $statisticsTable;
     private string $timeBetweenAutoFullUpdates = '1 day';
     private string | null $clearLockIfDurationExceeds = '30 minutes';
@@ -71,6 +74,7 @@ class UpdateStatsCommand extends AppCommand
 
         $this->metricsTable = TableRegistry::getTableLocator()->get('Metrics');
         $this->releasesTable = TableRegistry::getTableLocator()->get('Releases');
+        $this->spreadsheetsTable = TableRegistry::getTableLocator()->get('Spreadsheets');
         $this->statisticsTable = TableRegistry::getTableLocator()->get('Statistics');
     }
 
@@ -128,7 +132,6 @@ class UpdateStatsCommand extends AppCommand
         }
 
         $cacheUpdater = new UpdateCacheCommand($io);
-        $spreadsheetWriter = new MakeSpreadsheetsCommand($io);
         $this->onlyNew = (bool)$args->getOption('only-new');
         $this->initAutoMode($args);
 
@@ -180,7 +183,7 @@ class UpdateStatsCommand extends AppCommand
 
             if ($groupUpdated) {
                 $cacheUpdater->refreshGroup($endpointGroup);
-                $spreadsheetWriter->makeSpreadsheetsForGroup($endpointGroup);
+                $this->flagSpreadsheetsForUpdating($endpointGroup);
             }
 
             $io->out();
@@ -846,5 +849,44 @@ class UpdateStatsCommand extends AppCommand
     private function getLastFullUpdateTime()
     {
         return Cache::read('last_full_update', self::CACHE_CONFIG);
+    }
+
+    /**
+     * Marks spreadsheets as needing to be updated and creates any missing spreadsheet records
+     *
+     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
+     * @return void
+     */
+    private function flagSpreadsheetsForUpdating(mixed $endpointGroup)
+    {
+        $this->toConsoleAndSlack('- Flagging spreadsheets for updates');
+        foreach ([true, false] as $isTimeSeries) {
+            $spreadsheet = $this->spreadsheetsTable
+                ->find()
+                ->where([
+                    'group_name' => $endpointGroup['title'],
+                    'is_time_series' => $isTimeSeries,
+                ])
+                ->first();
+
+            // Update spreadsheet
+            if ($spreadsheet) {
+                $spreadsheet = $this->spreadsheetsTable->patchEntity($spreadsheet, ['needs_update' => true]);
+                if (!$this->spreadsheetsTable->save($spreadsheet)) {
+                    $this->toConsoleAndSlack('Error flagging spreadsheet for update. Details:', 'error');
+                    $this->toConsoleAndSlack(print_r($spreadsheet->getErrors(), true));
+                    $this->shutdown();
+                    exit;
+                }
+                continue;
+            }
+
+            // Or create a new record
+            $spreadsheet = $this->createSpreadsheet($endpointGroup['title'], $isTimeSeries);
+            if (!$spreadsheet) {
+                $this->shutdown();
+                exit;
+            }
+        }
     }
 }

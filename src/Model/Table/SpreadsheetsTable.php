@@ -3,25 +3,30 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
+use App\Model\Entity\Spreadsheet;
+use Cake\Database\Expression\QueryExpression;
+use Cake\Datasource\EntityInterface;
+use Cake\I18n\FrozenTime;
+use Cake\ORM\Query;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
 /**
  * Spreadsheets Model
  *
- * @method \App\Model\Entity\Spreadsheet newEmptyEntity()
- * @method \App\Model\Entity\Spreadsheet newEntity(array $data, array $options = [])
- * @method \App\Model\Entity\Spreadsheet[] newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\Spreadsheet get($primaryKey, $options = [])
- * @method \App\Model\Entity\Spreadsheet findOrCreate($search, ?callable $callback = null, $options = [])
- * @method \App\Model\Entity\Spreadsheet patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method \App\Model\Entity\Spreadsheet[] patchEntities(iterable $entities, array $data, array $options = [])
- * @method \App\Model\Entity\Spreadsheet|false save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\Spreadsheet saveOrFail(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\Spreadsheet[]|\Cake\Datasource\ResultSetInterface|false saveMany(iterable $entities, $options = [])
- * @method \App\Model\Entity\Spreadsheet[]|\Cake\Datasource\ResultSetInterface saveManyOrFail(iterable $entities, $options = [])
- * @method \App\Model\Entity\Spreadsheet[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable $entities, $options = [])
- * @method \App\Model\Entity\Spreadsheet[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
+ * @method Spreadsheet newEmptyEntity()
+ * @method Spreadsheet newEntity(array $data, array $options = [])
+ * @method Spreadsheet[] newEntities(array $data, array $options = [])
+ * @method Spreadsheet get($primaryKey, $options = [])
+ * @method Spreadsheet findOrCreate($search, ?callable $callback = null, $options = [])
+ * @method Spreadsheet patchEntity(EntityInterface $entity, array $data, array $options = [])
+ * @method Spreadsheet[] patchEntities(iterable $entities, array $data, array $options = [])
+ * @method Spreadsheet|false save(EntityInterface $entity, $options = [])
+ * @method Spreadsheet saveOrFail(EntityInterface $entity, $options = [])
+ * @method Spreadsheet[]|\Cake\Datasource\ResultSetInterface|false saveMany(iterable $entities, $options = [])
+ * @method Spreadsheet[]|\Cake\Datasource\ResultSetInterface saveManyOrFail(iterable $entities, $options = [])
+ * @method Spreadsheet[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable $entities, $options = [])
+ * @method Spreadsheet[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class SpreadsheetsTable extends Table
@@ -68,11 +73,70 @@ class SpreadsheetsTable extends Table
             ->notEmptyString('is_time_series');
 
         $validator
+            ->boolean('needs_update')
+            ->notEmptyString('needs_update');
+
+        $validator
+            ->dateTime('file_generation_started')
+            ->allowEmptyDateTime('file_generation_started');
+
+        $validator
             ->scalar('filename')
-            ->maxLength('filename', 100)
-            ->requirePresence('filename', 'create')
-            ->notEmptyFile('filename');
+            ->maxLength('filename', 100);
 
         return $validator;
+    }
+
+    /**
+     * Sets the file_generation_started field to the current time
+     *
+     * @param \App\Model\Entity\Spreadsheet|\Cake\Datasource\EntityInterface $spreadsheet Spreadsheet entity
+     * @return \App\Model\Entity\Spreadsheet
+     */
+    public function recordFileGenerationStartTime(Spreadsheet | EntityInterface $spreadsheet)
+    {
+        $spreadsheet = $this->patchEntity(
+            $spreadsheet,
+            ['file_generation_started' => new FrozenTime()],
+        );
+        $this->save($spreadsheet);
+
+        return $spreadsheet;
+    }
+
+    /**
+     * Sets the file_generation_started field to NULL and needs_update to FALSE
+     *
+     * @param \App\Model\Entity\Spreadsheet|\Cake\Datasource\EntityInterface $spreadsheet Spreadsheet entity
+     * @return \App\Model\Entity\Spreadsheet
+     */
+    public function recordFileGenerationDone(Spreadsheet | EntityInterface $spreadsheet)
+    {
+        $spreadsheet = $this->patchEntity($spreadsheet, [
+            'file_generation_started' => null,
+            'needs_update' => false,
+        ]);
+        $this->save($spreadsheet);
+
+        return $spreadsheet;
+    }
+
+    /**
+     * Modifies a query to fetch all spreadsheets that appear to have started file generation and failed to complete it
+     *
+     * @param \Cake\ORM\Query $query Query object
+     * @param array $options Options, with 'wait' expected
+     * @return \Cake\ORM\Query
+     */
+    protected function findFailedGeneration(Query $query, array $options): Query
+    {
+        $startedBefore = new FrozenTime('now - ' . $options['wait']);
+
+        return $query
+            ->where([
+                function (QueryExpression $exp) use ($startedBefore) {
+                    return $exp->lte('file_generation_started', $startedBefore);
+                },
+            ]);
     }
 }

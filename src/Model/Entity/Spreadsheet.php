@@ -8,12 +8,14 @@ use Cake\ORM\Entity;
 /**
  * Spreadsheet Entity
  *
- * @property int $id
- * @property string $group_name
- * @property bool $is_time_series
- * @property string $filename
  * @property \Cake\I18n\FrozenTime $created
+ * @property \Cake\I18n\FrozenTime $file_generation_started
  * @property \Cake\I18n\FrozenTime $modified
+ * @property bool $is_time_series
+ * @property bool $needs_update
+ * @property int $id
+ * @property string $filename
+ * @property string $group_name
  */
 class Spreadsheet extends Entity
 {
@@ -27,10 +29,12 @@ class Spreadsheet extends Entity
      * @var array
      */
     protected $_accessible = [
+        'created' => true,
+        'file_generation_started' => true,
+        'filename' => true,
         'group_name' => true,
         'is_time_series' => true,
-        'filename' => true,
-        'created' => true,
         'modified' => true,
+        'needs_update' => true,
     ];
 }
