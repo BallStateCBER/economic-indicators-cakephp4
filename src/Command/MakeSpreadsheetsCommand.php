@@ -130,60 +130,6 @@ class MakeSpreadsheetsCommand extends AppCommand
     /**
      * Re-generates cached statistic and date ranges for this endpoint group
      *
-     * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
-     * @return void
-     */
-    /*
-    public function makeSpreadsheetsForGroup(array $endpointGroup): void
-    {
-        $this->toSlack('- Creating spreadsheets for ' . $endpointGroup['title']);
-        foreach ([false, true] as $isTimeSeries) {
-            try {
-                $newFilename = $this->statisticsTable->getFilename($endpointGroup, $isTimeSeries);
-                $spreadsheetEntity = $this->getSpreadsheetRecord($endpointGroup['title'], $isTimeSeries);
-                if (!$spreadsheetEntity) {
-                    $spreadsheetEntity = $this->createSpreadsheet($endpointGroup['title'], $isTimeSeries);
-                    if (!$spreadsheetEntity) {
-                        exit;
-                    }
-                }
-                $spreadsheetEntity = $this->spreadsheetsTable->recordFileGenerationStartTime($spreadsheetEntity);
-                $oldFilename = $spreadsheetEntity->filename;
-
-                $this->toConsoleAndSlack(sprintf(
-                    '- Creating %s spreadsheet',
-                    $isTimeSeries ? 'time-series' : 'single-date'
-                ));
-                $spreadsheetData = $isTimeSeries
-                    ? new SpreadsheetTimeSeries($endpointGroup)
-                    : new SpreadsheetSingleDate($endpointGroup);
-
-                $this->toConsoleAndSlack('- Saving file: ' . $newFilename);
-                $spreadsheetWriter = IOFactory::createWriter($spreadsheetData->get(), 'Xlsx');
-                $spreadsheetWriter->save(SpreadsheetsTable::FILE_PATH . $newFilename);
-                unset($spreadsheetWriter);
-
-                $this->toConsoleAndSlack('- Updating spreadsheet database record');
-                $this->updateSpreadsheetFilename($endpointGroup, $isTimeSeries, $newFilename);
-
-                $oldFileNeedsDeleted = $oldFilename && $oldFilename != $newFilename;
-                $oldFilePath = SpreadsheetsTable::FILE_PATH . $oldFilename;
-                if ($oldFileNeedsDeleted && file_exists($oldFilePath)) {
-                    $this->toConsoleAndSlack('- Removing old file: ' . $oldFilename);
-                    unlink($oldFilePath);
-                }
-            } catch (Exception | PhpOfficeException $e) {
-                $this->toConsoleAndSlack('There was an error generating that spreadsheet. Details:', 'error');
-                $this->toConsoleAndSlack($e->getMessage());
-                exit;
-            }
-            $this->spreadsheetsTable->recordFileGenerationDone($spreadsheetEntity);
-        }
-    }*/
-
-    /**
-     * Re-generates cached statistic and date ranges for this endpoint group
-     *
      * @param \App\Model\Entity\Spreadsheet|\Cake\Datasource\EntityInterface $spreadsheetEntity Spreadsheet entity
      * @param array $endpointGroup A group defined in \App\Fetcher\EndpointGroups
      * @return void
@@ -259,24 +205,6 @@ class MakeSpreadsheetsCommand extends AppCommand
             $this->toConsoleAndSlack(print_r($spreadsheet->getErrors(), true));
             exit;
         }
-    }
-
-    /**
-     * Returns a spreadsheet record, or NULL if the specified record doesn't exist
-     *
-     * @param string $groupName A string used to uniquely identify an endpoint group
-     * @param bool $isTimeSeries TRUE if this is a time-series spreadsheet
-     * @return \App\Model\Entity\Spreadsheet|\Cake\Datasource\EntityInterface|null
-     */
-    private function getSpreadsheetRecord(string $groupName, bool $isTimeSeries): Spreadsheet | EntityInterface | null
-    {
-        return $this->spreadsheetsTable
-            ->find()
-            ->where([
-                'group_name' => $groupName,
-                'is_time_series' => $isTimeSeries,
-            ])
-            ->first();
     }
 
     /**
