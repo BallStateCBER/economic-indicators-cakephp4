@@ -428,6 +428,7 @@ class UpdateStatsCommand extends AppCommand
             observations: $this->getObservations(['units' => self::UNITS_VALUE]),
             metricId: $metric->id,
             dataTypeId: StatisticsTable::DATA_TYPE_VALUE,
+            label: "$name values",
         );
 
         $this->io->out('- Changes');
@@ -435,6 +436,7 @@ class UpdateStatsCommand extends AppCommand
             observations: $this->getObservations(['units' => self::UNITS_CHANGE_FROM_1_YEAR_AGO]),
             metricId: $metric->id,
             dataTypeId: StatisticsTable::DATA_TYPE_CHANGE,
+            label: "$name changes",
         );
 
         $this->io->out('- Percent changes');
@@ -442,6 +444,7 @@ class UpdateStatsCommand extends AppCommand
             observations: $this->getObservations(['units' => self::UNITS_PERCENT_CHANGE_FROM_1_YEAR_AGO]),
             metricId: $metric->id,
             dataTypeId: StatisticsTable::DATA_TYPE_PERCENT_CHANGE,
+            label: "$name percent changes",
         );
 
         $lastUpdated = $endpointMeta['@attributes']['last_updated'];
@@ -541,9 +544,10 @@ class UpdateStatsCommand extends AppCommand
      * @param array $observations Array of ['date' => ..., 'value' => ...] API call results
      * @param int $metricId Metric ID
      * @param int $dataTypeId ID corresponding to value, change, or percent change
+     * @param string $label What to call this set of statistics in "stat loop Slack messages"
      * @return void
      */
-    private function saveAllStatistics(array $observations, int $metricId, int $dataTypeId)
+    private function saveAllStatistics(array $observations, int $metricId, int $dataTypeId, string $label)
     {
         $observationCount = count($observations);
         $this->progress->init([
@@ -558,7 +562,7 @@ class UpdateStatsCommand extends AppCommand
         foreach ($observations as $observation) {
             $this->updateLock();
             $percentDone = round($i / $observationCount);
-            $this->sendStatLoopSlackMsg("- Saving stats ($percentDone% completed)");
+            $this->sendStatLoopSlackMsg("- Saving $label ($percentDone% completed)");
             $this->saveStatistic(
                 metricId: $metricId,
                 dataTypeId: $dataTypeId,
