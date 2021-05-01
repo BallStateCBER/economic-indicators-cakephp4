@@ -561,7 +561,7 @@ class UpdateStatsCommand extends AppCommand
         $i = 1;
         foreach ($observations as $observation) {
             $this->updateLock();
-            $percentDone = round($i / $observationCount);
+            $percentDone = round(($i / $observationCount) * 100);
             $this->sendStatLoopSlackMsg("- Saving $label ($percentDone% completed)");
             $this->saveStatistic(
                 metricId: $metricId,
