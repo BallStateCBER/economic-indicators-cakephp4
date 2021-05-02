@@ -243,7 +243,7 @@ class MakeSpreadsheetsCommand extends AppCommand
             /** @var \App\Model\Entity\Spreadsheet $spreadsheet */
             $spreadsheet = $query->first();
             $this->toConsoleAndSlack(sprintf(
-                'Regenerating %s %s spreadsheet, which started file generation at %s and never completed.',
+                'Regenerating %s %s spreadsheet, which started file generation %s and never completed.',
                 $spreadsheet->group_name,
                 $spreadsheet->is_time_series ? 'time-series' : 'single-date',
                 $spreadsheet->file_generation_started->timeAgoInWords(),
