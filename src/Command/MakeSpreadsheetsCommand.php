@@ -140,7 +140,7 @@ class MakeSpreadsheetsCommand extends AppCommand
     ): void {
         $this->toSlack(
             "- Creating spreadsheet for $spreadsheetEntity->group_name " .
-            $spreadsheetEntity->is_time_series ? '(time series)' : '(single date)',
+            ($spreadsheetEntity->is_time_series ? '(time series)' : '(single date)'),
         );
         try {
             $newFilename = $this->statisticsTable->getFilename($endpointGroup, $spreadsheetEntity->is_time_series);
